@@ -3,630 +3,194 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Finanzas E-Ink</title>
+  <title>Plantilla Finanzas E-Ink</title>
   <style>
     * { box-sizing: border-box; }
-    body {
-      font-family: serif;
-      background: #fff; color: #000;
-      margin: 0; padding: 15px; line-height: 1.4;
-    }
-    h1, h2 {
-      font-family: sans-serif;
-      text-transform: uppercase;
-      border-bottom: 2px solid #000;
-      padding-bottom: 4px;
-    }
+    body { font-family: serif; background: #fff; color: #000; margin: 0; padding: 15px; line-height: 1.2; }
+    h1, h2 { font-family: sans-serif; text-transform: uppercase; border-bottom: 2px solid #000; padding-bottom: 4px; }
     h1 { font-size: 1.3rem; margin-top: 0; }
-    h2 { font-size: 1rem; margin-top: 25px; }
+    h2 { font-size: 0.85rem; margin-top: 25px; background: #000; color: #fff; padding: 3px 6px; }
 
-    .section { margin-bottom: 20px; }
-
-    label {
-      display: block; font-size: 0.75rem; font-weight: bold;
-      margin-bottom: 4px; text-transform: uppercase;
-    }
-    select, input, button {
-      width: 100%;
-      padding: 10px;
-      border: 2px solid #000;
-      border-radius: 0;
-      font-size: 1rem;
-      background: #fff;
-      margin-bottom: 8px;
-      color: #000;
+    .section { margin-bottom: 25px; }
+    .box { border: 2px solid #000; padding: 10px; margin-bottom: 15px; }
+    
+    label { display: block; font-size: 0.65rem; font-weight: bold; margin-bottom: 3px; text-transform: uppercase; }
+    select, input, button { 
+      width: 100%; padding: 10px; border: 2px solid #000; border-radius: 0; 
+      font-size: 0.95rem; background: #fff; margin-bottom: 8px; color: #000;
       -webkit-appearance: none;
     }
-    button { background: #000; color: #fff; font-weight: bold; cursor: pointer; }
+    button { background: #000; color: #fff; font-weight: bold; cursor: pointer; text-transform: uppercase; }
     button.alt { background: #fff; color: #000; }
-    button.danger { background:#fff; color:#000; border-style: dashed; }
+    
+    .btn-del { display: none; width: auto; padding: 4px 10px; font-size: 0.8rem; float: right; margin: 0; background: #000; color: #fff; }
+    .editing .btn-del { display: block; }
 
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
 
-    .status-msg {
-      font-size: 0.8rem;
-      margin-top: 5px;
-      font-style: italic;
-      padding: 4px;
-      border: 1px solid #000;
-      display: inline-block;
-      min-height: 1.2em;
-    }
+    .checkbox-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; }
+    input[type="checkbox"] { width: 20px; height: 20px; margin: 0; }
 
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    th { text-align: left; font-size: 0.7rem; border-bottom: 1px solid #000; text-transform: uppercase; }
-    td { padding: 8px 0; font-size: 0.9rem; border-bottom: 1px dotted #000; vertical-align: top; }
-    .right { text-align: right; }
+    .hidden { display: none; }
 
-    .card-item { border-bottom: 2px solid #000; padding: 12px 0; margin-bottom: 5px; }
-    .mini { font-size: 0.7rem; opacity: 0.9; font-family: sans-serif; text-transform: uppercase; }
-    .muted { opacity: .8; font-size: .85rem; }
+    .chart-row { margin: 12px 0; border: 1px solid #000; padding: 8px; }
+    .bar-bg { border: 1px solid #000; height: 12px; width: 100%; background: #fff; margin: 4px 0; }
+    .bar-fill { background: #000; height: 100%; transition: width 0.3s; }
+    .bar-fill.min { background: repeating-linear-gradient(45deg, #000, #000 2px, #fff 2px, #fff 4px); }
+    .bar-label { display: flex; justify-content: space-between; font-size: 0.75rem; }
 
-    .hidden { display:none !important; }
-    .row-ok { opacity:.65; text-decoration: line-through; }
+    .item-row { border-bottom: 1px solid #000; padding: 10px 0; overflow: hidden; }
+    .muted { font-size: 0.6rem; font-style: italic; margin-top: 2px; }
+    
+    .sticky-actions { position: sticky; bottom: 0; background: #fff; padding: 10px 0; border-top: 2px solid #000; display: flex; gap: 10px; z-index: 100; }
   </style>
 </head>
-<body>
+<body id="mainBody">
 
-<h1>Finanzas</h1>
+  <h1>Cartera E-Ink (Estructura)</h1>
 
-<!-- PIN -->
-<div class="section">
-  <div class="grid">
-    <div>
-      <label>PIN acceso</label>
-      <input id="pinInput" type="password" placeholder="******" />
-    </div>
-    <div>
-      <label>&nbsp;</label>
-      <button id="pinOk">OK</button>
-    </div>
-  </div>
-  <div id="pinStatus" class="status-msg">Introduce el PIN.</div>
-</div>
-
-<!-- APP (solo visible con PIN correcto) -->
-<div id="app" class="hidden">
-
-  <!-- PERIODO -->
   <div class="section">
     <div class="grid-3">
       <div><label>Año</label><select id="yearSelect"></select></div>
-      <div><label>Mes</label>
-        <select id="monthSelect">
-          <option value="01">Ene</option><option value="02">Feb</option><option value="03">Mar</option>
-          <option value="04">Abr</option><option value="05">May</option><option value="06">Jun</option>
-          <option value="07">Jul</option><option value="08">Ago</option><option value="09">Sep</option>
-          <option value="10">Oct</option><option value="11">Nov</option><option value="12">Dic</option>
-        </select>
+      <div><label>Mes</label><select id="monthSelect" onchange="refreshAll()">
+        <option value="01">Ene</option><option value="02">Feb</option><option value="03">Mar</option>
+        <option value="04">Abr</option><option value="05">May</option><option value="06">Jun</option>
+        <option value="07">Jul</option><option value="08">Ago</option><option value="09">Sep</option>
+        <option value="10">Oct</option><option value="11">Nov</option><option value="12">Dic</option>
+      </select></div>
+      <div><label>&nbsp;</label><button onclick="refreshAll()">IR</button></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Pagos Reales</h2>
+    <div id="chartsContainer"></div>
+  </div>
+
+  <div class="section">
+    <h2>Tarjetas</h2>
+    <div id="cardsList"></div>
+    <div class="box">
+      <label>+ Nueva Tarjeta</label>
+      <input type="text" id="newCardName" placeholder="Nombre de la tarjeta" />
+      <div class="grid">
+        <select id="newCardCur"><option>AED</option><option>EUR</option><option>IDR</option></select>
+        <button class="alt" id="addCardBtn">Añadir</button>
       </div>
-      <div><label>&nbsp;</label><button id="loadMonth">IR</button></div>
     </div>
-    <div id="status" class="status-msg"></div>
   </div>
 
-  <!-- CALENDARIO (fecha de pago de cada cosa) -->
   <div class="section">
-    <h2>Pagos del Mes</h2>
-    <div class="muted">Cada item tiene su fecha de pago. El “mínimo” de tarjeta usa la fecha configurada en la tarjeta.</div>
-    <table>
-      <thead>
-        <tr>
-          <th style="width:90px;">Fecha</th>
-          <th>Concepto</th>
-          <th class="right" style="width:150px;">Importe</th>
-          <th class="right" style="width:90px;">Pagado</th>
-        </tr>
-      </thead>
-      <tbody id="payBody"></tbody>
-    </table>
-  </div>
-
-  <!-- TARJETAS (por mes: montos) -->
-  <div class="section">
-    <h2>Tarjetas del Mes</h2>
-    <div class="muted">Aquí solo cambian los importes del mes. La fecha de pago está en “Gestión de items”.</div>
-    <div id="cardsMonthForm"></div>
-    <button id="saveCardsMonth">Guardar Importes del Mes</button>
-  </div>
-
-  <!-- GESTIÓN (crear/editar/eliminar items + fecha de pago) -->
-  <div class="section">
-    <h2>Gestión de Items</h2>
-    <div class="grid">
-      <button class="alt" id="addSub">Añadir Suscripción / Recurrente</button>
-      <button class="alt" id="addCard">Añadir Tarjeta</button>
+    <h2>Gastos Fijos</h2>
+    <div id="fixedList"></div>
+    <div class="box">
+      <label>+ Nuevo Gasto</label>
+      <input type="text" id="fixName" placeholder="Concepto" />
+      <div class="grid">
+        <input type="number" id="fixAmt" step="0.01" placeholder="Importe" />
+        <select id="fixCur"><option>AED</option><option>EUR</option><option>IDR</option></select>
+      </div>
+      <div class="checkbox-row">
+        <input type="checkbox" id="checkFreq" onchange="toggleFreqOptions()" />
+        <span>Pago no mensual</span>
+      </div>
+      <div id="extraOptions" class="hidden">
+        <div class="grid">
+          <div><label>Cada cuánto</label><select id="fixFreq"><option value="6">6 Meses</option><option value="12">1 Año</option><option value="36">3 Años</option></select></div>
+          <div><label>Mes Cobro</label><select id="fixMonth"><option value="01">Ene</option><option value="02">Feb</option><option value="03">Mar</option><option value="04">Abr</option><option value="05">May</option><option value="06">Jun</option><option value="07">Jul</option><option value="08">Ago</option><option value="09">Sep</option><option value="10">Oct</option><option value="11">Nov</option><option value="12">Dic</option></select></div>
+        </div>
+      </div>
+      <label>Día del mes</label><input type="number" id="fixDay" placeholder="1-31" />
+      <button class="alt" id="addFixBtn">Añadir Gasto</button>
     </div>
-
-    <div class="muted">
-      Reglas simples: todos los items son “mensuales” y se les define <strong>día de pago (1–31)</strong>.
-      (Si luego quieres “cada 6 meses”/“anual”, lo añadimos.)
-    </div>
-
-    <div id="itemsEditor"></div>
   </div>
 
-  <div class="section">
-    <button class="alt" id="lock">Bloquear</button>
+  <div class="sticky-actions">
+    <button class="alt" id="editToggle" style="flex: 1;">✎ Ajustes</button>
+    <button id="mainSave" style="flex: 2;">💾 Guardar Nube</button>
   </div>
-
-</div>
 
 <script>
-/* ================= CONFIG ================= */
-const SUPABASE_URL = "https://jwssqrtbsmrjrnerpunt.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3c3NxcnRic21yanJuZXJwdW50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1ODM4NzYsImV4cCI6MjA4NTE1OTg3Nn0.Rl_kRUUTgYt763PakOlBvRObvergx_QBU37aEpAEvlQ";
+// La estructura comienza vacía para que tú introduzcas los datos
+let cards = JSON.parse(localStorage.getItem('fin_cards')) || [];
+let fixedGasto = JSON.parse(localStorage.getItem('fin_fixed')) || [];
 
-let SESSION_PIN = "";
-
-let STATE = {
-  month: null,        // YYYY-MM
-  items: [],          // fin_items (activos)
-  cardsMonth: {},     // fin_month.cards
-  paid: {},           // map item_id -> bool
-};
-
-/* ================= UTIL ================= */
-function setPinStatus(t){ document.getElementById("pinStatus").textContent = t; }
-function setStatus(t){ document.getElementById("status").textContent = t; }
-
-function functionUrl(){ return `${SUPABASE_URL}/functions/v1/finanzas`; }
-
-async function apiCall(action, month=null, data=null){
-  const res = await fetch(functionUrl(),{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json",
-      "Authorization":`Bearer ${SUPABASE_ANON_KEY}`,
-      "apikey":SUPABASE_ANON_KEY
-    },
-    body:JSON.stringify({ action, pin: SESSION_PIN, month, data })
-  });
-  const j = await res.json().catch(()=> ({}));
-  if(!res.ok) throw new Error(j.error || `HTTP ${res.status}`);
-  return j.data;
+function toggleFreqOptions() {
+  const isChecked = document.getElementById("checkFreq").checked;
+  document.getElementById("extraOptions").classList.toggle("hidden", !isChecked);
 }
 
-function initDateSelectors(){
-  const ySel = document.getElementById("yearSelect");
-  const now = new Date();
-  const start = now.getFullYear() - 2;
-  const end = now.getFullYear() + 5;
-
-  ySel.innerHTML = "";
-  for(let y=start; y<=end; y++){
-    const opt = new Option(y, y);
-    if(y === now.getFullYear()) opt.selected = true;
-    ySel.add(opt);
-  }
-  document.getElementById("monthSelect").value = String(now.getMonth()+1).padStart(2,"0");
+function saveToLocal() {
+  localStorage.setItem('fin_cards', JSON.stringify(cards));
+  localStorage.setItem('fin_fixed', JSON.stringify(fixedGasto));
 }
 
-function currentMonthISO(){
-  const y = document.getElementById("yearSelect").value;
-  const m = document.getElementById("monthSelect").value;
-  return `${y}-${m}`;
-}
+function refreshAll() { renderCards(); renderFixed(); renderCharts(); }
 
-function clampDay(y, mIndex, day){
-  const last = new Date(y, mIndex+1, 0).getDate();
-  return Math.min(Math.max(1, day), last);
-}
-function payDateForMonth(day, ym){
-  const [Y,M]=ym.split("-").map(Number);
-  const mIndex=M-1;
-  const d = clampDay(Y, mIndex, Number(day)||1);
-  return new Date(Y, mIndex, d);
-}
-function prettyDate(dt){
-  const dd=String(dt.getDate()).padStart(2,"0");
-  const mm=String(dt.getMonth()+1).padStart(2,"0");
-  const yy=String(dt.getFullYear()).slice(-2);
-  return `${dd}/${mm}/${yy}`;
-}
-
-/* ================= BUILD PAY CALENDAR =================
-   - fixed: usa amount_default
-   - card: usa min_payment del mes (STATE.cardsMonth[item_id].min_payment)
-*/
-function buildCalendar(){
-  const ym = STATE.month;
-  const out = [];
-
-  STATE.items.filter(x=>x.active).forEach(it=>{
-    const date = payDateForMonth(it.schedule_day, ym);
-    if(it.type === "fixed"){
-      out.push({
-        id: it.id,
-        date,
-        concept: it.name,
-        meta: it.category ? it.category : "Recurrente",
-        currency: it.currency,
-        amount: Number(it.amount_default||0),
-        paid: !!STATE.paid[it.id],
-      });
-    }else if(it.type === "card"){
-      const v = STATE.cardsMonth?.[it.id] || {};
-      out.push({
-        id: it.id,
-        date,
-        concept: `Tarjeta ${it.name} (mínimo)`,
-        meta: "Tarjetas",
-        currency: it.currency,
-        amount: Number(v.min_payment||0),
-        paid: !!STATE.paid[it.id],
-      });
-    }
-  });
-
-  out.sort((a,b)=>a.date-b.date);
-  return out;
-}
-
-function renderCalendar(){
-  const tb = document.getElementById("payBody");
-  tb.innerHTML = "";
-
-  const rows = buildCalendar();
-
-  if(!rows.length){
-    tb.innerHTML = `<tr><td colspan="4">—</td></tr>`;
-    return;
-  }
-
-  rows.forEach(r=>{
-    const cls = r.paid ? "row-ok" : "";
-    tb.innerHTML += `
-      <tr class="${cls}">
-        <td>${prettyDate(r.date)}</td>
-        <td>
-          <div><strong>${r.concept}</strong></div>
-          <div class="muted">${r.meta}</div>
-        </td>
-        <td class="right">${r.currency} ${Number(r.amount||0).toFixed(2)}</td>
-        <td class="right">
-          <input type="checkbox" data-paid="${r.id}" ${r.paid?"checked":""}
-            style="width:auto; transform:scale(1.15); margin:0;">
-        </td>
-      </tr>
-    `;
-  });
-
-  tb.querySelectorAll("input[data-paid]").forEach(ch=>{
-    ch.addEventListener("change", async ()=>{
-      const id = ch.dataset.paid;
-      const paid = !!ch.checked;
-
-      // UI optimista
-      STATE.paid[id] = paid;
-      renderCalendar();
-
-      try{
-        await apiCall("paid_set", STATE.month, { item_id: id, paid });
-      }catch(e){
-        // rollback
-        STATE.paid[id] = !paid;
-        renderCalendar();
-        setStatus(e.message);
-      }
+function renderCharts() {
+  const container = document.getElementById("chartsContainer");
+  const selectedMonth = document.getElementById("monthSelect").value;
+  container.innerHTML = "";
+  ["AED", "EUR", "IDR"].forEach(cur => {
+    const fijosDelMes = fixedGasto.filter(f => f.currency === cur && (f.dueMonth === "all" || f.dueMonth === selectedMonth)).reduce((acc, f) => acc + f.amount, 0);
+    let totalDeudaT = 0, totalMinT = 0;
+    cards.filter(c => c.currency === cur).forEach(c => {
+      const d = document.querySelector(`input[data-card="${c.name}"]`), m = document.querySelector(`input[data-min="${c.name}"]`);
+      totalDeudaT += d ? parseFloat(d.value)||0 : 0; totalMinT += m ? parseFloat(m.value)||0 : 0;
     });
+    const sumaTotal = fijosDelMes + totalDeudaT, sumaPago = fijosDelMes + totalMinT;
+    if (sumaTotal === 0) return;
+    const max = cur === "IDR" ? 5000 : (cur === "AED" ? 25000 : 8000);
+    container.innerHTML += `<div class="chart-row"><div class="bar-label"><strong>${cur}</strong><span>Deuda: ${sumaTotal.toFixed(2)}</span></div><div class="bar-bg"><div class="bar-fill" style="width:${Math.min((sumaTotal/max)*100,100)}%"></div></div><div class="bar-label"><span>Pago este mes: ${sumaPago.toFixed(2)}</span></div><div class="bar-bg"><div class="bar-fill min" style="width:${Math.min((sumaPago/max)*100,100)}%"></div></div></div>`;
   });
 }
 
-/* ================= CARDS MONTH AMOUNTS ================= */
-function cardItems(){
-  return STATE.items.filter(x=>x.active && x.type==="card");
-}
-
-function renderCardsMonth(){
-  const wrap = document.getElementById("cardsMonthForm");
-  wrap.innerHTML = "";
-
-  const cards = cardItems();
-  if(!cards.length){
-    wrap.innerHTML = `<div class="status-msg">No hay tarjetas aún.</div>`;
-    return;
-  }
-
-  cards.forEach(it=>{
-    const v = STATE.cardsMonth?.[it.id] || {};
-    wrap.innerHTML += `
-      <div class="card-item">
-        <label>${it.name} (${it.currency})</label>
-        <div class="grid">
-          <div>
-            <div class="mini">Deuda total (mes)</div>
-            <input type="number" step="0.01" data-card-total="${it.id}" value="${v.amount ?? ""}" placeholder="0.00">
-          </div>
-          <div>
-            <div class="mini">Mínimo a pagar (mes)</div>
-            <input type="number" step="0.01" data-card-min="${it.id}" value="${v.min_payment ?? ""}" placeholder="0.00">
-          </div>
-        </div>
-        <div class="muted">Fecha de pago: día ${Number(it.schedule_day)||1}</div>
-      </div>
-    `;
+function renderCards() {
+  const list = document.getElementById("cardsList");
+  list.innerHTML = "";
+  cards.forEach((c, i) => {
+    list.innerHTML += `<div class="item-row"><button class="btn-del" onclick="deleteItem('card', ${i})">X</button><label>${c.name} (${c.currency})</label><div class="grid"><div><label>Deuda Total</label><input type="number" step="0.01" data-card="${c.name}" oninput="renderCharts()"></div><div><label>Mínimo Mes</label><input type="number" step="0.01" data-min="${c.name}" oninput="renderCharts()"></div></div></div>`;
   });
 }
 
-function collectCardsMonth(){
-  const out = structuredClone(STATE.cardsMonth || {});
-  document.querySelectorAll("input[data-card-total]").forEach(i=>{
-    const id = i.dataset.cardTotal;
-    out[id] = out[id] || {};
-    out[id].amount = Number(i.value)||0;
+function renderFixed() {
+  const list = document.getElementById("fixedList");
+  const selectedMonth = document.getElementById("monthSelect").value;
+  list.innerHTML = "";
+  fixedGasto.forEach((f, i) => {
+    const isDue = f.dueMonth === "all" || f.dueMonth === selectedMonth;
+    list.innerHTML += `<div class="item-row" style="${!isDue ? 'opacity: 0.2' : ''}"><button class="btn-del" onclick="deleteItem('fix', ${i})">X</button><div class="grid"><input type="text" value="${f.name}" onchange="updateFix(${i}, 'name', this.value)" /><select onchange="updateFix(${i}, 'currency', this.value)"><option ${f.currency=='AED'?'selected':''}>AED</option><option ${f.currency=='EUR'?'selected':''}>EUR</option><option ${f.currency=='IDR'?'selected':''}>IDR</option></select></div><div class="grid-3"><div><label>Importe</label><input type="number" step="0.01" value="${f.amount}" onchange="updateFix(${i}, 'amount', this.value)" /></div><div><label>Día</label><input type="number" value="${f.day}" onchange="updateFix(${i}, 'day', this.value)" /></div><div><label>Cobro</label><select onchange="updateFix(${i}, 'dueMonth', this.value)"><option value="all" ${f.dueMonth=='all'?'selected':''}>Mes</option><option value="01" ${f.dueMonth=='01'?'selected':''}>Ene</option><option value="12" ${f.dueMonth=='12'?'selected':''}>Dic</option></select></div></div></div>`;
   });
-  document.querySelectorAll("input[data-card-min]").forEach(i=>{
-    const id = i.dataset.cardMin;
-    out[id] = out[id] || {};
-    out[id].min_payment = Number(i.value)||0;
-  });
-  return out;
+  renderCharts();
 }
 
-/* ================= ITEMS EDITOR (CRUD + fecha pago) ================= */
-function renderItemsEditor(){
-  const w = document.getElementById("itemsEditor");
-  w.innerHTML = "";
-
-  if(!STATE.items.length){
-    w.innerHTML = `<div class="status-msg">No hay items aún.</div>`;
-    return;
-  }
-
-  const grouped = [
-    { title: "Suscripciones / Pagos recurrentes", type: "fixed" },
-    { title: "Tarjetas", type: "card" },
-  ];
-
-  grouped.forEach(g=>{
-    w.innerHTML += `<h2 style="margin-top:18px;">${g.title}</h2>`;
-
-    const list = STATE.items.filter(x=>x.type===g.type && x.active);
-    if(!list.length){
-      w.innerHTML += `<div class="status-msg">—</div>`;
-      return;
-    }
-
-    list.forEach(it=>{
-      w.innerHTML += `
-        <div class="card-item">
-          <div class="mini"><strong>${it.name}</strong></div>
-
-          <div class="grid">
-            <div>
-              <div class="mini">Nombre</div>
-              <input data-name="${it.id}" value="${it.name}">
-            </div>
-            <div>
-              <div class="mini">Moneda</div>
-              <select data-currency="${it.id}">
-                ${["AED","EUR","IDR","USD"].map(c=>`<option value="${c}" ${c===it.currency?"selected":""}>${c}</option>`).join("")}
-              </select>
-            </div>
-          </div>
-
-          <div class="grid">
-            <div>
-              <div class="mini">Categoría</div>
-              <input data-category="${it.id}" value="${it.category||""}" placeholder="Suscripciones / Telefonía / Préstamos...">
-            </div>
-            <div>
-              <div class="mini">Fecha de pago (día del mes)</div>
-              <input type="number" min="1" max="31" data-day="${it.id}" value="${it.schedule_day ?? 1}">
-            </div>
-          </div>
-
-          ${it.type==="fixed" ? `
-          <div class="grid">
-            <div>
-              <div class="mini">Importe (recurrente)</div>
-              <input type="number" step="0.01" data-amount="${it.id}" value="${it.amount_default ?? 0}">
-            </div>
-            <div>
-              <div class="mini">Notas</div>
-              <input data-notes="${it.id}" value="${it.notes||""}" placeholder="Opcional">
-            </div>
-          </div>
-          ` : `
-          <div class="grid">
-            <div>
-              <div class="mini">Notas</div>
-              <input data-notes="${it.id}" value="${it.notes||""}" placeholder="Opcional">
-            </div>
-            <div>
-              <div class="mini">—</div>
-              <input disabled value="Los importes mensuales se ponen arriba">
-            </div>
-          </div>
-          `}
-
-          <div class="grid">
-            <button class="alt" data-save="${it.id}">Guardar</button>
-            <button class="danger" data-del="${it.id}">Eliminar</button>
-          </div>
-        </div>
-      `;
-    });
-  });
-
-  // handlers save/delete
-  w.querySelectorAll("button[data-save]").forEach(btn=>{
-    btn.addEventListener("click", async ()=>{
-      try{
-        const id = btn.dataset.save;
-        const it = STATE.items.find(x=>x.id===id);
-        if(!it) return;
-
-        const name = w.querySelector(`input[data-name="${id}"]`).value.trim();
-        const currency = w.querySelector(`select[data-currency="${id}"]`).value;
-        const category = w.querySelector(`input[data-category="${id}"]`).value.trim();
-        const day = Number(w.querySelector(`input[data-day="${id}"]`).value) || 1;
-        const notes = w.querySelector(`input[data-notes="${id}"]`).value.trim() || null;
-
-        if(!name) throw new Error("Nombre requerido");
-        if(day < 1 || day > 31) throw new Error("Día de pago inválido");
-
-        const updated = {
-          ...it,
-          name,
-          currency,
-          category,
-          schedule_type: "monthly",
-          schedule_day: day,
-          notes,
-        };
-
-        if(it.type==="fixed"){
-          const amt = Number(w.querySelector(`input[data-amount="${id}"]`).value) || 0;
-          updated.amount_default = amt;
-        }else{
-          updated.amount_default = null;
-        }
-
-        setStatus("Guardando…");
-        const saved = await apiCall("item_upsert", null, { item: updated });
-
-        // update local state item
-        STATE.items = STATE.items.map(x=>x.id===saved.id ? saved : x);
-
-        // re-render dependent sections
-        renderItemsEditor();
-        renderCardsMonth();
-        renderCalendar();
-
-        setStatus("Guardado ✅");
-      }catch(e){
-        setStatus(e.message);
-      }
-    });
-  });
-
-  w.querySelectorAll("button[data-del]").forEach(btn=>{
-    btn.addEventListener("click", async ()=>{
-      try{
-        const id = btn.dataset.del;
-
-        setStatus("Eliminando…");
-        await apiCall("item_delete", null, { id });
-
-        // limpia cardsMonth si existía
-        const next = structuredClone(STATE.cardsMonth || {});
-        delete next[id];
-        STATE.cardsMonth = next;
-
-        // guarda el mes actualizado (para no dejar basura en JSON)
-        await apiCall("set", STATE.month, { cards: next });
-
-        // recarga todo
-        await loadMonth();
-
-        setStatus("Eliminado ✅");
-      }catch(e){
-        setStatus(e.message);
-      }
-    });
-  });
-}
-
-async function addItem(type){
-  const base = {
-    type,
-    category: type==="fixed" ? "Suscripciones" : "Tarjetas",
-    name: type==="fixed" ? "Nuevo pago" : "Nueva tarjeta",
-    currency: "AED",
-    amount_default: type==="fixed" ? 0 : null,
-    notes: null,
-    schedule_type: "monthly",
-    schedule_day: 1,
-    schedule_next: null,
-    schedule_interval_months: null,
-    schedule_interval_years: null,
-    active: true,
-    sort: 1000,
-  };
-
-  setStatus("Creando…");
-  await apiCall("item_upsert", null, { item: base });
-  await loadMonth();
-  setStatus("Creado ✅");
-}
-
-/* ================= LOAD ================= */
-async function loadMonth(){
-  const month = currentMonthISO();
-  setStatus("Cargando…");
-
-  const payload = await apiCall("get", month);
-  // payload: { month, cards, items, paid[] }
-  STATE.month = payload.month || month;
-  STATE.cardsMonth = payload.cards || {};
-  STATE.items = payload.items || [];
-
-  const paidMap = {};
-  (payload.paid || []).forEach(x=> paidMap[x.item_id] = !!x.paid);
-  STATE.paid = paidMap;
-
-  renderItemsEditor();
-  renderCardsMonth();
-  renderCalendar();
-
-  setStatus("Actualizado ✅");
-}
-
-/* ================= PIN FLOW ================= */
-function lock(){
-  SESSION_PIN = "";
-  document.getElementById("app").classList.add("hidden");
-  document.getElementById("pinInput").value = "";
-  setStatus("");
-  setPinStatus("Introduce el PIN.");
-}
-
-document.getElementById("pinOk").addEventListener("click", async ()=>{
-  const p = document.getElementById("pinInput").value.trim();
-  if(p.length < 6) return setPinStatus("PIN inválido.");
-
-  SESSION_PIN = p;
-  setPinStatus("Verificando…");
-
-  try{
-    document.getElementById("app").classList.remove("hidden");
-    await loadMonth();
-    setPinStatus("PIN correcto ✅");
-    document.getElementById("pinInput").value = "";
-  }catch(e){
-    lock();
-    setPinStatus(e.message || "PIN incorrecto.");
-  }
+document.getElementById("editToggle").addEventListener("click", function() {
+  const isEditing = document.getElementById("mainBody").classList.toggle("editing");
+  this.textContent = isEditing ? "✓ Guardar" : "✎ Ajustes";
 });
 
-/* ================= EVENTS ================= */
-document.getElementById("loadMonth").addEventListener("click", ()=> {
-  loadMonth().catch(e=> setStatus(e.message));
+window.updateFix = (i, fld, val) => { fixedGasto[i][fld] = (fld === 'amount' || fld === 'day') ? parseFloat(val) : val; saveToLocal(); renderFixed(); };
+
+window.deleteItem = (type, i) => { if(!confirm("¿Eliminar?")) return; if(type === 'card') cards.splice(i, 1); else fixedGasto.splice(i, 1); saveToLocal(); refreshAll(); };
+
+document.getElementById("addCardBtn").addEventListener("click", () => {
+  const n = document.getElementById("newCardName"); if(!n.value) return;
+  cards.push({ name: n.value, currency: document.getElementById("newCardCur").value });
+  n.value = ""; saveToLocal(); renderCards();
 });
 
-document.getElementById("saveCardsMonth").addEventListener("click", async ()=>{
-  try{
-    setStatus("Guardando…");
-    const cards = collectCardsMonth();
-    await apiCall("set", STATE.month, { cards });
-    await loadMonth();
-    setStatus("Guardado ✅");
-  }catch(e){
-    setStatus(e.message);
-  }
+document.getElementById("addFixBtn").addEventListener("click", () => {
+  const name = document.getElementById("fixName").value, amt = parseFloat(document.getElementById("fixAmt").value), isFreq = document.getElementById("checkFreq").checked;
+  if(!name || !amt) return;
+  fixedGasto.push({ name, amount: amt, currency: document.getElementById("fixCur").value, day: parseInt(document.getElementById("fixDay").value) || 1, freq: isFreq ? parseInt(document.getElementById("fixFreq").value) : 1, dueMonth: isFreq ? document.getElementById("fixMonth").value : "all" });
+  document.getElementById("fixName").value = ""; document.getElementById("fixAmt").value = ""; saveToLocal(); renderFixed();
 });
 
-document.getElementById("addSub").addEventListener("click", ()=> addItem("fixed").catch(e=>setStatus(e.message)));
-document.getElementById("addCard").addEventListener("click", ()=> addItem("card").catch(e=>setStatus(e.message)));
-
-document.getElementById("lock").addEventListener("click", lock);
-
-/* ================= START ================= */
-initDateSelectors();
-lock();
+const now = new Date();
+for(let y=2026;y<=2031;y++) document.getElementById("yearSelect").add(new Option(y,y,y===now.getFullYear()));
+document.getElementById("monthSelect").value = String(now.getMonth()+1).padStart(2,'0');
+refreshAll();
 </script>
 </body>
 </html>
