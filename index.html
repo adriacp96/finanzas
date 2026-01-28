@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Finanzas</title>
+  <style>
+    :root { font-family: -apple-system, system-ui, Segoe UI, Roboto, Arial, sans-serif; }
+    body { margin: 16px; max-width: 900px; }
+    h1 { margin: 6px 0 12px; }
+    .card { border: 1px solid #e5e5e5; border-radius: 12px; padding: 14px; margin: 12px 0; }
+    .row { display: grid; grid-template-columns: 1fr 140px 120px; gap: 10px; align-items: center; }
+    .row4 { display: grid; grid-template-columns: 1fr 140px 120px 120px; gap: 10px; align-items: center; }
+    label { font-size: 12px; color: #666; display:block; margin-bottom: 6px; }
+    input, select, button { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #d9d9d9; }
+    button { cursor: pointer; }
+    .btn { background: #111; color: #fff; border: 1px solid #111; }
+    .btn2 { background: #fff; color: #111; }
+    .muted { color:#666; font-size: 13px; }
+    .totals { display:flex; flex-wrap:wrap; gap:10px; }
+    .pill { border:1px solid #eee; border-radius:999px; padding:8px 12px; }
+    table { width:100%; border-collapse: collapse; }
+    th, td { text-align:left; padding:10px; border-bottom:1px solid #eee; font-size: 14px; }
+    th { font-size: 12px; color:#666; font-weight:600; }
+    .right { text-align:right; }
+    .warn { color:#b45309; }
+  </style>
+</head>
+<body>
+  <h1>Finanzas</h1>
+  <p class="muted">Se guarda en este dispositivo (memoria local). Si borras Safari o cambias de iPhone, se pierde.</p>
+
+  <div class="card">
+    <h2 style="margin:0 0 10px;">Mes</h2>
+    <div class="row">
+      <div>
+        <label>Selecciona mes</label>
+        <input id="month" type="month" />
+      </div>
+      <div>
+        <label>Moneda base</label>
+        <select id="baseCurrency">
+          <option value="AED">AED</option>
+          <option value="EUR">EUR</option>
+        </select>
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <button class="btn" id="saveMonth">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 style="margin:0 0 10px;">Tarjetas (solo esto cambia cada mes)</h2>
+    <div id="cardsForm"></div>
+    <div style="display:flex; gap:10px; margin-top:10px;">
+      <button class="btn" id="saveCards">Guardar tarjetas</button>
+      <button class="btn2" id="resetCards">Reset mes</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 style="margin:0 0 10px;">Totales</h2>
+    <div class="totals" id="totals"></div>
+    <p class="muted warn" id="note"></p>
+  </div>
+
+  <div class="card">
+    <h2 style="margin:0 0 10px;">Gastos fijos (no deberías tocarlos)</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Concepto</th><th>Categoría</th><th>Frecuencia</th><th class="right">Importe</th><th>Moneda</th><th class="right">Mensual real</th>
+        </tr>
+      </thead>
+      <tbody id="fixedTable"></tbody>
+    </table>
+  </div>
+
+<script>
+/** ===== Datos fijos (precargados con lo que me pasaste) ===== */
+const FIXED = [
+  { concept:"Apple One", category:"Suscripción", freq:"Mensual", amount:97.95, currency:"AED", day:26 },
+  { concept:"Netflix", category:"Suscripción", freq:"Mensual", amount:9.99, currency:"EUR", day:28, note:"AMEX España" },
+  { concept:"Real Debrid", category:"Suscripción", freq:"Semestral", amount:16, currency:"EUR", day:6 },
+  { concept:"Formula 1", category:"Suscripción", freq:"Anual", amount:3649, currency:"IDR", day:26, note:"App Store India" },
+  { concept:"YouTube Premium", category:"Suscripción", freq:"Mensual", amount:195, currency:"IDR", day:28, note:"App Store India" },
+  { concept:"Du", category:"Telefonía", freq:"Mensual", amount:252, currency:"AED", day:24 },
+  { concept:"Virgin", category:"Telefonía", freq:"Anual", amount:1575, currency:"AED", day:17 },
+  { concept:"Emirates Islamic", category:"Préstamo", freq:"Mensual", amount:1739, currency:"AED", day:27 },
+  { concept:"Emirates NBD", category:"Préstamo", freq:"Mensual", amount:3346, currency:"AED", day:24 },
+  { concept:"Seguro coche", category:"Seguro / Carné", freq:"Anual", amount:3003, currency:"AED", day:29 },
+  { concept:"Carné conducir", category:"Seguro / Carné", freq:"Trienal", amount:320, currency:"AED", day:29 }
+];
+
+const CARD_NAMES = [
+  { name:"Emirates NBD", currency:"AED" },
+  { name:"Tabby", currency:"AED" },
+  { name:"Amex", currency:"EUR" }
+];
+
+/** ===== Utilidades ===== */
+function monthlyReal(item){
+  if(item.freq === "Mensual") return item.amount;
+  if(item.freq === "Anual") return item.amount/12;
+  if(item.freq === "Semestral") return item.amount/6;
+  if(item.freq === "Trienal") return item.amount/36;
+  return 0;
+}
+
+const LS_KEY = "finanzas_v1";
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(!raw) return { baseCurrency:"AED", month: defaultMonth(), cardsByMonth:{} };
+    return JSON.parse(raw);
+  }catch(e){
+    return { baseCurrency:"AED", month: defaultMonth(), cardsByMonth:{} };
+  }
+}
+
+function saveState(state){
+  localStorage.setItem(LS_KEY, JSON.stringify(state));
+}
+
+function defaultMonth(){
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,"0");
+  return `${y}-${m}`;
+}
+
+function fmt(n, c){
+  if(typeof n !== "number" || isNaN(n)) n = 0;
+  return new Intl.NumberFormat("es-ES", { style:"currency", currency: c }).format(n);
+}
+
+/** ===== Render ===== */
+const state = loadState();
+
+const monthInput = document.getElementById("month");
+const baseCurrencySelect = document.getElementById("baseCurrency");
+monthInput.value = state.month || defaultMonth();
+baseCurrencySelect.value = state.baseCurrency || "AED";
+
+document.getElementById("saveMonth").addEventListener("click", () => {
+  state.month = monthInput.value || defaultMonth();
+  state.baseCurrency = baseCurrencySelect.value;
+  saveState(state);
+  renderAll();
+});
+
+function renderFixed(){
+  const tbody = document.getElementById("fixedTable");
+  tbody.innerHTML = "";
+  for(const item of FIXED){
+    const tr = document.createElement("tr");
+    const m = monthlyReal(item);
+    tr.innerHTML = `
+      <td>${item.concept}</td>
+      <td>${item.category}</td>
+      <td>${item.freq}</td>
+      <td class="right">${item.amount}</td>
+      <td>${item.currency}</td>
+      <td class="right">${item.currency === "IDR" ? m.toFixed(0) : m.toFixed(2)} ${item.currency}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+function renderCardsForm(){
+  const wrap = document.getElementById("cardsForm");
+  wrap.innerHTML = "";
+  const key = monthInput.value || defaultMonth();
+  const saved = state.cardsByMonth[key] || {};
+  for(const c of CARD_NAMES){
+    const val = saved[c.name]?.amount ?? "";
+    const row = document.createElement("div");
+    row.className = "row4";
+    row.style.marginBottom = "10px";
+    row.innerHTML = `
+      <div>
+        <label>Tarjeta</label>
+        <input value="${c.name}" disabled />
+      </div>
+      <div>
+        <label>Importe</label>
+        <input inputmode="decimal" placeholder="0" data-card="${c.name}" value="${val}" />
+      </div>
+      <div>
+        <label>Moneda</label>
+        <input value="${c.currency}" disabled />
+      </div>
+      <div>
+        <label>Pagado</label>
+        <select data-paid="${c.name}">
+          <option value="no">No</option>
+          <option value="si">Sí</option>
+        </select>
+      </div>
+    `;
+    wrap.appendChild(row);
+
+    const paidSel = row.querySelector(`select[data-paid="${c.name}"]`);
+    paidSel.value = (saved[c.name]?.paid ? "si" : "no");
+  }
+}
+
+document.getElementById("saveCards").addEventListener("click", () => {
+  const key = monthInput.value || defaultMonth();
+  const obj = {};
+  document.querySelectorAll(`input[data-card]`).forEach(inp => {
+    const name = inp.getAttribute("data-card");
+    const num = Number(String(inp.value).replace(",", "."));
+    obj[name] = obj[name] || {};
+    obj[name].amount = isNaN(num) ? 0 : num;
+  });
+  document.querySelectorAll(`select[data-paid]`).forEach(sel => {
+    const name = sel.getAttribute("data-paid");
+    obj[name] = obj[name] || {};
+    obj[name].paid = sel.value === "si";
+  });
+  state.cardsByMonth[key] = obj;
+  saveState(state);
+  renderTotals();
+});
+
+document.getElementById("resetCards").addEventListener("click", () => {
+  const key = monthInput.value || defaultMonth();
+  delete state.cardsByMonth[key];
+  saveState(state);
+  renderAll();
+});
+
+function renderTotals(){
+  const totalsDiv = document.getElementById("totals");
+  const note = document.getElementById("note");
+  totalsDiv.innerHTML = "";
+
+  const key = monthInput.value || defaultMonth();
+  const cards = state.cardsByMonth[key] || {};
+
+  // Totales por moneda (sin conversión: tú decides si quieres cambiar esto luego)
+  const fixedByCur = {};
+  for(const f of FIXED){
+    const m = monthlyReal(f);
+    fixedByCur[f.currency] = (fixedByCur[f.currency] || 0) + m;
+  }
+
+  const cardsByCur = {};
+  for(const c of CARD_NAMES){
+    const a = Number(cards[c.name]?.amount || 0);
+    cardsByCur[c.currency] = (cardsByCur[c.currency] || 0) + a;
+  }
+
+  const currencies = new Set([...Object.keys(fixedByCur), ...Object.keys(cardsByCur)]);
+  for(const cur of currencies){
+    const fixed = fixedByCur[cur] || 0;
+    const card = cardsByCur[cur] || 0;
+    const total = fixed + card;
+
+    const pill = document.createElement("div");
+    pill.className = "pill";
+    pill.innerHTML = `
+      <div><strong>${cur}</strong></div>
+      <div class="muted">Fijos (mensual real): ${cur === "IDR" ? fixed.toFixed(0)+" "+cur : fmt(fixed, cur)}</div>
+      <div class="muted">Tarjetas (mes): ${cur === "IDR" ? card.toFixed(0)+" "+cur : fmt(card, cur)}</div>
+      <div style="margin-top:6px;"><strong>Total:</strong> ${cur === "IDR" ? total.toFixed(0)+" "+cur : fmt(total, cur)}</div>
+    `;
+    totalsDiv.appendChild(pill);
+  }
+
+  note.textContent = "Nota: no hay conversión automática entre monedas. Si quieres, luego lo mejoramos con tipo de cambio manual.";
+}
+
+function renderAll(){
+  renderFixed();
+  renderCardsForm();
+  renderTotals();
+}
+
+renderAll();
+</script>
+</body>
+</html>
