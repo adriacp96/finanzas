@@ -72,7 +72,7 @@
     <label>PERIODO (MES)</label>
     <div class="grid">
       <input id="month" type="month" />
-      <button id="loadMonth">CARGAR</button>
+      <div></div>
     </div>
     <div id="status" class="status-msg"></div>
   </div>
@@ -80,7 +80,7 @@
   <div class="section">
     <h2>Resumen de Gastos</h2>
     <div id="chartsContainer">
-      <p style="font-size:0.8rem">Cargue un mes para visualizar totales.</p>
+      <p style="font-size:0.8rem">Cargando…</p>
     </div>
   </div>
 
@@ -153,6 +153,10 @@ function safeMonthValue(){
   const m = document.getElementById("month").value;
   if (!m || !/^\d{4}-\d{2}$/.test(m)) throw new Error("Mes inválido. Usa YYYY-MM.");
   return m;
+}
+
+function currentMonthISO(){
+  return new Date().toISOString().slice(0, 7);
 }
 
 /** =========================
@@ -304,11 +308,42 @@ function collectCardsFromUI(){
 }
 
 /** =========================
+ *  AUTO-CARGA
+ *  ========================= */
+let isAutoLoading = false;
+
+async function autoLoadSelectedMonth(){
+  if (isAutoLoading) return;
+  isAutoLoading = true;
+
+  try {
+    const month = safeMonthValue();
+    setStatus("Cargando…");
+
+    const res = await apiCall("get", month, null);
+    const payload = res?.data || { month, cards: {} };
+
+    renderCards(payload.cards || {});
+    renderSimpleCharts(payload.cards || {});
+    setStatus("Actualizado ✅");
+  } catch (e) {
+    // Si no hay PIN o es incorrecto, apiCall fallará.
+    // Dejamos la UI en blanco y mostramos el error.
+    renderCards({});
+    renderSimpleCharts({});
+    setStatus("Error: " + (e?.message || e));
+  } finally {
+    isAutoLoading = false;
+  }
+}
+
+/** =========================
  *  EVENTOS
  *  ========================= */
-document.getElementById("month").value = new Date().toISOString().slice(0, 7);
+document.getElementById("month").value = currentMonthISO();
 
-document.getElementById("savePin").addEventListener("click", () => {
+// Guardar PIN y auto-cargar el mes seleccionado
+document.getElementById("savePin").addEventListener("click", async () => {
   const p = (document.getElementById("pinInput").value || "").trim();
   if (p.length < 6) {
     setStatus("PIN demasiado corto (mínimo 6).");
@@ -316,50 +351,37 @@ document.getElementById("savePin").addEventListener("click", () => {
   }
   localStorage.setItem(PIN_KEY, p);
   document.getElementById("pinInput").value = "";
-  setStatus("PIN guardado ✅");
-  document.getElementById("pinHint").textContent = "Este dispositivo ya tiene PIN guardado.";
+  document.getElementById("pinHint").textContent = "Este dispositivo ya tiene PIN guardado ✅";
+  await autoLoadSelectedMonth();
 });
 
-document.getElementById("loadMonth").addEventListener("click", async () => {
-  try {
-    const month = safeMonthValue();
-    setStatus("Cargando...");
-
-    const res = await apiCall("get", month, null);
-    const payload = res?.data || { month, cards: {} };
-
-    renderCards(payload.cards || {});
-    renderSimpleCharts(payload.cards || {});
-    setStatus("Mes cargado ✅");
-  } catch (e) {
-    renderCards({});
-    renderSimpleCharts({});
-    setStatus("Error: " + (e?.message || e));
-  }
+// Cambiar mes => auto-cargar
+document.getElementById("month").addEventListener("change", async () => {
+  await autoLoadSelectedMonth();
 });
 
+// Guardar + sincronizar (guarda y recarga desde la nube)
 document.getElementById("syncNow").addEventListener("click", async () => {
   try {
     const month = safeMonthValue();
-    setStatus("Guardando y sincronizando...");
+    setStatus("Guardando y sincronizando…");
 
     const cards = collectCardsFromUI();
-
-    // 1) Guardar
     await apiCall("set", month, { month, cards });
 
-    // 2) Cargar de vuelta (confirmación de sync)
+    // Confirmación real: recarga desde la nube
     const res = await apiCall("get", month, null);
     const payload = res?.data || { month, cards: {} };
 
     renderCards(payload.cards || {});
     renderSimpleCharts(payload.cards || {});
-    setStatus("Sincronizado correctamente ✅");
+    setStatus("Sincronizado ✅");
   } catch (e) {
     setStatus("Error: " + (e?.message || e));
   }
 });
 
+// Limpiar (solo UI)
 document.getElementById("resetCards").addEventListener("click", () => {
   renderCards({});
   renderSimpleCharts({});
@@ -377,6 +399,13 @@ const existingPin = (localStorage.getItem(PIN_KEY) || "").trim();
 document.getElementById("pinHint").textContent = existingPin
   ? "Este dispositivo ya tiene PIN guardado ✅"
   : "No hay PIN guardado aún. Escríbelo y pulsa OK.";
+
+// Auto-carga al abrir si ya hay PIN guardado
+if (existingPin) {
+  autoLoadSelectedMonth();
+} else {
+  setStatus("Introduce el PIN y pulsa OK.");
+}
 </script>
 </body>
 </html>
