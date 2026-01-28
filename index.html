@@ -63,7 +63,16 @@ function unlock(){
   document.getElementById("content").classList.remove("hidden");
 }
 
+function currentMonthISO(){
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  return `${y}-${m}`; // YYYY-MM
+}
+
 async function callFinanzas(action){
+  const payload = { action, pin: SESSION_PIN, month: currentMonthISO() };
+
   const res = await fetch(`${SUPABASE_URL}/functions/v1/finanzas`, {
     method: "POST",
     headers: {
@@ -71,7 +80,7 @@ async function callFinanzas(action){
       "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
       "apikey": SUPABASE_ANON_KEY
     },
-    body: JSON.stringify({ action, pin: SESSION_PIN })
+    body: JSON.stringify(payload)
   });
 
   const j = await res.json().catch(()=> ({}));
