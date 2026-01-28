@@ -9,13 +9,21 @@
     body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin:0; padding:16px; background:#fff; color:#000; }
     h1 { margin:0 0 12px; font-size:18px; text-transform:uppercase; border-bottom:2px solid #000; padding-bottom:6px; }
     .section { border:2px solid #000; padding:12px; margin:12px 0; }
-    label { display:block; font-size:12px; font-weight:800; text-transform:uppercase; margin-bottom:6px; }
-    input, button { width:100%; padding:10px; border:2px solid #000; border-radius:0; font-size:14px; background:#fff; margin-bottom:10px; }
+    label { display:block; font-size:12px; font-weight:900; text-transform:uppercase; margin-bottom:6px; }
+    input, select, button { width:100%; padding:10px; border:2px solid #000; border-radius:0; font-size:14px; background:#fff; margin-bottom:10px; }
     button { background:#000; color:#fff; font-weight:900; text-transform:uppercase; cursor:pointer; }
+    button.alt { background:#fff; color:#000; }
     .grid { display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
     .status { font-size:12px; font-style:italic; min-height:16px; }
     .hidden { display:none !important; }
-    pre { margin:0; border:2px solid #000; padding:10px; font-size:12px; min-height:180px; white-space:pre-wrap; word-break:break-word; }
+
+    table { width:100%; border-collapse: collapse; }
+    th { text-align:left; font-size:12px; text-transform:uppercase; border-bottom:2px solid #000; padding:8px 0; }
+    td { padding:10px 0; border-bottom:1px dotted #000; vertical-align:top; }
+    .right { text-align:right; }
+    .muted { opacity:.75; font-size:12px; }
+    .row-ok { opacity:.65; text-decoration: line-through; }
+    .pill { display:inline-block; border:1px solid #000; padding:2px 6px; font-size:11px; margin-right:6px; }
   </style>
 </head>
 <body>
@@ -36,51 +44,81 @@
   <div id="pinStatus" class="status">Introduce el PIN.</div>
 </div>
 
-<!-- Solo se ve si el PIN es correcto -->
+<div class="section">
+  <label>Periodo</label>
+  <div class="grid">
+    <select id="monthSelect" disabled></select>
+    <select id="yearSelect" disabled></select>
+  </div>
+  <div id="loadStatus" class="status"></div>
+</div>
+
+<!-- CONTENIDO: solo se ve si el PIN es correcto -->
 <div id="content" class="section hidden">
-  <label>Respuesta del backend</label>
-  <pre id="out">{}</pre>
-  <button id="lock" style="background:#fff;color:#000;">BLOQUEAR</button>
+  <label>Calendario de pagos</label>
+  <div class="muted" style="margin-bottom:10px;">Marca como pagado y se guarda en Supabase.</div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:90px;">Fecha</th>
+        <th>Concepto</th>
+        <th class="right" style="width:150px;">Importe</th>
+        <th class="right" style="width:80px;">Pagado</th>
+      </tr>
+    </thead>
+    <tbody id="payBody"></tbody>
+  </table>
+
+  <div class="grid" style="margin-top:12px;">
+    <button class="alt" id="reload">Recargar</button>
+    <button class="alt" id="lock">Bloquear</button>
+  </div>
 </div>
 
 <script>
+/* ========= CONFIG ========= */
 const SUPABASE_URL = "https://jwssqrtbsmrjrnerpunt.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3c3NxcnRic21yanJuZXJwdW50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1ODM4NzYsImV4cCI6MjA4NTE1OTg3Nn0.Rl_kRUUTgYt763PakOlBvRObvergx_QBU37aEpAEvlQ";
 
+/* ========= STATE ========= */
 let SESSION_PIN = "";
+let PIN_OK = false;
+let LAST = { month:null, cards:{}, items:[], paid:{} };
 
-function setStatus(t){ document.getElementById("pinStatus").textContent = t; }
-function showData(obj){
-  document.getElementById("out").textContent = JSON.stringify(obj, null, 2);
+/* ========= UI HELPERS ========= */
+function setPinStatus(t){ document.getElementById("pinStatus").textContent = t; }
+function setLoadStatus(t){ document.getElementById("loadStatus").textContent = t; }
+function showContent(show){
+  document.getElementById("content").classList.toggle("hidden", !show);
 }
-function lock(){
-  SESSION_PIN = "";
-  document.getElementById("content").classList.add("hidden");
-  showData({});
-  setStatus("Introduce el PIN.");
+function lockUI(){
+  PIN_OK = false;
+  showContent(false);
+  document.getElementById("monthSelect").disabled = true;
+  document.getElementById("yearSelect").disabled = true;
+  document.getElementById("payBody").innerHTML = "";
+  setLoadStatus("");
 }
-function unlock(){
-  document.getElementById("content").classList.remove("hidden");
+function unlockUI(){
+  PIN_OK = true;
+  showContent(true);
+  document.getElementById("monthSelect").disabled = false;
+  document.getElementById("yearSelect").disabled = false;
 }
 
-function currentMonthISO(){
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, "0");
-  return `${y}-${m}`; // YYYY-MM
-}
+/* ========= API ========= */
+function functionUrl(){ return `${SUPABASE_URL}/functions/v1/finanzas`; }
 
-async function callFinanzas(action){
-  const payload = { action, pin: SESSION_PIN, month: currentMonthISO() };
-
-  const res = await fetch(`${SUPABASE_URL}/functions/v1/finanzas`, {
+async function apiCall(action, month, data=null){
+  const res = await fetch(functionUrl(), {
     method: "POST",
     headers: {
       "Content-Type":"application/json",
       "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
       "apikey": SUPABASE_ANON_KEY
     },
-    body: JSON.stringify(payload)
+    body: JSON.stringify({ action, pin: SESSION_PIN, month, data })
   });
 
   const j = await res.json().catch(()=> ({}));
@@ -88,27 +126,225 @@ async function callFinanzas(action){
   return j.data;
 }
 
+/* ========= DATE / SCHEDULE ========= */
+function currentMonthISO(){
+  const m = document.getElementById("monthSelect").value;
+  const y = document.getElementById("yearSelect").value;
+  return `${y}-${m}`; // YYYY-MM
+}
+function clampDay(y, mIndex, day){
+  const last = new Date(y, mIndex+1, 0).getDate();
+  return Math.min(Math.max(1, day), last);
+}
+function prettyDate(d){
+  const dd = String(d.getDate()).padStart(2,"0");
+  const mm = String(d.getMonth()+1).padStart(2,"0");
+  const yy = String(d.getFullYear()).slice(-2);
+  return `${dd}/${mm}/${yy}`;
+}
+function occursInMonth(item, ym){
+  const [Y,M] = ym.split("-").map(Number);
+  const mIndex = M - 1;
+  const st = item.schedule_type;
+
+  if(st === "monthly"){
+    const day = clampDay(Y, mIndex, Number(item.schedule_day)||1);
+    return { occurs:true, date: new Date(Y, mIndex, day) };
+  }
+
+  const nextStr = item.schedule_next;
+  const next = nextStr ? new Date(nextStr + "T00:00:00") : null;
+  if(!next || isNaN(next)) return { occurs:false, date:null };
+
+  let d = new Date(next.getTime());
+  const start = new Date(Y, mIndex, 1);
+  const end = new Date(Y, mIndex+1, 0, 23,59,59);
+
+  let guard = 0;
+  while(d < start && guard++ < 5000){
+    if(st === "every_n_months"){
+      d.setMonth(d.getMonth() + (Number(item.schedule_interval_months)||1));
+    } else if(st === "every_n_years"){
+      d.setFullYear(d.getFullYear() + (Number(item.schedule_interval_years)||1));
+    } else break;
+  }
+
+  if(d >= start && d <= end) return { occurs:true, date:d };
+  return { occurs:false, date:null };
+}
+
+/* ========= CALENDAR BUILD ========= */
+function buildCalendar(ym, items, cardsById, paidMap){
+  const out = [];
+
+  // fixed
+  items.filter(x=>x.active && x.type==="fixed").forEach(it=>{
+    const occ = occursInMonth(it, ym);
+    if(!occ.occurs) return;
+
+    out.push({
+      id: it.id,
+      date: occ.date,
+      concept: it.name,
+      meta: (it.category || "") + (it.notes ? " — " + it.notes : ""),
+      currency: it.currency,
+      amount: Number(it.amount_default || 0),
+      paid: !!paidMap[it.id],
+      kind: "fixed"
+    });
+  });
+
+  // cards (as min_payment)
+  items.filter(x=>x.active && x.type==="card").forEach(it=>{
+    const occ = occursInMonth(it, ym);
+    if(!occ.occurs) return;
+
+    const v = cardsById?.[it.id] || {};
+    out.push({
+      id: it.id,
+      date: occ.date,
+      concept: `Tarjeta ${it.name} (mínimo)`,
+      meta: "Tarjetas",
+      currency: it.currency,
+      amount: Number(v.min_payment || 0),
+      paid: !!paidMap[it.id],
+      kind: "card"
+    });
+  });
+
+  out.sort((a,b)=>a.date-b.date);
+  return out;
+}
+
+function renderCalendar(){
+  const tb = document.getElementById("payBody");
+  tb.innerHTML = "";
+
+  const ym = LAST.month;
+  const cal = buildCalendar(ym, LAST.items, LAST.cards, LAST.paid);
+
+  if(!cal.length){
+    tb.innerHTML = `<tr><td colspan="4" class="muted">Sin pagos en este mes.</td></tr>`;
+    return;
+  }
+
+  cal.forEach(row=>{
+    const cls = row.paid ? "row-ok" : "";
+    const amountText = `${row.currency} ${Number(row.amount||0).toFixed(2)}`;
+
+    tb.innerHTML += `
+      <tr class="${cls}">
+        <td>${prettyDate(row.date)}</td>
+        <td>
+          <div><strong>${row.concept}</strong></div>
+          <div class="muted">${row.meta || ""}</div>
+        </td>
+        <td class="right">${amountText}</td>
+        <td class="right">
+          <input type="checkbox" data-paid="${row.id}" ${row.paid ? "checked":""}
+            style="width:auto; transform:scale(1.2); margin:0;">
+        </td>
+      </tr>
+    `;
+  });
+
+  // listeners paid
+  tb.querySelectorAll("input[data-paid]").forEach(ch=>{
+    ch.addEventListener("change", async ()=>{
+      const id = ch.dataset.paid;
+      const paid = !!ch.checked;
+
+      // UI optimista
+      LAST.paid[id] = paid;
+      renderCalendar();
+
+      try{
+        await apiCall("paid_set", LAST.month, { item_id: id, paid });
+      }catch(e){
+        // rollback
+        LAST.paid[id] = !paid;
+        renderCalendar();
+        setLoadStatus(e.message || "Error guardando pagado");
+      }
+    });
+  });
+}
+
+/* ========= LOAD ========= */
+async function loadAll(){
+  if(!PIN_OK) return;
+
+  const ym = currentMonthISO();
+  setLoadStatus("Cargando…");
+
+  const data = await apiCall("get", ym);
+
+  // data: { month, cards, items, paid[] }
+  LAST.month = data.month || ym;
+  LAST.cards = data.cards || {};
+  LAST.items = data.items || [];
+
+  const paidMap = {};
+  (data.paid || []).forEach(x=> paidMap[x.item_id] = !!x.paid);
+  LAST.paid = paidMap;
+
+  renderCalendar();
+  setLoadStatus("Cargado ✅");
+}
+
+/* ========= INIT PERIOD ========= */
+(function init(){
+  const now = new Date();
+  const ms = document.getElementById("monthSelect");
+  const ys = document.getElementById("yearSelect");
+
+  ["01","02","03","04","05","06","07","08","09","10","11","12"]
+    .forEach((m,i)=> ms.innerHTML += `<option value="${m}">${i+1}</option>`);
+
+  const y = now.getFullYear();
+  for(let i=y-2;i<=y+2;i++) ys.innerHTML += `<option value="${i}">${i}</option>`;
+
+  ms.value = String(now.getMonth()+1).padStart(2,"0");
+  ys.value = y;
+
+  ms.addEventListener("change", ()=>loadAll().catch(e=>setLoadStatus(e.message)));
+  ys.addEventListener("change", ()=>loadAll().catch(e=>setLoadStatus(e.message)));
+
+  lockUI();
+})();
+
+/* ========= PIN ========= */
 document.getElementById("pinOk").addEventListener("click", async ()=>{
-  lock();
+  lockUI();
+
   const p = document.getElementById("pinInput").value.trim();
-  if(p.length < 6) return setStatus("PIN inválido (mínimo 6).");
+  if(p.length < 6){
+    SESSION_PIN = "";
+    return setPinStatus("PIN inválido (mínimo 6).");
+  }
 
   SESSION_PIN = p;
-  setStatus("Verificando…");
+  setPinStatus("Verificando…");
 
   try{
-    const data = await callFinanzas("get");
-    unlock();
-    showData(data);
-    setStatus("PIN correcto ✅");
+    unlockUI();
+    await loadAll();
+    setPinStatus("PIN correcto ✅");
     document.getElementById("pinInput").value = "";
   }catch(e){
-    lock();
-    setStatus(e.message || "PIN incorrecto.");
+    SESSION_PIN = "";
+    lockUI();
+    setPinStatus(e.message || "PIN incorrecto.");
   }
 });
 
-document.getElementById("lock").addEventListener("click", lock);
+/* ========= BUTTONS ========= */
+document.getElementById("reload").addEventListener("click", ()=>loadAll().catch(e=>setLoadStatus(e.message)));
+document.getElementById("lock").addEventListener("click", ()=>{
+  SESSION_PIN = "";
+  lockUI();
+  setPinStatus("Introduce el PIN.");
+});
 </script>
 
 </body>
