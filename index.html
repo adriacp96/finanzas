@@ -87,7 +87,7 @@
   <div class="section">
     <h2>Tarjetas del Mes</h2>
     <div id="cardsForm"></div>
-    <button id="saveCards">GUARDAR EN LA NUBE</button>
+    <button id="syncNow">GUARDAR Y SINCRONIZAR</button>
     <button class="alt" id="resetCards">LIMPIAR DATOS</button>
   </div>
 
@@ -107,10 +107,7 @@
 <script>
 /** =========================
  *  CONFIG SUPABASE (FIJO)
- *  =========================
- *  OJO: La ANON KEY puede ir en el frontend (es “public”).
- *  La SERVICE ROLE KEY NUNCA debe ir aquí (va en secrets de la Edge Function).
- */
+ *  ========================= */
 const SUPABASE_URL = "https://wogqftmhwgosoaldwees.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvZ3FmdG1od2dvc29hbGR3ZWVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1ODE2MjUsImV4cCI6MjA4NTE1NzYyNX0.lJw1YPSOiV-RJBrhX7aNpJiwUwGjes6cNxTfg5CEg38";
 
@@ -200,15 +197,11 @@ async function apiCall(action, month, data=null){
 /** =========================
  *  RENDER
  *  ========================= */
-
-// Gráfico minimalista (manteniendo tu estilo)
-// Nota: tu escala (maxVal) es estética, no “real”.
 function renderSimpleCharts(cardsData) {
   const container = document.getElementById("chartsContainer");
   container.innerHTML = "";
 
   const currs = ["AED", "EUR", "IDR"];
-
   let any = false;
 
   currs.forEach(cur => {
@@ -228,7 +221,6 @@ function renderSimpleCharts(cardsData) {
     const maxVal = cur === "IDR" ? 10000 : 8000;
     const percent = Math.min((total / maxVal) * 100, 100);
 
-    // Formato: IDR sin decimales, resto con 2
     const displayTotal = (cur === "IDR")
       ? `${Math.round(total)}`
       : `${total.toFixed(2)}`;
@@ -279,7 +271,6 @@ function renderFixed() {
 
   FIXED.forEach(f => {
     const m = monthlyReal(f);
-
     const display = (f.currency === "IDR")
       ? `${f.currency} ${Math.round(m)}`
       : `${f.currency} ${m.toFixed(2)}`;
@@ -347,16 +338,23 @@ document.getElementById("loadMonth").addEventListener("click", async () => {
   }
 });
 
-document.getElementById("saveCards").addEventListener("click", async () => {
+document.getElementById("syncNow").addEventListener("click", async () => {
   try {
     const month = safeMonthValue();
-    setStatus("Guardando...");
+    setStatus("Guardando y sincronizando...");
 
     const cards = collectCardsFromUI();
+
+    // 1) Guardar
     await apiCall("set", month, { month, cards });
 
-    renderSimpleCharts(cards);
-    setStatus("Guardado en la nube ✅");
+    // 2) Cargar de vuelta (confirmación de sync)
+    const res = await apiCall("get", month, null);
+    const payload = res?.data || { month, cards: {} };
+
+    renderCards(payload.cards || {});
+    renderSimpleCharts(payload.cards || {});
+    setStatus("Sincronizado correctamente ✅");
   } catch (e) {
     setStatus("Error: " + (e?.message || e));
   }
