@@ -39,6 +39,7 @@
     }
     button { background: #000; color: #fff; font-weight: bold; cursor: pointer; }
     button.alt { background: #fff; color: #000; }
+    button.danger { background:#fff; color:#000; border-style: dashed; }
 
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
@@ -50,98 +51,120 @@
       padding: 4px;
       border: 1px solid #000;
       display: inline-block;
+      min-height: 1.2em;
     }
 
-    /* charts */
-    .chart-row { margin: 15px 0; border: 1px dotted #000; padding: 8px; }
-    .bar-bg { border: 1px solid #000; height: 14px; width: 100%; background: #fff; margin: 4px 0 8px; }
-    .bar-fill { background: #000; height: 100%; width: 0%; }
-    .bar-fill.min { background: repeating-linear-gradient(45deg, #000, #000 2px, #fff 2px, #fff 4px); }
-    .bar-label { display: flex; justify-content: space-between; font-size: 0.85rem; font-family: sans-serif; }
-
-    .card-item { border-bottom: 2px solid #000; padding: 12px 0; margin-bottom: 5px; }
     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    th { text-align: left; font-size: 0.7rem; border-bottom: 1px solid #000; }
-    td { padding: 6px 0; font-size: 0.85rem; border-bottom: 1px dotted #000; }
+    th { text-align: left; font-size: 0.7rem; border-bottom: 1px solid #000; text-transform: uppercase; }
+    td { padding: 8px 0; font-size: 0.9rem; border-bottom: 1px dotted #000; vertical-align: top; }
     .right { text-align: right; }
 
-    .hidden { display:none !important; }
+    .card-item { border-bottom: 2px solid #000; padding: 12px 0; margin-bottom: 5px; }
     .mini { font-size: 0.7rem; opacity: 0.9; font-family: sans-serif; text-transform: uppercase; }
+    .muted { opacity: .8; font-size: .85rem; }
+
+    .hidden { display:none !important; }
+    .row-ok { opacity:.65; text-decoration: line-through; }
   </style>
 </head>
 <body>
 
-  <h1>Finanzas</h1>
+<h1>Finanzas</h1>
 
-  <!-- PIN -->
+<!-- PIN -->
+<div class="section">
+  <div class="grid">
+    <div>
+      <label>PIN acceso</label>
+      <input id="pinInput" type="password" placeholder="******" />
+    </div>
+    <div>
+      <label>&nbsp;</label>
+      <button id="pinOk">OK</button>
+    </div>
+  </div>
+  <div id="pinStatus" class="status-msg">Introduce el PIN.</div>
+</div>
+
+<!-- APP (solo visible con PIN correcto) -->
+<div id="app" class="hidden">
+
+  <!-- PERIODO -->
   <div class="section">
+    <div class="grid-3">
+      <div><label>Año</label><select id="yearSelect"></select></div>
+      <div><label>Mes</label>
+        <select id="monthSelect">
+          <option value="01">Ene</option><option value="02">Feb</option><option value="03">Mar</option>
+          <option value="04">Abr</option><option value="05">May</option><option value="06">Jun</option>
+          <option value="07">Jul</option><option value="08">Ago</option><option value="09">Sep</option>
+          <option value="10">Oct</option><option value="11">Nov</option><option value="12">Dic</option>
+        </select>
+      </div>
+      <div><label>&nbsp;</label><button id="loadMonth">IR</button></div>
+    </div>
+    <div id="status" class="status-msg"></div>
+  </div>
+
+  <!-- CALENDARIO (fecha de pago de cada cosa) -->
+  <div class="section">
+    <h2>Pagos del Mes</h2>
+    <div class="muted">Cada item tiene su fecha de pago. El “mínimo” de tarjeta usa la fecha configurada en la tarjeta.</div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:90px;">Fecha</th>
+          <th>Concepto</th>
+          <th class="right" style="width:150px;">Importe</th>
+          <th class="right" style="width:90px;">Pagado</th>
+        </tr>
+      </thead>
+      <tbody id="payBody"></tbody>
+    </table>
+  </div>
+
+  <!-- TARJETAS (por mes: montos) -->
+  <div class="section">
+    <h2>Tarjetas del Mes</h2>
+    <div class="muted">Aquí solo cambian los importes del mes. La fecha de pago está en “Gestión de items”.</div>
+    <div id="cardsMonthForm"></div>
+    <button id="saveCardsMonth">Guardar Importes del Mes</button>
+  </div>
+
+  <!-- GESTIÓN (crear/editar/eliminar items + fecha de pago) -->
+  <div class="section">
+    <h2>Gestión de Items</h2>
     <div class="grid">
-      <div>
-        <label>PIN acceso</label>
-        <input id="pinInput" type="password" placeholder="******" />
-      </div>
-      <div>
-        <label>&nbsp;</label>
-        <button id="pinOk">OK</button>
-      </div>
+      <button class="alt" id="addSub">Añadir Suscripción / Recurrente</button>
+      <button class="alt" id="addCard">Añadir Tarjeta</button>
     </div>
-    <div id="pinStatus" class="status-msg">Introduce el PIN.</div>
+
+    <div class="muted">
+      Reglas simples: todos los items son “mensuales” y se les define <strong>día de pago (1–31)</strong>.
+      (Si luego quieres “cada 6 meses”/“anual”, lo añadimos.)
+    </div>
+
+    <div id="itemsEditor"></div>
   </div>
 
-  <!-- UI bloqueada hasta PIN OK -->
-  <div id="app" class="hidden">
-
-    <div class="section">
-      <div class="grid-3">
-        <div><label>Año</label><select id="yearSelect"></select></div>
-        <div><label>Mes</label>
-          <select id="monthSelect">
-            <option value="01">Ene</option><option value="02">Feb</option><option value="03">Mar</option>
-            <option value="04">Abr</option><option value="05">May</option><option value="06">Jun</option>
-            <option value="07">Jul</option><option value="08">Ago</option><option value="09">Sep</option>
-            <option value="10">Oct</option><option value="11">Nov</option><option value="12">Dic</option>
-          </select>
-        </div>
-        <div><label>&nbsp;</label><button id="loadMonth">IR</button></div>
-      </div>
-      <div id="status" class="status-msg"></div>
-    </div>
-
-    <div class="section">
-      <h2>Resumen (Total vs Mínimo)</h2>
-      <div id="chartsContainer"></div>
-      <p style="font-size: 0.7rem;">■ Total (Fijos prorrateados + Deuda tarjetas) | ▨ Mínimo (Fijos prorrateados + Mínimos tarjeta)</p>
-    </div>
-
-    <div class="section">
-      <h2>Tarjetas</h2>
-      <div id="cardsForm"></div>
-      <button id="saveCards">Guardar Cambios</button>
-      <button class="alt" id="lock">Bloquear</button>
-    </div>
-
-    <div class="section">
-      <h2>Gastos Fijos (Prorrateo)</h2>
-      <table>
-        <thead><tr><th>CONCEPTO</th><th class="right">MENSUAL</th></tr></thead>
-        <tbody id="fixedTableBody"></tbody>
-      </table>
-    </div>
-
+  <div class="section">
+    <button class="alt" id="lock">Bloquear</button>
   </div>
+
+</div>
 
 <script>
-/* ================= CONFIG SUPABASE ================= */
+/* ================= CONFIG ================= */
 const SUPABASE_URL = "https://jwssqrtbsmrjrnerpunt.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3c3NxcnRic21yanJuZXJwdW50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1ODM4NzYsImV4cCI6MjA4NTE1OTg3Nn0.Rl_kRUUTgYt763PakOlBvRObvergx_QBU37aEpAEvlQ";
 
-/* ================= STATE ================= */
 let SESSION_PIN = "";
+
 let STATE = {
-  month: null,         // YYYY-MM
-  items: [],           // fin_items (activos)
-  cardsMonth: {},      // fin_month.cards (por item_id)
-  paid: {},            // map item_id -> bool (fin_paid)
+  month: null,        // YYYY-MM
+  items: [],          // fin_items (activos)
+  cardsMonth: {},     // fin_month.cards
+  paid: {},           // map item_id -> bool
 };
 
 /* ================= UTIL ================= */
@@ -165,52 +188,139 @@ async function apiCall(action, month=null, data=null){
   return j.data;
 }
 
+function initDateSelectors(){
+  const ySel = document.getElementById("yearSelect");
+  const now = new Date();
+  const start = now.getFullYear() - 2;
+  const end = now.getFullYear() + 5;
+
+  ySel.innerHTML = "";
+  for(let y=start; y<=end; y++){
+    const opt = new Option(y, y);
+    if(y === now.getFullYear()) opt.selected = true;
+    ySel.add(opt);
+  }
+  document.getElementById("monthSelect").value = String(now.getMonth()+1).padStart(2,"0");
+}
+
 function currentMonthISO(){
   const y = document.getElementById("yearSelect").value;
   const m = document.getElementById("monthSelect").value;
   return `${y}-${m}`;
 }
 
-/* ================= PRORRATEO ================= */
-function monthlyReal(item){
-  // item.schedule_type: monthly | every_n_months | every_n_years
-  const amt = Number(item.amount_default || 0);
-  if(item.schedule_type === "monthly") return amt;
-  if(item.schedule_type === "every_n_months") {
-    const n = Number(item.schedule_interval_months || 1);
-    return n > 0 ? (amt / n) : 0;
-  }
-  if(item.schedule_type === "every_n_years") {
-    const n = Number(item.schedule_interval_years || 1);
-    return n > 0 ? (amt / (12 * n)) : 0;
-  }
-  return 0;
+function clampDay(y, mIndex, day){
+  const last = new Date(y, mIndex+1, 0).getDate();
+  return Math.min(Math.max(1, day), last);
+}
+function payDateForMonth(day, ym){
+  const [Y,M]=ym.split("-").map(Number);
+  const mIndex=M-1;
+  const d = clampDay(Y, mIndex, Number(day)||1);
+  return new Date(Y, mIndex, d);
+}
+function prettyDate(dt){
+  const dd=String(dt.getDate()).padStart(2,"0");
+  const mm=String(dt.getMonth()+1).padStart(2,"0");
+  const yy=String(dt.getFullYear()).slice(-2);
+  return `${dd}/${mm}/${yy}`;
 }
 
-/* ================= RENDER FIXED ================= */
-function renderFixed(){
-  const tb = document.getElementById("fixedTableBody");
+/* ================= BUILD PAY CALENDAR =================
+   - fixed: usa amount_default
+   - card: usa min_payment del mes (STATE.cardsMonth[item_id].min_payment)
+*/
+function buildCalendar(){
+  const ym = STATE.month;
+  const out = [];
+
+  STATE.items.filter(x=>x.active).forEach(it=>{
+    const date = payDateForMonth(it.schedule_day, ym);
+    if(it.type === "fixed"){
+      out.push({
+        id: it.id,
+        date,
+        concept: it.name,
+        meta: it.category ? it.category : "Recurrente",
+        currency: it.currency,
+        amount: Number(it.amount_default||0),
+        paid: !!STATE.paid[it.id],
+      });
+    }else if(it.type === "card"){
+      const v = STATE.cardsMonth?.[it.id] || {};
+      out.push({
+        id: it.id,
+        date,
+        concept: `Tarjeta ${it.name} (mínimo)`,
+        meta: "Tarjetas",
+        currency: it.currency,
+        amount: Number(v.min_payment||0),
+        paid: !!STATE.paid[it.id],
+      });
+    }
+  });
+
+  out.sort((a,b)=>a.date-b.date);
+  return out;
+}
+
+function renderCalendar(){
+  const tb = document.getElementById("payBody");
   tb.innerHTML = "";
 
-  const fixed = STATE.items.filter(x=>x.type==="fixed" && x.active);
-  if(!fixed.length){
-    tb.innerHTML = `<tr><td colspan="2">—</td></tr>`;
+  const rows = buildCalendar();
+
+  if(!rows.length){
+    tb.innerHTML = `<tr><td colspan="4">—</td></tr>`;
     return;
   }
 
-  fixed.forEach(f=>{
-    const m = monthlyReal(f);
-    tb.innerHTML += `<tr><td>${f.name}</td><td class="right">${f.currency} ${m.toFixed(2)}</td></tr>`;
+  rows.forEach(r=>{
+    const cls = r.paid ? "row-ok" : "";
+    tb.innerHTML += `
+      <tr class="${cls}">
+        <td>${prettyDate(r.date)}</td>
+        <td>
+          <div><strong>${r.concept}</strong></div>
+          <div class="muted">${r.meta}</div>
+        </td>
+        <td class="right">${r.currency} ${Number(r.amount||0).toFixed(2)}</td>
+        <td class="right">
+          <input type="checkbox" data-paid="${r.id}" ${r.paid?"checked":""}
+            style="width:auto; transform:scale(1.15); margin:0;">
+        </td>
+      </tr>
+    `;
+  });
+
+  tb.querySelectorAll("input[data-paid]").forEach(ch=>{
+    ch.addEventListener("change", async ()=>{
+      const id = ch.dataset.paid;
+      const paid = !!ch.checked;
+
+      // UI optimista
+      STATE.paid[id] = paid;
+      renderCalendar();
+
+      try{
+        await apiCall("paid_set", STATE.month, { item_id: id, paid });
+      }catch(e){
+        // rollback
+        STATE.paid[id] = !paid;
+        renderCalendar();
+        setStatus(e.message);
+      }
+    });
   });
 }
 
-/* ================= RENDER CARDS ================= */
+/* ================= CARDS MONTH AMOUNTS ================= */
 function cardItems(){
-  return STATE.items.filter(x=>x.type==="card" && x.active);
+  return STATE.items.filter(x=>x.active && x.type==="card");
 }
 
-function renderCards(){
-  const wrap = document.getElementById("cardsForm");
+function renderCardsMonth(){
+  const wrap = document.getElementById("cardsMonthForm");
   wrap.innerHTML = "";
 
   const cards = cardItems();
@@ -221,96 +331,226 @@ function renderCards(){
 
   cards.forEach(it=>{
     const v = STATE.cardsMonth?.[it.id] || {};
-    const amt = (v.amount ?? "");
-    const min = (v.min_payment ?? "");
-    const isPaid = !!STATE.paid[it.id];
-
     wrap.innerHTML += `
       <div class="card-item">
         <label>${it.name} (${it.currency})</label>
-
         <div class="grid">
           <div>
-            <div class="mini">Deuda total</div>
-            <input type="number" step="0.01" data-card="${it.id}" value="${amt}" placeholder="0.00">
+            <div class="mini">Deuda total (mes)</div>
+            <input type="number" step="0.01" data-card-total="${it.id}" value="${v.amount ?? ""}" placeholder="0.00">
           </div>
           <div>
-            <div class="mini">Mínimo mes</div>
-            <input type="number" step="0.01" data-min="${it.id}" value="${min}" placeholder="0.00">
+            <div class="mini">Mínimo a pagar (mes)</div>
+            <input type="number" step="0.01" data-card-min="${it.id}" value="${v.min_payment ?? ""}" placeholder="0.00">
           </div>
         </div>
-
-        <select data-paid="${it.id}">
-          <option value="no" ${!isPaid?'selected':''}>PENDIENTE</option>
-          <option value="si" ${isPaid?'selected':''}>PAGADO</option>
-        </select>
-      </div>`;
+        <div class="muted">Fecha de pago: día ${Number(it.schedule_day)||1}</div>
+      </div>
+    `;
   });
 }
 
 function collectCardsMonth(){
   const out = structuredClone(STATE.cardsMonth || {});
-  cardItems().forEach(it=>{
-    const amount = parseFloat(document.querySelector(`input[data-card="${it.id}"]`).value) || 0;
-    const min_payment = parseFloat(document.querySelector(`input[data-min="${it.id}"]`).value) || 0;
-    out[it.id] = out[it.id] || {};
-    out[it.id].amount = amount;
-    out[it.id].min_payment = min_payment;
+  document.querySelectorAll("input[data-card-total]").forEach(i=>{
+    const id = i.dataset.cardTotal;
+    out[id] = out[id] || {};
+    out[id].amount = Number(i.value)||0;
+  });
+  document.querySelectorAll("input[data-card-min]").forEach(i=>{
+    const id = i.dataset.cardMin;
+    out[id] = out[id] || {};
+    out[id].min_payment = Number(i.value)||0;
   });
   return out;
 }
 
-function collectPaidUpdates(){
-  const o = {};
-  document.querySelectorAll("select[data-paid]").forEach(s=>{
-    const id = s.dataset.paid;
-    o[id] = (s.value === "si");
+/* ================= ITEMS EDITOR (CRUD + fecha pago) ================= */
+function renderItemsEditor(){
+  const w = document.getElementById("itemsEditor");
+  w.innerHTML = "";
+
+  if(!STATE.items.length){
+    w.innerHTML = `<div class="status-msg">No hay items aún.</div>`;
+    return;
+  }
+
+  const grouped = [
+    { title: "Suscripciones / Pagos recurrentes", type: "fixed" },
+    { title: "Tarjetas", type: "card" },
+  ];
+
+  grouped.forEach(g=>{
+    w.innerHTML += `<h2 style="margin-top:18px;">${g.title}</h2>`;
+
+    const list = STATE.items.filter(x=>x.type===g.type && x.active);
+    if(!list.length){
+      w.innerHTML += `<div class="status-msg">—</div>`;
+      return;
+    }
+
+    list.forEach(it=>{
+      w.innerHTML += `
+        <div class="card-item">
+          <div class="mini"><strong>${it.name}</strong></div>
+
+          <div class="grid">
+            <div>
+              <div class="mini">Nombre</div>
+              <input data-name="${it.id}" value="${it.name}">
+            </div>
+            <div>
+              <div class="mini">Moneda</div>
+              <select data-currency="${it.id}">
+                ${["AED","EUR","IDR","USD"].map(c=>`<option value="${c}" ${c===it.currency?"selected":""}>${c}</option>`).join("")}
+              </select>
+            </div>
+          </div>
+
+          <div class="grid">
+            <div>
+              <div class="mini">Categoría</div>
+              <input data-category="${it.id}" value="${it.category||""}" placeholder="Suscripciones / Telefonía / Préstamos...">
+            </div>
+            <div>
+              <div class="mini">Fecha de pago (día del mes)</div>
+              <input type="number" min="1" max="31" data-day="${it.id}" value="${it.schedule_day ?? 1}">
+            </div>
+          </div>
+
+          ${it.type==="fixed" ? `
+          <div class="grid">
+            <div>
+              <div class="mini">Importe (recurrente)</div>
+              <input type="number" step="0.01" data-amount="${it.id}" value="${it.amount_default ?? 0}">
+            </div>
+            <div>
+              <div class="mini">Notas</div>
+              <input data-notes="${it.id}" value="${it.notes||""}" placeholder="Opcional">
+            </div>
+          </div>
+          ` : `
+          <div class="grid">
+            <div>
+              <div class="mini">Notas</div>
+              <input data-notes="${it.id}" value="${it.notes||""}" placeholder="Opcional">
+            </div>
+            <div>
+              <div class="mini">—</div>
+              <input disabled value="Los importes mensuales se ponen arriba">
+            </div>
+          </div>
+          `}
+
+          <div class="grid">
+            <button class="alt" data-save="${it.id}">Guardar</button>
+            <button class="danger" data-del="${it.id}">Eliminar</button>
+          </div>
+        </div>
+      `;
+    });
   });
-  return o;
+
+  // handlers save/delete
+  w.querySelectorAll("button[data-save]").forEach(btn=>{
+    btn.addEventListener("click", async ()=>{
+      try{
+        const id = btn.dataset.save;
+        const it = STATE.items.find(x=>x.id===id);
+        if(!it) return;
+
+        const name = w.querySelector(`input[data-name="${id}"]`).value.trim();
+        const currency = w.querySelector(`select[data-currency="${id}"]`).value;
+        const category = w.querySelector(`input[data-category="${id}"]`).value.trim();
+        const day = Number(w.querySelector(`input[data-day="${id}"]`).value) || 1;
+        const notes = w.querySelector(`input[data-notes="${id}"]`).value.trim() || null;
+
+        if(!name) throw new Error("Nombre requerido");
+        if(day < 1 || day > 31) throw new Error("Día de pago inválido");
+
+        const updated = {
+          ...it,
+          name,
+          currency,
+          category,
+          schedule_type: "monthly",
+          schedule_day: day,
+          notes,
+        };
+
+        if(it.type==="fixed"){
+          const amt = Number(w.querySelector(`input[data-amount="${id}"]`).value) || 0;
+          updated.amount_default = amt;
+        }else{
+          updated.amount_default = null;
+        }
+
+        setStatus("Guardando…");
+        const saved = await apiCall("item_upsert", null, { item: updated });
+
+        // update local state item
+        STATE.items = STATE.items.map(x=>x.id===saved.id ? saved : x);
+
+        // re-render dependent sections
+        renderItemsEditor();
+        renderCardsMonth();
+        renderCalendar();
+
+        setStatus("Guardado ✅");
+      }catch(e){
+        setStatus(e.message);
+      }
+    });
+  });
+
+  w.querySelectorAll("button[data-del]").forEach(btn=>{
+    btn.addEventListener("click", async ()=>{
+      try{
+        const id = btn.dataset.del;
+
+        setStatus("Eliminando…");
+        await apiCall("item_delete", null, { id });
+
+        // limpia cardsMonth si existía
+        const next = structuredClone(STATE.cardsMonth || {});
+        delete next[id];
+        STATE.cardsMonth = next;
+
+        // guarda el mes actualizado (para no dejar basura en JSON)
+        await apiCall("set", STATE.month, { cards: next });
+
+        // recarga todo
+        await loadMonth();
+
+        setStatus("Eliminado ✅");
+      }catch(e){
+        setStatus(e.message);
+      }
+    });
+  });
 }
 
-/* ================= RENDER CHARTS ================= */
-function renderCharts(){
-  const container = document.getElementById("chartsContainer");
-  container.innerHTML = "";
+async function addItem(type){
+  const base = {
+    type,
+    category: type==="fixed" ? "Suscripciones" : "Tarjetas",
+    name: type==="fixed" ? "Nuevo pago" : "Nueva tarjeta",
+    currency: "AED",
+    amount_default: type==="fixed" ? 0 : null,
+    notes: null,
+    schedule_type: "monthly",
+    schedule_day: 1,
+    schedule_next: null,
+    schedule_interval_months: null,
+    schedule_interval_years: null,
+    active: true,
+    sort: 1000,
+  };
 
-  const currencies = ["AED","EUR","IDR","USD"];
-  currencies.forEach(cur=>{
-    const fixedSum = STATE.items
-      .filter(x=>x.active && x.type==="fixed" && x.currency===cur)
-      .reduce((acc,x)=>acc + monthlyReal(x), 0);
-
-    const cards = cardItems().filter(x=>x.currency===cur);
-    const totalCard = cards.reduce((acc,c)=>{
-      const v = STATE.cardsMonth?.[c.id] || {};
-      return acc + Number(v.amount || 0);
-    }, 0);
-    const minCard = cards.reduce((acc,c)=>{
-      const v = STATE.cardsMonth?.[c.id] || {};
-      return acc + Number(v.min_payment || 0);
-    }, 0);
-
-    const sumTotal = fixedSum + totalCard;
-    const sumMin = fixedSum + minCard;
-
-    if(sumTotal === 0 && sumMin === 0) return;
-
-    const maxVal = cur === "IDR" ? 10000 : 8000;
-    const pTotal = Math.min((sumTotal / maxVal) * 100, 100);
-    const pMin = Math.min((sumMin / maxVal) * 100, 100);
-
-    container.innerHTML += `
-      <div class="chart-row">
-        <div class="bar-label"><strong>${cur}</strong><span>Total: ${sumTotal.toFixed(2)}</span></div>
-        <div class="bar-bg"><div class="bar-fill" style="width:${pTotal}%"></div></div>
-        <div class="bar-label"><span>Mínimo mes:</span><span>${sumMin.toFixed(2)}</span></div>
-        <div class="bar-bg"><div class="bar-fill min" style="width:${pMin}%"></div></div>
-      </div>`;
-  });
-
-  if(!container.innerHTML.trim()){
-    container.innerHTML = `<div class="status-msg">Sin datos para este mes.</div>`;
-  }
+  setStatus("Creando…");
+  await apiCall("item_upsert", null, { item: base });
+  await loadMonth();
+  setStatus("Creado ✅");
 }
 
 /* ================= LOAD ================= */
@@ -325,29 +565,14 @@ async function loadMonth(){
   STATE.items = payload.items || [];
 
   const paidMap = {};
-  (payload.paid || []).forEach(x => paidMap[x.item_id] = !!x.paid);
+  (payload.paid || []).forEach(x=> paidMap[x.item_id] = !!x.paid);
   STATE.paid = paidMap;
 
-  renderFixed();
-  renderCards();
-  renderCharts();
+  renderItemsEditor();
+  renderCardsMonth();
+  renderCalendar();
 
   setStatus("Actualizado ✅");
-}
-
-/* ================= INIT DATE SELECTORS ================= */
-function initDateSelectors() {
-  const ySel = document.getElementById("yearSelect");
-  const now = new Date();
-  const start = now.getFullYear() - 2;
-  const end = now.getFullYear() + 5;
-
-  for (let y = start; y <= end; y++) {
-    const opt = new Option(y, y);
-    if (y === now.getFullYear()) opt.selected = true;
-    ySel.add(opt);
-  }
-  document.getElementById("monthSelect").value = String(now.getMonth() + 1).padStart(2, '0');
 }
 
 /* ================= PIN FLOW ================= */
@@ -367,7 +592,6 @@ document.getElementById("pinOk").addEventListener("click", async ()=>{
   setPinStatus("Verificando…");
 
   try{
-    // Validación real: get del mes actual
     document.getElementById("app").classList.remove("hidden");
     await loadMonth();
     setPinStatus("PIN correcto ✅");
@@ -383,22 +607,11 @@ document.getElementById("loadMonth").addEventListener("click", ()=> {
   loadMonth().catch(e=> setStatus(e.message));
 });
 
-document.getElementById("saveCards").addEventListener("click", async ()=>{
+document.getElementById("saveCardsMonth").addEventListener("click", async ()=>{
   try{
-    if(!STATE.month) throw new Error("No hay mes seleccionado");
     setStatus("Guardando…");
-
-    // 1) guarda cardsMonth en fin_month
     const cards = collectCardsMonth();
     await apiCall("set", STATE.month, { cards });
-
-    // 2) guarda paid (fin_paid)
-    const paid = collectPaidUpdates();
-    // guardamos solo las tarjetas (así es “como el ejemplo”)
-    for(const [item_id, isPaid] of Object.entries(paid)){
-      await apiCall("paid_set", STATE.month, { item_id, paid: isPaid });
-    }
-
     await loadMonth();
     setStatus("Guardado ✅");
   }catch(e){
@@ -406,11 +619,14 @@ document.getElementById("saveCards").addEventListener("click", async ()=>{
   }
 });
 
+document.getElementById("addSub").addEventListener("click", ()=> addItem("fixed").catch(e=>setStatus(e.message)));
+document.getElementById("addCard").addEventListener("click", ()=> addItem("card").catch(e=>setStatus(e.message)));
+
 document.getElementById("lock").addEventListener("click", lock);
 
 /* ================= START ================= */
 initDateSelectors();
-lock(); // arranca bloqueado
+lock();
 </script>
 </body>
 </html>
