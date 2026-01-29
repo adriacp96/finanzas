@@ -56,8 +56,33 @@
     .square-btn.text-fit { width: auto; height: var(--ctrl-h); padding: 0 10px; display: inline-flex; align-items: center; justify-content: center; }
     .chip { border: 2px solid #000; padding: 4px 6px; font-size: 0.65rem; text-transform: uppercase; }
     .month-pagination { display: flex; align-items: center; gap: 4px; width: calc(5 * var(--ctrl-h) + 24px); }
-    .month-grid { display: flex; gap: 6px; flex-wrap: nowrap; overflow: hidden; height: var(--ctrl-h); align-items: center; width: calc(3 * var(--ctrl-h) + 12px); transform: translateY(-2px); }
-    .month-btn, .month-arrow { flex: 0 0 var(--ctrl-h); width: var(--ctrl-h); height: var(--ctrl-h); border: 2px solid #000; background: #fff; color: #000; padding: 0; text-transform: uppercase; font-size: 0.75rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; margin: 0; }
+    .month-grid { display: flex; gap: 6px; flex-wrap: nowrap; overflow: hidden; height: var(--ctrl-h); align-items: center; width: calc(3 * var(--ctrl-h) + 12px); }
+    .month-btn, .month-arrow {
+      flex: 0 0 var(--ctrl-h);
+      width: var(--ctrl-h);
+      min-width: var(--ctrl-h);
+      height: var(--ctrl-h);
+      border: 2px solid #000;
+      background: #fff;
+      color: #000;
+      padding: 0;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+      box-sizing: border-box;
+      -webkit-appearance: none;
+      appearance: none;
+      line-height: var(--ctrl-h);
+    }
+    .month-arrow {
+      min-width: calc(var(--ctrl-h) + 0px);
+      width: calc(var(--ctrl-h) + 0px);
+    }
     .month-btn.active, .month-arrow:focus-visible { background: #000; color: #fff; }
     .expense-logo { height: 16px; width: auto; display: inline-block; }
     .expense-logo--mono { filter: grayscale(1) brightness(0); }
@@ -148,9 +173,9 @@
       <div class="field-stack">
         <label for="monthSelect">Month</label>
         <div class="month-pagination">
-          <button type="button" class="month-arrow" onclick="shiftMonth(-1)" aria-label="Previous month">‹</button>
+          <button type="button" class="month-btn month-arrow" onclick="shiftMonth(-1)" aria-label="Previous month">‹</button>
           <div id="monthGrid" class="month-grid" role="group" aria-label="Month selection"></div>
-          <button type="button" class="month-arrow" onclick="shiftMonth(1)" aria-label="Next month">›</button>
+          <button type="button" class="month-btn month-arrow" onclick="shiftMonth(1)" aria-label="Next month">›</button>
         </div>
         <select id="monthSelect" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;border:0;" aria-hidden="true">
           <option value="01">Jan</option><option value="02">Feb</option><option value="03">Mar</option>
