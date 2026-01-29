@@ -268,6 +268,8 @@
 let cards = [];
 let fixedGasto = [];
 let prevCards = [];
+let monthCardData = {};
+let prevMonthCardData = {};
 
 const SUPABASE_URL = "https://yienfdeekaqbvixmuabi.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlpZW5mZGVla2FxYnZpeG11YWJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2MTQwNDAsImV4cCI6MjA4NTE5MDA0MH0.nXq_GV34A4QpcWFJr0R2Za6t1OvJdduHyxEAiAmp72E";
@@ -322,6 +324,47 @@ const num = (val) => {
   const n = parseFloat(val);
   return Number.isFinite(n) ? n : 0;
 };
+
+let cardIdCounter = 0;
+function makeCardId() {
+  cardIdCounter += 1;
+  return `card_${Date.now()}_${cardIdCounter}`;
+}
+
+function ensureCardId(card) {
+  if (!card.id) {
+    card.id = makeCardId();
+  }
+  return card.id;
+}
+
+function cardSignature(card) {
+  const name = (card.name || "").trim().toLowerCase();
+  const cur = (card.currency || "").trim().toLowerCase();
+  const day = String(card.day || 1);
+  return `${name}__${cur}__${day}`;
+}
+
+function buildMonthCardData(monthCards) {
+  const data = {};
+  const idBySig = {};
+  cards.forEach((c) => {
+    idBySig[cardSignature(c)] = c.id;
+  });
+  (monthCards || []).forEach((c) => {
+    const id = c.id || idBySig[cardSignature(c)];
+    if (!id) return;
+    data[id] = {
+      debt: num(c.debt),
+      min: num(c.min)
+    };
+  });
+  return data;
+}
+
+function getMonthValues(cardId) {
+  return monthCardData[cardId] || { debt: 0, min: 0 };
+}
 
 const isSupabaseConfigured = () => (
   SUPABASE_URL.startsWith("https://") &&
@@ -456,7 +499,7 @@ async function loadFromSupabase() {
     console.error("Supabase load error:", monthError);
     return;
   }
-  cards = monthData && Array.isArray(monthData.cards) ? monthData.cards : [];
+  const monthCards = monthData && Array.isArray(monthData.cards) ? monthData.cards : [];
 
   const prev = getPrevYearMonth(year, month);
   const { data: prevData, error: prevError } = await supabaseClient
@@ -470,11 +513,12 @@ async function loadFromSupabase() {
     return;
   }
   prevCards = prevData && Array.isArray(prevData.cards) ? prevData.cards : [];
+  prevMonthCardData = buildMonthCardData(prevCards);
 
   const globalKey = getGlobalFixedKey();
   const { data: fixedData, error: fixedError } = await supabaseClient
     .from('fin_snapshots')
-    .select('fixed,categories')
+    .select('fixed,categories,cards')
     .eq('year', globalKey.year)
     .eq('month', globalKey.month)
     .maybeSingle();
@@ -483,6 +527,19 @@ async function loadFromSupabase() {
     return;
   }
   fixedGasto = fixedData && Array.isArray(fixedData.fixed) ? fixedData.fixed : [];
+  if (fixedData && Array.isArray(fixedData.cards) && fixedData.cards.length) {
+    cards = fixedData.cards;
+  } else if (monthCards.length) {
+    cards = monthCards.map((c) => ({
+      id: c.id,
+      name: c.name,
+      currency: c.currency,
+      day: c.day,
+      cycle: c.cycle
+    }));
+  }
+  cards.forEach(ensureCardId);
+  monthCardData = buildMonthCardData(monthCards);
   categories = fixedData && Array.isArray(fixedData.categories) && fixedData.categories.length
     ? fixedData.categories
     : DEFAULT_CATEGORIES;
@@ -498,7 +555,11 @@ async function saveToSupabase(showAlert = false) {
   const payload = {
     year,
     month,
-    cards,
+    cards: Object.entries(monthCardData).map(([id, vals]) => ({
+      id,
+      debt: num(vals.debt),
+      min: num(vals.min)
+    })),
     updated_at: new Date().toISOString()
   };
   const { error } = await supabaseClient
@@ -514,6 +575,7 @@ async function saveToSupabase(showAlert = false) {
     year: globalKey.year,
     month: globalKey.month,
     fixed: fixedGasto,
+    cards,
     categories,
     updated_at: new Date().toISOString()
   };
@@ -546,9 +608,7 @@ function renderCharts() {
     }
   });
 
-  const monthCards = cards.filter((c) => (c.cycle || "this") === "this");
-  const prevMonthCards = prevCards.filter((c) => (c.cycle || "this") === "next");
-  const paymentCards = monthCards.concat(prevMonthCards);
+  const paymentCards = cards;
 
   const out = [];
   CURRENCIES.forEach((cur) => {
@@ -556,8 +616,9 @@ function renderCharts() {
     let totalMinT = 0;
     paymentCards.forEach((c) => {
       if (c.currency !== cur) return;
-      totalDeudaT += num(c.debt);
-      totalMinT += num(c.min);
+      const vals = c.cycle === "next" ? (prevMonthCardData[c.id] || { debt: 0, min: 0 }) : getMonthValues(c.id);
+      totalDeudaT += num(vals.debt);
+      totalMinT += num(vals.min);
     });
     const sumaTotal = fixedByCur[cur] + totalDeudaT;
     const sumaPago = fixedByCur[cur] + totalMinT;
@@ -621,16 +682,15 @@ function renderCalendar() {
     }
   });
 
-  const monthCards = cards.filter((c) => (c.cycle || "this") === "this");
-  const prevMonthCards = prevCards.filter((c) => (c.cycle || "this") === "next");
-  const paymentCards = monthCards.concat(prevMonthCards);
+  const paymentCards = cards;
   paymentCards.forEach((c) => {
     const day = Math.min(Math.max(parseInt(c.day, 10) || 1, 1), daysInMonth);
-    const amt = num(c.min);
+    const vals = c.cycle === "next" ? (prevMonthCardData[c.id] || { debt: 0, min: 0 }) : getMonthValues(c.id);
+    const amt = num(vals.min);
     chargesByDay[day - 1] += amt;
     if (chargesByCur[c.currency]) chargesByCur[c.currency][day - 1] += amt;
     if (chargesByCurCard[c.currency]) chargesByCurCard[c.currency][day - 1] += amt;
-    if (descByCur[c.currency]) {
+    if (amt > 0 && descByCur[c.currency]) {
       const label = `${(c.name || "CARD").toUpperCase()} MIN`;
       descByCur[c.currency][day - 1].push(label);
     }
@@ -696,15 +756,17 @@ function renderCalendar() {
       if (eurCard > 0) cardParts.push(`${eurCard.toFixed(2)} EUR`);
       if (idrCard > 0) cardParts.push(`${idrCard.toFixed(2)} IDR`);
       const totalLine = totalParts.length ? `Total: ${totalParts.join(" · ")}` : "Total: 0";
-      const detailBits = [];
+      const lines = [];
       const aedDesc = descByCur.AED[dayIdx] || [];
       const eurDesc = descByCur.EUR[dayIdx] || [];
       const idrDesc = descByCur.IDR[dayIdx] || [];
-      if (aedDesc.length) detailBits.push(`AED: ${aedDesc.join(", ")}`);
-      if (eurDesc.length) detailBits.push(`EUR: ${eurDesc.join(", ")}`);
-      if (idrDesc.length) detailBits.push(`IDR: ${idrDesc.join(", ")}`);
-      const detailLine = detailBits.length ? ` — ${detailBits.join(" · ")}` : " — No charges";
-      dom.calendarInfo.textContent = `Day ${day}: ${totalLine}${detailLine}`;
+      aedDesc.forEach((desc) => lines.push(`AED: ${desc}`));
+      eurDesc.forEach((desc) => lines.push(`EUR: ${desc}`));
+      idrDesc.forEach((desc) => lines.push(`IDR: ${desc}`));
+      if (!lines.length) lines.push("No charges");
+      dom.calendarInfo.innerHTML =
+        `<div><strong>${totalLine}</strong></div>` +
+        lines.map((line) => `<div>${line}</div>`).join("");
     });
   });
 }
@@ -712,8 +774,9 @@ function renderCalendar() {
 function renderCards() {
   const out = [];
   cards.forEach((c, i) => {
-    const debtVal = num(c.debt);
-    const minVal = num(c.min);
+    const vals = getMonthValues(c.id);
+    const debtVal = num(vals.debt);
+    const minVal = num(vals.min);
     const dayVal = parseInt(c.day, 10) || 1;
     const cycleVal = c.cycle === "next" ? "Next Month" : "This Month";
     out.push(
@@ -892,9 +955,15 @@ window.updateFix = (i, fld, val) => {
 };
 
 window.updateCard = (i, fld, val) => {
-  if (fld === 'day') cards[i][fld] = parseInt(val, 10) || 1;
-  else if (fld === 'cycle') cards[i][fld] = val;
-  else cards[i][fld] = num(val);
+  const card = cards[i];
+  if (!card) return;
+  ensureCardId(card);
+  if (fld === 'day') card.day = parseInt(val, 10) || 1;
+  else if (fld === 'cycle') card.cycle = val;
+  else {
+    if (!monthCardData[card.id]) monthCardData[card.id] = { debt: 0, min: 0 };
+    monthCardData[card.id][fld] = num(val);
+  }
   queueAutosave();
   if (fld === 'day' || fld === 'cycle') renderCards();
   else renderCharts();
@@ -902,7 +971,10 @@ window.updateCard = (i, fld, val) => {
 
 window.deleteItem = (type, i) => {
   if (!confirm("Delete?")) return;
-  if (type === 'card') cards.splice(i, 1);
+  if (type === 'card') {
+    const removed = cards.splice(i, 1)[0];
+    if (removed && removed.id) delete monthCardData[removed.id];
+  }
   else fixedGasto.splice(i, 1);
   queueAutosave();
   refreshAll();
@@ -911,14 +983,15 @@ window.deleteItem = (type, i) => {
 dom.addCardBtn.addEventListener("click", () => {
   const n = dom.newCardName;
   if (!n.value) return;
-  cards.push({
+  const newCard = {
+    id: makeCardId(),
     name: n.value,
     currency: dom.newCardCur.value,
-    debt: 0,
-    min: 0,
     day: parseInt(dom.newCardDay.value, 10) || 1,
     cycle: dom.newCardCycle.value || "this"
-  });
+  };
+  cards.push(newCard);
+  monthCardData[newCard.id] = { debt: 0, min: 0 };
   n.value = "";
   queueAutosave();
   renderCards();
