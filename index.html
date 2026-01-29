@@ -505,7 +505,9 @@ window.setCycle = setCycle;
 function formatCharge(f) {
   const monthLabel = f.dueMonth === "all" ? "Monthly" : (MONTHS[f.dueMonth] || f.dueMonth);
   const dayLabel = f.day ? `Day ${f.day}` : "Day ?";
-  return `${dayLabel} · ${monthLabel}`;
+  const freq = parseInt(f.freq, 10) || 1;
+  const freqLabel = freq > 1 ? `Every ${freq} month${freq === 1 ? "" : "s"}` : "";
+  return [dayLabel, monthLabel, freqLabel].filter(Boolean).join(" · ");
 }
 
 function renderExpenseName(name) {
@@ -866,13 +868,13 @@ function renderCards() {
       `<div class="item-row" style="${isNext ? 'opacity: 0.2' : ''}">` +
         `<button class="btn-del" onclick="deleteItem('card', ${i})">X</button>` +
         `<div class="view-only">` +
-          `<div class="fixed-summary">` +
-            `<strong>${cardLabel}</strong>` +
-            `<span class="chip">Debt ${debtVal ? debtVal.toFixed(2) : "0.00"}<span class="currency-chip">${currencyLabel}</span></span>` +
-            `<span class="chip">Min ${minVal ? minVal.toFixed(2) : "0.00"}<span class="currency-chip">${currencyLabel}</span></span>` +
-            `<span class="chip">Day ${dayVal}</span>` +
-            `<span class="chip">${cycleVal}</span>` +
-          `</div>` +
+            `<div class="fixed-summary">` +
+              `<strong>${cardLabel}</strong>` +
+              `<span class="chip">Debt ${debtVal ? debtVal.toFixed(2) : "0.00"} ${currencyLabel}</span>` +
+              `<span class="chip">Min ${minVal ? minVal.toFixed(2) : "0.00"} ${currencyLabel}</span>` +
+              `<span class="chip">Day ${dayVal}</span>` +
+              `<span class="chip">${cycleVal}</span>` +
+            `</div>` +
         `</div>` +
         `<div class="edit-only">` +
           `<label>${c.name} (${c.currency})</label>` +
