@@ -1,4 +1,4 @@
-# finanzas
+# INKFLOW
 
 Minimal single-file finance tracker styled around a monochrome “Inkflow” aesthetic.  
 The page lets you log cards and fixed expenses, visualizes payments per month/weekday, and syncs with Supabase snapshots if credentials are configured.
