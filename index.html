@@ -895,12 +895,14 @@ function renderCards() {
     const dayVal = parseInt(c.day, 10) || 1;
     const cycleVal = c.cycle === "next" ? "Next Month" : "This Month";
     const isNext = c.cycle === "next";
+    const cardLabel = renderExpenseName(c.name);
+    const currencyLabel = c.currency || '—';
     out.push(
       `<div class="item-row" style="${isNext ? 'opacity: 0.2' : ''}">` +
         `<button class="btn-del" onclick="deleteItem('card', ${i})">X</button>` +
         `<div class="view-only">` +
           `<div class="fixed-summary">` +
-            `<strong>${c.name || '—'} (${c.currency || '—'})</strong>` +
+            `<strong>${cardLabel} <span class="currency-text">${currencyLabel}</span></strong>` +
             `<span class="chip">Debt ${debtVal ? debtVal.toFixed(2) : "0.00"}</span>` +
             `<span class="chip">Min ${minVal ? minVal.toFixed(2) : "0.00"}</span>` +
             `<span class="chip">Day ${dayVal}</span>` +
