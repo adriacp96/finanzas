@@ -70,6 +70,19 @@
     .edit-only { display: none; }
     .editing .view-only { display: none; }
     .editing .edit-only { display: block; }
+    .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 10px; }
+    .cal-head { font-size: 0.6rem; text-transform: uppercase; text-align: center; }
+    .cal-day { border: 2px solid #000; width: 100%; aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; background: #fff; }
+    .cal-day[data-intensity="1"] { background: #e5e5e5; }
+    .cal-day[data-intensity="2"] { background: #bfbfbf; }
+    .cal-day[data-intensity="3"] { background: #9a9a9a; color: #fff; }
+    .cal-day[data-intensity="4"] { background: #666; color: #fff; }
+    .cal-day[data-intensity="5"] { background: #000; color: #fff; }
+    .actual-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 10px; align-items: start; }
+    .calendar { gap: 4px; margin-top: 0; }
+    .cal-day { font-size: 0.65rem; }
+    .cal-head { font-size: 0.55rem; }
+    .cal-info { border-top: 2px solid #000; margin-top: 8px; padding-top: 6px; font-size: 0.7rem; text-transform: uppercase; }
     
     .sticky-actions { position: sticky; bottom: 0; background: #fff; padding: 10px 0; border-top: 2px solid #000; display: flex; gap: 10px; z-index: 100; }
   </style>
@@ -93,7 +106,13 @@
 
   <div class="section">
     <h2>Actual Payments</h2>
-    <div id="chartsContainer"></div>
+    <div class="actual-grid">
+      <div id="chartsContainer"></div>
+      <div>
+        <div id="calendarContainer"></div>
+        <div id="calendarInfo" class="cal-info"></div>
+      </div>
+    </div>
   </div>
 
   <div class="section">
@@ -259,6 +278,8 @@ const dom = {
   yearSelect: document.getElementById("yearSelect"),
   monthSelect: document.getElementById("monthSelect"),
   chartsContainer: document.getElementById("chartsContainer"),
+  calendarContainer: document.getElementById("calendarContainer"),
+  calendarInfo: document.getElementById("calendarInfo"),
   cardsList: document.getElementById("cardsList"),
   fixedList: document.getElementById("fixedList"),
   newCardName: document.getElementById("newCardName"),
@@ -554,6 +575,138 @@ function renderCharts() {
     );
   });
   dom.chartsContainer.innerHTML = out.join("");
+  renderCalendar();
+}
+
+function renderCalendar() {
+  if (!dom.calendarContainer) return;
+  const { year, month } = getSelectedYearMonth();
+  const monthIdx = parseInt(month, 10) - 1;
+  const daysInMonth = new Date(year, monthIdx + 1, 0).getDate();
+  const firstDayIndex = new Date(year, monthIdx, 1).getDay();
+  const weekday = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+  const chargesByDay = Array.from({ length: daysInMonth }, () => 0);
+  const chargesByCur = {
+    AED: Array.from({ length: daysInMonth }, () => 0),
+    EUR: Array.from({ length: daysInMonth }, () => 0),
+    IDR: Array.from({ length: daysInMonth }, () => 0)
+  };
+  const chargesByCurFixed = {
+    AED: Array.from({ length: daysInMonth }, () => 0),
+    EUR: Array.from({ length: daysInMonth }, () => 0),
+    IDR: Array.from({ length: daysInMonth }, () => 0)
+  };
+  const chargesByCurCard = {
+    AED: Array.from({ length: daysInMonth }, () => 0),
+    EUR: Array.from({ length: daysInMonth }, () => 0),
+    IDR: Array.from({ length: daysInMonth }, () => 0)
+  };
+  const descByCur = {
+    AED: Array.from({ length: daysInMonth }, () => []),
+    EUR: Array.from({ length: daysInMonth }, () => []),
+    IDR: Array.from({ length: daysInMonth }, () => [])
+  };
+
+  fixedGasto.forEach((f) => {
+    if (f.dueMonth !== "all" && f.dueMonth !== month) return;
+    const day = Math.min(Math.max(parseInt(f.day, 10) || 1, 1), daysInMonth);
+    const amt = num(f.amount);
+    chargesByDay[day - 1] += amt;
+    if (chargesByCur[f.currency]) chargesByCur[f.currency][day - 1] += amt;
+    if (chargesByCurFixed[f.currency]) chargesByCurFixed[f.currency][day - 1] += amt;
+    if (descByCur[f.currency]) {
+      const label = (f.name || "Expense").toUpperCase();
+      descByCur[f.currency][day - 1].push(label);
+    }
+  });
+
+  const monthCards = cards.filter((c) => (c.cycle || "this") === "this");
+  const prevMonthCards = prevCards.filter((c) => (c.cycle || "this") === "next");
+  const paymentCards = monthCards.concat(prevMonthCards);
+  paymentCards.forEach((c) => {
+    const day = Math.min(Math.max(parseInt(c.day, 10) || 1, 1), daysInMonth);
+    const amt = num(c.min);
+    chargesByDay[day - 1] += amt;
+    if (chargesByCur[c.currency]) chargesByCur[c.currency][day - 1] += amt;
+    if (chargesByCurCard[c.currency]) chargesByCurCard[c.currency][day - 1] += amt;
+    if (descByCur[c.currency]) {
+      const label = `${(c.name || "CARD").toUpperCase()} MIN`;
+      descByCur[c.currency][day - 1].push(label);
+    }
+  });
+
+  const maxAmount = Math.max(1, ...chargesByDay);
+  const intensityFor = (amt) => {
+    if (amt <= 0) return 0;
+    const pct = amt / maxAmount;
+    if (pct >= 0.8) return 5;
+    if (pct >= 0.6) return 4;
+    if (pct >= 0.4) return 3;
+    if (pct >= 0.2) return 2;
+    return 1;
+  };
+
+  const head = `<div class="calendar">` +
+    weekday.map((d) => `<div class="cal-head">${d}</div>`).join("") +
+  `</div>`;
+
+  const grid = [];
+  for (let i = 0; i < firstDayIndex; i++) grid.push(`<div class="cal-day"></div>`);
+  for (let d = 1; d <= daysInMonth; d++) {
+    const amt = chargesByDay[d - 1];
+    const intensity = intensityFor(amt);
+    grid.push(
+      `<div class="cal-day" data-intensity="${intensity}" data-day="${d}"` +
+      ` data-aed="${chargesByCur.AED[d - 1].toFixed(2)}"` +
+      ` data-eur="${chargesByCur.EUR[d - 1].toFixed(2)}"` +
+      ` data-idr="${chargesByCur.IDR[d - 1].toFixed(2)}">` +
+      `${d}</div>`
+    );
+  }
+
+  dom.calendarContainer.innerHTML = head + `<div class="calendar">${grid.join("")}</div>`;
+  if (dom.calendarInfo) {
+    dom.calendarInfo.textContent = "Tap a day to see total charges.";
+  }
+  dom.calendarContainer.querySelectorAll(".cal-day[data-day]").forEach((el) => {
+    el.addEventListener("click", () => {
+      if (!dom.calendarInfo) return;
+      const day = el.getAttribute("data-day");
+      const dayIdx = parseInt(day, 10) - 1;
+      const totalParts = [];
+      const fixedParts = [];
+      const cardParts = [];
+      const aed = chargesByCur.AED[dayIdx] || 0;
+      const eur = chargesByCur.EUR[dayIdx] || 0;
+      const idr = chargesByCur.IDR[dayIdx] || 0;
+      const aedFix = chargesByCurFixed.AED[dayIdx] || 0;
+      const eurFix = chargesByCurFixed.EUR[dayIdx] || 0;
+      const idrFix = chargesByCurFixed.IDR[dayIdx] || 0;
+      const aedCard = chargesByCurCard.AED[dayIdx] || 0;
+      const eurCard = chargesByCurCard.EUR[dayIdx] || 0;
+      const idrCard = chargesByCurCard.IDR[dayIdx] || 0;
+      if (aed > 0) totalParts.push(`${aed.toFixed(2)} AED`);
+      if (eur > 0) totalParts.push(`${eur.toFixed(2)} EUR`);
+      if (idr > 0) totalParts.push(`${idr.toFixed(2)} IDR`);
+      if (aedFix > 0) fixedParts.push(`${aedFix.toFixed(2)} AED`);
+      if (eurFix > 0) fixedParts.push(`${eurFix.toFixed(2)} EUR`);
+      if (idrFix > 0) fixedParts.push(`${idrFix.toFixed(2)} IDR`);
+      if (aedCard > 0) cardParts.push(`${aedCard.toFixed(2)} AED`);
+      if (eurCard > 0) cardParts.push(`${eurCard.toFixed(2)} EUR`);
+      if (idrCard > 0) cardParts.push(`${idrCard.toFixed(2)} IDR`);
+      const totalLine = totalParts.length ? `Total: ${totalParts.join(" · ")}` : "Total: 0";
+      const detailBits = [];
+      const aedDesc = descByCur.AED[dayIdx] || [];
+      const eurDesc = descByCur.EUR[dayIdx] || [];
+      const idrDesc = descByCur.IDR[dayIdx] || [];
+      if (aedDesc.length) detailBits.push(`AED: ${aedDesc.join(", ")}`);
+      if (eurDesc.length) detailBits.push(`EUR: ${eurDesc.join(", ")}`);
+      if (idrDesc.length) detailBits.push(`IDR: ${idrDesc.join(", ")}`);
+      const detailLine = detailBits.length ? ` — ${detailBits.join(" · ")}` : " — No charges";
+      dom.calendarInfo.textContent = `Day ${day}: ${totalLine}${detailLine}`;
+    });
+  });
 }
 
 function renderCards() {
