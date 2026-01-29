@@ -33,7 +33,10 @@
     .editing .btn-del { display: block; }
 
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; align-items: center; }
+    .field-stack { display: flex; flex-direction: column; gap: 4px; }
+    .field-stack label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .field-inline label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.02em; }
 
     .checkbox-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; }
     .checkbox-row label { display: inline-flex; align-items: center; }
@@ -51,6 +54,9 @@
     .square-btn.active { background: #000; color: #fff; }
     .square-btn.text-fit { width: auto; height: var(--ctrl-h); padding: 0 10px; display: inline-flex; align-items: center; justify-content: center; }
     .chip { border: 2px solid #000; padding: 4px 6px; font-size: 0.65rem; text-transform: uppercase; }
+    .month-grid { display: flex; gap: 6px; flex-wrap: nowrap; overflow-x: auto; height: var(--ctrl-h); align-items: center; flex: 1; }
+    .month-btn { flex: 1; min-width: 48px; border: 2px solid #000; background: #fff; color: #000; padding: 0; text-transform: uppercase; font-size: 0.75rem; font-weight: bold; cursor: pointer; height: 100%; }
+    .month-btn.active { background: #000; color: #fff; }
     .expense-logo { height: 16px; width: auto; display: inline-block; }
     .expense-logo--mono { filter: grayscale(1) brightness(0); }
 
@@ -103,8 +109,8 @@
       button { background: #fff; color: #000; }
       button.alt { background: #000; color: #fff; }
       .btn-del { background: #fff; color: #000; }
-      .cur-btn, .square-btn, .day-btn { border-color: #fff; background: #000; color: #fff; }
-      .cur-btn.active, .square-btn.active, .day-btn.active { background: #fff; color: #000; }
+      .cur-btn, .square-btn, .day-btn, .month-btn { border-color: #fff; background: #000; color: #fff; }
+      .cur-btn.active, .square-btn.active, .day-btn.active, .month-btn.active { background: #fff; color: #000; }
       .chip { border-color: #fff; }
       .chart-row { border-color: #fff; }
       .bar-bg { border-color: #fff; background: #000; }
@@ -132,13 +138,20 @@
 
   <div class="section">
     <div class="grid-3">
-      <div><label>Year</label><select id="yearSelect"></select></div>
-      <div><label>Month</label><select id="monthSelect" onchange="onDateChange()">
-        <option value="01">Jan</option><option value="02">Feb</option><option value="03">Mar</option>
-        <option value="04">Apr</option><option value="05">May</option><option value="06">Jun</option>
-        <option value="07">Jul</option><option value="08">Aug</option><option value="09">Sep</option>
-        <option value="10">Oct</option><option value="11">Nov</option><option value="12">Dec</option>
-      </select></div>
+      <div class="field-stack">
+        <label for="yearSelect">Year</label>
+        <select id="yearSelect"></select>
+      </div>
+      <div class="field-stack">
+        <label for="monthSelect">Month</label>
+        <div id="monthGrid" class="month-grid" role="group" aria-label="Month selection"></div>
+        <select id="monthSelect" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;border:0;" aria-hidden="true">
+          <option value="01">Jan</option><option value="02">Feb</option><option value="03">Mar</option>
+          <option value="04">Apr</option><option value="05">May</option><option value="06">Jun</option>
+          <option value="07">Jul</option><option value="08">Aug</option><option value="09">Sep</option>
+          <option value="10">Oct</option><option value="11">Nov</option><option value="12">Dec</option>
+        </select>
+      </div>
       <div></div>
     </div>
   </div>
@@ -318,6 +331,7 @@ const dom = {
   mainBody: document.getElementById("mainBody"),
   yearSelect: document.getElementById("yearSelect"),
   monthSelect: document.getElementById("monthSelect"),
+  monthGrid: document.getElementById("monthGrid"),
   chartsContainer: document.getElementById("chartsContainer"),
   calendarContainer: document.getElementById("calendarContainer"),
   calendarInfo: document.getElementById("calendarInfo"),
@@ -499,6 +513,31 @@ function setCycle(targetId, value) {
   });
 }
 window.setCycle = setCycle;
+
+function renderMonthButtons() {
+  if (!dom.monthGrid) return;
+  dom.monthGrid.innerHTML = Object.entries(MONTHS).map(([code, label]) => (
+    `<button type="button" class="month-btn" data-month="${code}" onclick="selectMonth('${code}')">${label}</button>`
+  )).join("");
+  updateMonthButtons();
+}
+
+function updateMonthButtons() {
+  if (!dom.monthGrid) return;
+  dom.monthGrid.querySelectorAll(".month-btn").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.month === dom.monthSelect.value);
+  });
+}
+
+function selectMonth(value) {
+  if (!value || dom.monthSelect.value === value) return;
+  dom.monthSelect.value = value;
+  updateMonthButtons();
+  if (typeof window.onDateChange === "function") {
+    window.onDateChange();
+  }
+}
+window.selectMonth = selectMonth;
 
 function formatCharge(f) {
   const monthLabel = f.dueMonth === "all" ? "Monthly" : (MONTHS[f.dueMonth] || f.dueMonth);
@@ -1003,6 +1042,9 @@ function renderFixed() {
       const catButtons = categories.map((cat) =>
         `<button type="button" class="square-btn text-fit ${f.category==cat.key?'active':''}" onclick="updateFix(${i}, 'category', '${cat.key}')">${cat.label}</button>`
       ).join("");
+      const freqVal = parseInt(f.freq, 10) || 1;
+      const freqLabel = freqVal > 1 ? `Every ${freqVal} months` : "";
+      const freqChip = freqLabel ? `<span class="chip">${freqLabel}</span>` : "";
       out.push(
         `<div class="item-row" style="${!isDue ? 'opacity: 0.2' : ''}">` +
           `<button class="btn-del" onclick="deleteItem('fix', ${i})">X</button>` +
@@ -1012,6 +1054,7 @@ function renderFixed() {
               `<span class="chip">${num(f.amount).toFixed(2)}</span>` +
               `<span class="chip">${f.currency || '—'}</span>` +
               `<span class="chip">${formatCharge(f)}</span>` +
+              freqChip +
             `</div>` +
           `</div>` +
           `<div class="edit-only">` +
@@ -1169,6 +1212,8 @@ for (let y = now.getFullYear(); y <= now.getFullYear() + 5; y++) {
   dom.yearSelect.add(new Option(y, y, y === now.getFullYear()));
 }
 dom.monthSelect.value = String(now.getMonth()+1).padStart(2,'0');
+renderMonthButtons();
+updateMonthButtons();
 dom.fixFreq.dataset.changed = "0";
 dom.fixMonth.dataset.changed = "0";
 dom.fixFreq.addEventListener("change", () => { dom.fixFreq.dataset.changed = "1"; });
@@ -1181,6 +1226,7 @@ dom.addCatBtn.addEventListener("click", () => {
 window.onDateChange = async () => {
   await loadFromSupabase();
   refreshAll();
+  updateMonthButtons();
 };
 dom.yearSelect.addEventListener("change", window.onDateChange);
 dom.monthSelect.addEventListener("change", window.onDateChange);
