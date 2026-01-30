@@ -107,7 +107,6 @@
       padding: 10px;
     }
     .square-chart-controls {
-      border-top: 2px solid #000;
       padding: 6px 10px;
       display: flex;
       flex-direction: column;
@@ -149,20 +148,23 @@
     .card-months {
       display: flex;
       flex-wrap: nowrap;
-      gap: 4px;
-      justify-content: center;
+      gap: 2px;
+      justify-content: space-between;
       font-size: 0.55rem;
       text-transform: uppercase;
       letter-spacing: 0.02em;
-      overflow-x: auto;
+      width: 100%;
+      min-width: 0;
       padding: 4px 0;
     }
     .card-months span {
+      flex: 1 1 0;
       border: 1px solid #000;
-      padding: 2px 6px;
+      padding: 2px 0;
       writing-mode: vertical-rl;
       text-orientation: mixed;
       transform: rotate(180deg);
+      text-align: center;
     }
     .cards-section .cards-grid {
       display: flex;
@@ -301,7 +303,6 @@
         </div>
         <div class="square-chart-controls">
           <div id="yearlyMonthRow" class="card-months"></div>
-          <div id="yearlyCardSelector" class="card-selector"></div>
         </div>
       </div>
       <div id="cardsList"></div>
