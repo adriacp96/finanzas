@@ -1098,7 +1098,6 @@ async function loadFromSupabase() {
     : DEFAULT_CATEGORIES;
   renderCategoryButtons();
   updateLoanTermVisibility();
-  await updateGraphicHistory();
 }
 
 async function saveToSupabase(showAlert = false) {
@@ -1656,7 +1655,6 @@ if (dom.graphicSelectors) {
   });
 }
 renderGraphic("cards");
-updateGraphicHistory().catch((err) => console.error("Graphic history error:", err));
 dom.addCatBtn.addEventListener("click", () => {
   addCategory(dom.newCatName.value);
   dom.newCatName.value = "";
@@ -1665,6 +1663,7 @@ window.onDateChange = async () => {
   await loadFromSupabase();
   refreshAll();
   updateMonthButtons();
+  updateGraphicHistory().catch((err) => console.error("Graphic history error:", err));
 };
 dom.yearSelect.addEventListener("change", window.onDateChange);
 dom.monthSelect.addEventListener("change", window.onDateChange);
