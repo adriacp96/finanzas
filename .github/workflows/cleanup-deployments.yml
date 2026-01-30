@@ -34,7 +34,8 @@ jobs:
             const toKeep = deployments[0];
             const toDelete = deployments.slice(1);
             
-            console.log(`Keeping deployment: ${toKeep.id} (${toKeep.environment}, created: ${toKeep.created_at})`);
+            console.log(`Keeping deployment: ${toKeep.id} (environment: ${toKeep.environment}, created: ${toKeep.created_at})`);
+            console.log(`Note: This will delete deployments across all environments.`);
             console.log(`Deleting ${toDelete.length} old deployments...`);
             
             for (const deployment of toDelete) {
@@ -54,9 +55,15 @@ jobs:
                   deployment_id: deployment.id
                 });
                 
-                console.log(`Deleted deployment ${deployment.id} (${deployment.environment})`);
+                console.log(`Deleted deployment ${deployment.id} (environment: ${deployment.environment})`);
+                
+                // Small delay to avoid rate limiting
+                await new Promise(resolve => setTimeout(resolve, 100));
               } catch (error) {
                 console.error(`Failed to delete deployment ${deployment.id}: ${error.message}`);
+                if (error.status) {
+                  console.error(`  Status: ${error.status}`);
+                }
               }
             }
             
