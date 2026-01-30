@@ -559,7 +559,7 @@ const GRAPHICS = {
 };
 
 const GRAPHIC_PALETTE = ["#000000", "#1c1c1c", "#383838", "#555555", "#707070", "#8a8a8a", "#a4a4a4"];
-let graphicHistory = { months: [], snapshots: {}, loaded: false };
+let graphicHistory = { months: getYearMonths(new Date().getFullYear()), snapshots: {}, loaded: false };
 let currentGraphicType = "cards";
 
 function getYearMonths(year) {
@@ -1096,8 +1096,12 @@ async function loadFromSupabase() {
   categories = fixedData && Array.isArray(fixedData.categories) && fixedData.categories.length
     ? fixedData.categories
     : DEFAULT_CATEGORIES;
+  graphicHistory.months = getYearMonths(year);
+  graphicHistory.snapshots = {};
+  graphicHistory.loaded = false;
   renderCategoryButtons();
   updateLoanTermVisibility();
+  renderGraphic(currentGraphicType);
 }
 
 async function saveToSupabase(showAlert = false) {
