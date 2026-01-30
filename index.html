@@ -143,9 +143,8 @@
       stroke-width: 1;
       stroke-linecap: butt;
     }
-    .yearly-chart circle {
-      fill: #000;
-      r: 1.5;
+    .yearly-chart rect {
+      shape-rendering: crispEdges;
     }
     .card-months {
       display: flex;
@@ -805,11 +804,11 @@ function renderYearlyChart() {
   const pathElements = pointsPerSeries
     .map((series) => {
       const pointsAttr = series.points.map((p) => `${p.x},${p.y}`).join(" ");
-      return `<polyline points="${pointsAttr}" fill="none" stroke="${series.color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline>`;
+      return `<polyline points="${pointsAttr}" fill="none" stroke="${series.color}" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter"></polyline>`;
     })
     .join("");
   const circleElements = pointsPerSeries
-    .map((series) => series.points.map((p) => `<circle cx="${p.x}" cy="${p.y}" r="1.5" fill="${series.color}"></circle>`).join(""))
+    .map((series) => series.points.map((p) => `<rect x="${p.x - 1.5}" y="${p.y - 1.5}" width="3" height="3" fill="${series.color}"></rect>`).join(""))
     .join("");
   dom.yearlyDebtChart.innerHTML = `
     <svg viewBox="0 0 100 100" preserveAspectRatio="none">
