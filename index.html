@@ -88,18 +88,35 @@
     .expense-logo--mono { filter: grayscale(1) brightness(0); }
     .square-chart {
       border: 2px solid #000;
-      padding: 10px;
+      padding: 0;
       display: flex;
       flex-direction: column;
-      gap: 6px;
       width: 100%;
-      aspect-ratio: auto;
-      height: auto;
+      height: 100%;
     }
-    .square-chart .btn-group {
-      flex-wrap: wrap;
-      justify-content: center;
+    .square-chart .yearly-chart {
+      flex: 1;
+      padding: 10px;
+    }
+    .square-chart-controls {
+      border-top: 2px solid #000;
+      padding: 6px 10px;
+      display: flex;
+      flex-direction: column;
       gap: 4px;
+      background: #fff;
+    }
+    .card-selector {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      justify-content: center;
+    }
+    .card-selector .square-btn {
+      width: auto;
+      min-width: 60px;
+      padding: 0 6px;
+      height: 30px;
     }
     .yearly-chart {
       flex: 1;
@@ -138,9 +155,6 @@
       flex-wrap: wrap;
     }
     .cards-section .square-chart {
-      flex: 0 0 230px;
-      max-width: 230px;
-      min-width: 200px;
       order: 2;
       margin-left: auto;
     }
@@ -265,9 +279,11 @@
     <h2>Cards</h2>
     <div class="cards-grid">
       <div class="square-chart">
-        <div id="yearlyCardSelector" class="btn-group"></div>
         <div id="yearlyDebtChart" class="yearly-chart"></div>
-        <div id="yearlyLegend" class="yearly-legend"></div>
+        <div class="square-chart-controls">
+          <div id="yearlyCardSelector" class="card-selector"></div>
+          <div id="yearlyLegend" class="yearly-legend"></div>
+        </div>
       </div>
       <div id="cardsList"></div>
     </div>
@@ -681,13 +697,16 @@ function refreshYearlyVisualization() {
   renderYearlyChart();
 }
 
-function syncSquareChartHeight() {
+function syncSquareChartSize() {
   const calendar = dom.calendarContainer;
   const square = document.querySelector(".cards-section .square-chart");
   if (!calendar || !square) return;
-  const height = calendar.getBoundingClientRect().height;
-  if (height > 0) {
-    square.style.height = `${height}px`;
+  const rect = calendar.getBoundingClientRect();
+  if (rect.width > 0) {
+    square.style.width = `${rect.width}px`;
+  }
+  if (rect.height > 0) {
+    square.style.height = `${rect.height}px`;
   }
 }
 
@@ -1223,7 +1242,7 @@ function renderCalendar() {
         lines.map((line) => `<div>${line}</div>`).join("");
     });
   });
-  syncSquareChartHeight();
+  syncSquareChartSize();
 }
 
 function renderCards() {
@@ -1543,7 +1562,7 @@ window.onDateChange = async () => {
 dom.yearSelect.addEventListener("change", window.onDateChange);
 dom.monthSelect.addEventListener("change", window.onDateChange);
 window.onDateChange();
-window.addEventListener("resize", syncSquareChartHeight);
+window.addEventListener("resize", syncSquareChartSize);
 </script>
 </body>
 </html>
