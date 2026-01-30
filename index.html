@@ -86,100 +86,14 @@
     .month-btn.active, .month-arrow:focus-visible { background: #000; color: #fff; }
     .expense-logo { height: 16px; width: auto; display: inline-block; }
     .expense-logo--mono { filter: grayscale(1) brightness(0); }
-    .square-chart {
-      border: 2px solid #000;
-      padding: 0;
+    .cards-section {
       display: flex;
       flex-direction: column;
-      width: auto;
-      background: #fff;
-      border-radius: 0;
-    }
-    .square-chart-body {
-      flex: 1;
-      display: flex;
-      align-items: stretch;
-      justify-content: stretch;
-      overflow: hidden;
-    }
-    .square-chart-body .yearly-chart {
-      flex: 1;
-      padding: 10px;
-    }
-    .square-chart-controls {
-      padding: 6px 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .card-selector {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-      justify-content: center;
-    }
-    .card-selector .square-btn {
-      width: auto;
-      min-width: 60px;
-      padding: 0 6px;
-      height: 30px;
-    }
-    .yearly-chart {
-      flex: 1;
-      position: relative;
-    }
-    .yearly-chart svg {
-      width: 100%;
-      height: 100%;
-      display: block;
-    }
-    .yearly-chart polyline,
-    .yearly-chart circle {
-      stroke: #000;
-      fill: none;
-    }
-    .yearly-chart polyline {
-      stroke-width: 1;
-      stroke-linecap: butt;
-    }
-    .yearly-chart rect {
-      shape-rendering: crispEdges;
-    }
-    .card-months {
-      display: flex;
-      flex-wrap: nowrap;
-      gap: 2px;
-      justify-content: space-between;
-      font-size: 0.55rem;
-      text-transform: uppercase;
-      letter-spacing: 0.02em;
-      width: 100%;
-      min-width: 0;
-      padding: 4px 0;
-    }
-    .card-months span {
-      flex: 1 1 0;
-      border: 1px solid #000;
-      padding: 2px 0;
-      writing-mode: vertical-rl;
-      text-orientation: mixed;
-      transform: rotate(180deg);
-      text-align: center;
-    }
-    .cards-section .cards-grid {
-      display: flex;
       gap: 10px;
-      align-items: flex-start;
-      justify-content: flex-start;
-      flex-wrap: wrap;
     }
+    .cards-section #cardsList,
     .cards-section .square-chart {
-      order: 2;
-      margin-left: auto;
-    }
-    .cards-section #cardsList {
-      flex: 1;
-      order: 1;
+      width: 100%;
     }
 
     .hidden { display: none; }
@@ -297,14 +211,6 @@
   <div class="section cards-section">
     <h2>Cards</h2>
     <div class="cards-grid">
-      <div class="square-chart">
-        <div class="square-chart-body">
-          <div id="yearlyDebtChart" class="yearly-chart"></div>
-        </div>
-        <div class="square-chart-controls">
-          <div id="yearlyMonthRow" class="card-months"></div>
-        </div>
-      </div>
       <div id="cardsList"></div>
     </div>
     <details class="box">
@@ -460,8 +366,6 @@ let fixedGasto = [];
 let prevCards = [];
 let monthCardData = {};
 let prevMonthCardData = {};
-let yearlyCardData = {};
-let selectedCardIds = new Set();
 
 const SUPABASE_URL = "https://yienfdeekaqbvixmuabi.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlpZW5mZGVla2FxYnZpeG11YWJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2MTQwNDAsImV4cCI6MjA4NTE5MDA0MH0.nXq_GV34A4QpcWFJr0R2Za6t1OvJdduHyxEAiAmp72E";
@@ -495,9 +399,7 @@ const dom = {
   fixDay: document.getElementById("fixDay"),
   addFixBtn: document.getElementById("addFixBtn"),
   editToggle: document.getElementById("editToggle"),
-  refreshBtn: document.getElementById("refreshBtn"),
-  yearlyDebtChart: document.getElementById("yearlyDebtChart"),
-  yearlyCardSelector: document.getElementById("yearlyCardSelector")
+  refreshBtn: document.getElementById("refreshBtn")
 };
 
 const CURRENCIES = ["AED", "EUR", "IDR"];
@@ -709,11 +611,6 @@ function syncSelectedCardIds() {
     availableIds.forEach((id) => updated.add(id));
   }
   selectedCardIds = updated;
-}
-
-function refreshYearlyVisualization() {
-  renderYearlyCardSelector();
-  renderYearlyChart();
 }
 
 function syncSquareChartSize() {
