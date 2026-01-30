@@ -38,6 +38,9 @@ jobs:
             console.log(`Note: This will delete deployments across all environments.`);
             console.log(`Deleting ${toDelete.length} old deployments...`);
             
+            let deletedCount = 0;
+            let failedCount = 0;
+            
             for (const deployment of toDelete) {
               try {
                 // First, set deployment status to inactive
@@ -56,15 +59,21 @@ jobs:
                 });
                 
                 console.log(`Deleted deployment ${deployment.id} (environment: ${deployment.environment})`);
+                deletedCount++;
                 
                 // Small delay to avoid rate limiting
-                await new Promise(resolve => setTimeout(resolve, 100));
+                await new Promise(resolve => setTimeout(resolve, 500));
               } catch (error) {
                 console.error(`Failed to delete deployment ${deployment.id}: ${error.message}`);
                 if (error.status) {
                   console.error(`  Status: ${error.status}`);
                 }
+                failedCount++;
               }
             }
             
-            console.log('Cleanup completed!');
+            console.log(`Cleanup completed: ${deletedCount} deleted, ${failedCount} failed`);
+            
+            if (failedCount > 0) {
+              throw new Error(`Failed to delete ${failedCount} deployment(s)`);
+            }
