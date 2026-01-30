@@ -93,6 +93,7 @@
       flex-direction: column;
       width: auto;
       background: #fff;
+      border-radius: 0;
     }
     .square-chart-body {
       flex: 1;
@@ -138,21 +139,31 @@
       stroke: #000;
       fill: none;
     }
+    .yearly-chart polyline {
+      stroke-width: 1;
+      stroke-linecap: butt;
+    }
     .yearly-chart circle {
       fill: #000;
+      r: 1.5;
     }
     .card-months {
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       gap: 4px;
       justify-content: center;
       font-size: 0.55rem;
       text-transform: uppercase;
       letter-spacing: 0.02em;
+      overflow-x: auto;
+      padding: 4px 0;
     }
     .card-months span {
       border: 1px solid #000;
       padding: 2px 6px;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      transform: rotate(180deg);
     }
     .cards-section .cards-grid {
       display: flex;
