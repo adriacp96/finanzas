@@ -337,6 +337,16 @@
           <button type="button" class="day-btn" onclick="setDay('fixDay', 30)">30</button>
           <button type="button" class="day-btn" onclick="setDay('fixDay', 31)">31</button>
         </div>
+        <div class="grid loan-fields hidden" data-loan-only>
+          <div>
+            <label>Loan start</label>
+            <input type="date" id="fixStartDate" />
+          </div>
+          <div>
+            <label>Loan end</label>
+            <input type="date" id="fixEndDate" />
+          </div>
+        </div>
         <button class="alt" id="addFixBtn">Add Expense</button>
       </div>
     </details>
@@ -386,10 +396,19 @@ const dom = {
   fixFreq: document.getElementById("fixFreq"),
   fixMonth: document.getElementById("fixMonth"),
   fixDay: document.getElementById("fixDay"),
+  fixStartDate: document.getElementById("fixStartDate"),
+  fixEndDate: document.getElementById("fixEndDate"),
   addFixBtn: document.getElementById("addFixBtn"),
   editToggle: document.getElementById("editToggle"),
   refreshBtn: document.getElementById("refreshBtn")
 };
+
+function updateLoanTermVisibility() {
+  const isLoan = dom.fixCat && dom.fixCat.value === "loans";
+  document.querySelectorAll("[data-loan-only]").forEach((el) => {
+    el.classList.toggle("hidden", !isLoan);
+  });
+}
 
 const CURRENCIES = ["AED", "EUR", "IDR"];
 const MONTHS = {
@@ -398,6 +417,62 @@ const MONTHS = {
   "09": "Sep", "10": "Oct", "11": "Nov", "12": "Dec"
 };
 const MONTH_KEYS = Object.keys(MONTHS);
+
+function buildYearMonthKey(year, month) {
+  const yr = String(year);
+  const mo = String(month).padStart(2, "0");
+  return `${yr}-${mo}`;
+}
+
+function normalizeFullDate(value) {
+  if (!value) return "";
+  const normalized = String(value).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!normalized) return "";
+  return `${normalized[1]}-${normalized[2]}-${normalized[3]}`;
+}
+
+function formatFullDate(value) {
+  const normalized = normalizeFullDate(value);
+  if (!normalized) return "";
+  const [year, month, day] = normalized.split("-");
+  const monthLabel = MONTHS[month] || month;
+  return `${day} ${monthLabel} ${year}`;
+}
+
+function monthKeyFromDate(value) {
+  const normalized = normalizeFullDate(value);
+  return normalized ? normalized.slice(0, 7) : "";
+}
+
+function monthsBetweenInclusive(startKey, endKey) {
+  if (!startKey || !endKey) return 0;
+  const [sy, sm] = startKey.split("-").map((v) => parseInt(v, 10));
+  const [ey, em] = endKey.split("-").map((v) => parseInt(v, 10));
+  if (![sy, sm, ey, em].every(Number.isFinite)) return 0;
+  const diff = (ey - sy) * 12 + (em - sm);
+  return diff >= 0 ? diff + 1 : 0;
+}
+
+function monthIndexSince(startKey, currentKey) {
+  if (!startKey || !currentKey) return 0;
+  const [sy, sm] = startKey.split("-").map((v) => parseInt(v, 10));
+  const [cy, cm] = currentKey.split("-").map((v) => parseInt(v, 10));
+  if (![sy, sm, cy, cm].every(Number.isFinite)) return 0;
+  return (cy - sy) * 12 + (cm - sm) + 1;
+}
+
+function getLoanInstallmentText(fix, year, month) {
+  if (fix.category !== "loans") return "";
+  const startKey = monthKeyFromDate(fix.startDate);
+  const endKey = monthKeyFromDate(fix.endDate);
+  if (!startKey || !endKey) return "";
+  const total = monthsBetweenInclusive(startKey, endKey);
+  if (!total) return "";
+  const currentKey = buildYearMonthKey(year, month);
+  if (currentKey < startKey || currentKey > endKey) return "";
+  const current = monthIndexSince(startKey, currentKey);
+  return `Installment ${current}/${total}`;
+}
 
 const DEFAULT_CATEGORIES = [
   { key: "subscriptions", label: "Subscriptions" },
@@ -492,6 +567,9 @@ function setCategory(targetId, value) {
   buttons.forEach((btn) => {
     btn.classList.toggle("active", btn.dataset.value === value);
   });
+  if (targetId === "fixCat") {
+    updateLoanTermVisibility();
+  }
 }
 window.setCategory = setCategory;
 
@@ -520,6 +598,7 @@ function addCategory(label) {
   }
   categories.push({ key, label: trimmed });
   renderCategoryButtons();
+  updateLoanTermVisibility();
   queueAutosave();
   renderFixed();
 }
@@ -591,7 +670,22 @@ window.shiftMonth = shiftMonth;
 function formatCharge(f) {
   const monthLabel = f.dueMonth === "all" ? "Monthly" : (MONTHS[f.dueMonth] || f.dueMonth);
   const dayLabel = f.day ? `Day ${f.day}` : "Day ?";
-  return `${dayLabel} · ${monthLabel}`;
+  const termParts = [];
+  if (f.startDate) termParts.push(`Start ${formatFullDate(f.startDate)}`);
+  if (f.endDate) termParts.push(`End ${formatFullDate(f.endDate)}`);
+  const termLabel = termParts.join(" · ");
+  return `${dayLabel} · ${monthLabel}${termLabel ? ` · ${termLabel}` : ""}`;
+}
+
+function isFixedDueThisMonth(fix, year, month) {
+  const key = buildYearMonthKey(year, month);
+  const dueMonth = fix.dueMonth || "all";
+  if (dueMonth !== "all" && dueMonth !== month) return false;
+  const startKey = monthKeyFromDate(fix.startDate);
+  if (startKey && key < startKey) return false;
+  const endKey = monthKeyFromDate(fix.endDate);
+  if (endKey && key > endKey) return false;
+  return true;
 }
 
 function renderExpenseName(name) {
@@ -742,7 +836,17 @@ async function loadFromSupabase() {
     console.error("Supabase fixed load error:", fixedError);
     return;
   }
-  fixedGasto = fixedData && Array.isArray(fixedData.fixed) ? fixedData.fixed : [];
+  fixedGasto = fixedData && Array.isArray(fixedData.fixed)
+    ? fixedData.fixed.map((f) => {
+      const startRaw = f.startDate || (f.startMonth ? `${f.startMonth}-01` : "");
+      const endRaw = f.endDate || (f.endMonth ? `${f.endMonth}-01` : "");
+      return {
+        ...f,
+        startDate: normalizeFullDate(startRaw),
+        endDate: normalizeFullDate(endRaw)
+      };
+    })
+    : [];
   if (fixedData && Array.isArray(fixedData.cards) && fixedData.cards.length) {
     cards = fixedData.cards;
   } else if (monthCards.length) {
@@ -760,6 +864,7 @@ async function loadFromSupabase() {
     ? fixedData.categories
     : DEFAULT_CATEGORIES;
   renderCategoryButtons();
+  updateLoanTermVisibility();
 }
 
 async function saveToSupabase(showAlert = false) {
@@ -816,12 +921,11 @@ function queueAutosave() {
 }
 
 function renderCharts() {
-  const selectedMonth = dom.monthSelect.value;
+  const { year, month } = getSelectedYearMonth();
   const fixedByCur = { AED: 0, EUR: 0, IDR: 0 };
   fixedGasto.forEach((f) => {
-    if (f.dueMonth === "all" || f.dueMonth === selectedMonth) {
-      fixedByCur[f.currency] += num(f.amount);
-    }
+    if (!isFixedDueThisMonth(f, year, month)) return;
+    fixedByCur[f.currency] += num(f.amount);
   });
 
   const paymentCards = cards;
@@ -886,7 +990,7 @@ function renderCalendar() {
   };
 
   fixedGasto.forEach((f) => {
-    if (f.dueMonth !== "all" && f.dueMonth !== month) return;
+    if (!isFixedDueThisMonth(f, year, month)) return;
     const day = Math.min(Math.max(parseInt(f.day, 10) || 1, 1), daysInMonth);
     const amt = num(f.amount);
     chargesByDay[day - 1] += amt;
@@ -1080,7 +1184,7 @@ function renderCards() {
 }
 
 function renderFixed() {
-  const selectedMonth = dom.monthSelect.value;
+  const { year, month } = getSelectedYearMonth();
   const groups = {};
   fixedGasto.forEach((f, i) => {
     const key = f.category || "uncategorized";
@@ -1106,13 +1210,22 @@ function renderFixed() {
       return 0;
     });
     groups[cat].forEach(({ f, i }) => {
-      const isDue = f.dueMonth === "all" || f.dueMonth === selectedMonth;
+      const isDue = isFixedDueThisMonth(f, year, month);
       const catButtons = categories.map((cat) =>
         `<button type="button" class="square-btn text-fit ${f.category==cat.key?'active':''}" onclick="updateFix(${i}, 'category', '${cat.key}')">${cat.label}</button>`
       ).join("");
       const freqVal = parseInt(f.freq, 10) || 1;
       const freqLabel = freqVal > 1 ? `Every ${freqVal} months` : "";
       const freqChip = freqLabel ? `<span class="chip">${freqLabel}</span>` : "";
+      const loanTermInputs = f.category === "loans"
+        ? (
+          `<div class="grid">` +
+            `<div><label>Loan start</label><input type="date" value="${f.startDate || ''}" onchange="updateFix(${i}, 'startDate', this.value)" /></div>` +
+            `<div><label>Loan end</label><input type="date" value="${f.endDate || ''}" onchange="updateFix(${i}, 'endDate', this.value)" /></div>` +
+          `</div>`
+        )
+        : "";
+      const installmentChip = getLoanInstallmentText(f, year, month);
       out.push(
         `<div class="item-row" style="${!isDue ? 'opacity: 0.2' : ''}">` +
           `<button class="btn-del" onclick="deleteItem('fix', ${i})">X</button>` +
@@ -1122,6 +1235,7 @@ function renderFixed() {
               `<span class="chip">${num(f.amount).toFixed(2)}</span>` +
               `<span class="chip">${f.currency || '—'}</span>` +
               `<span class="chip">${formatCharge(f)}</span>` +
+              `${installmentChip ? `<span class="chip">${installmentChip}</span>` : ""}` +
               freqChip +
             `</div>` +
           `</div>` +
@@ -1173,6 +1287,7 @@ function renderFixed() {
               `</div></div>` +
               `<div><label>Charge</label><select onchange="updateFix(${i}, 'dueMonth', this.value)"><option value="all" ${f.dueMonth=='all'?'selected':''}>Month</option><option value="01" ${f.dueMonth=='01'?'selected':''}>Jan</option><option value="02" ${f.dueMonth=='02'?'selected':''}>Feb</option><option value="03" ${f.dueMonth=='03'?'selected':''}>Mar</option><option value="04" ${f.dueMonth=='04'?'selected':''}>Apr</option><option value="05" ${f.dueMonth=='05'?'selected':''}>May</option><option value="06" ${f.dueMonth=='06'?'selected':''}>Jun</option><option value="07" ${f.dueMonth=='07'?'selected':''}>Jul</option><option value="08" ${f.dueMonth=='08'?'selected':''}>Aug</option><option value="09" ${f.dueMonth=='09'?'selected':''}>Sep</option><option value="10" ${f.dueMonth=='10'?'selected':''}>Oct</option><option value="11" ${f.dueMonth=='11'?'selected':''}>Nov</option><option value="12" ${f.dueMonth=='12'?'selected':''}>Dec</option></select></div>` +
             `</div>` +
+            `${loanTermInputs}` +
             `<div class="grid">` +
               `<div><label>Every (Months)</label><input type="number" min="1" step="1" value="${parseInt(f.freq, 10) || 1}" onchange="updateFix(${i}, 'freq', this.value)" /></div>` +
               `<div></div>` +
@@ -1204,6 +1319,9 @@ dom.refreshBtn.addEventListener("click", () => {
 });
 
 window.updateFix = (i, fld, val) => {
+  if (fld === 'startDate' || fld === 'endDate') {
+    val = normalizeFullDate(val);
+  }
   fixedGasto[i][fld] = (fld === 'amount' || fld === 'day' || fld === 'freq') ? num(val) : val;
   queueAutosave();
   renderFixed();
@@ -1261,18 +1379,22 @@ dom.addFixBtn.addEventListener("click", () => {
   if (!dom.fixCat.value) {
     dom.fixCat.value = categories[0] ? categories[0].key : "subscriptions";
   }
-  fixedGasto.push({
-    name,
-    amount: amt,
-    currency: dom.fixCur.value,
-    category: dom.fixCat.value,
-    day: parseInt(dom.fixDay.value, 10) || 1,
-    freq: hasNonMonthly ? parseInt(dom.fixFreq.value, 10) : 1,
-    dueMonth: hasNonMonthly ? dom.fixMonth.value : "all"
-  });
+    fixedGasto.push({
+      name,
+      amount: amt,
+      currency: dom.fixCur.value,
+      category: dom.fixCat.value,
+      day: parseInt(dom.fixDay.value, 10) || 1,
+      startDate: normalizeFullDate(dom.fixStartDate.value),
+      endDate: normalizeFullDate(dom.fixEndDate.value),
+      freq: hasNonMonthly ? parseInt(dom.fixFreq.value, 10) : 1,
+      dueMonth: hasNonMonthly ? dom.fixMonth.value : "all"
+    });
   dom.fixName.value = "";
   dom.fixAmt.value = "";
   dom.newCatName.value = "";
+  dom.fixStartDate.value = "";
+  dom.fixEndDate.value = "";
   dom.fixFreq.dataset.changed = "0";
   dom.fixMonth.dataset.changed = "0";
   queueAutosave();
@@ -1291,6 +1413,7 @@ dom.fixMonth.dataset.changed = "0";
 dom.fixFreq.addEventListener("change", () => { dom.fixFreq.dataset.changed = "1"; });
 dom.fixMonth.addEventListener("change", () => { dom.fixMonth.dataset.changed = "1"; });
 renderCategoryButtons();
+updateLoanTermVisibility();
 dom.addCatBtn.addEventListener("click", () => {
   addCategory(dom.newCatName.value);
   dom.newCatName.value = "";
