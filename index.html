@@ -668,13 +668,14 @@ function shiftMonth(delta) {
 window.shiftMonth = shiftMonth;
 
 function formatCharge(f) {
-  const monthLabel = f.dueMonth === "all" ? "Monthly" : (MONTHS[f.dueMonth] || f.dueMonth);
+  const monthLabel = f.dueMonth === "all" ? "" : (MONTHS[f.dueMonth] || f.dueMonth);
   const dayLabel = f.day ? `Day ${f.day}` : "Day ?";
   const termParts = [];
   if (f.startDate) termParts.push(`Start ${formatFullDate(f.startDate)}`);
   if (f.endDate) termParts.push(`End ${formatFullDate(f.endDate)}`);
   const termLabel = termParts.join(" · ");
-  return `${dayLabel} · ${monthLabel}${termLabel ? ` · ${termLabel}` : ""}`;
+  const monthPart = monthLabel ? ` · ${monthLabel}` : "";
+  return `${dayLabel}${monthPart}${termLabel ? ` · ${termLabel}` : ""}`;
 }
 
 function isFixedDueThisMonth(fix, year, month) {
