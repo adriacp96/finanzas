@@ -92,7 +92,9 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      aspect-ratio: 1 / 1;
+      width: 100%;
+      aspect-ratio: auto;
+      height: auto;
     }
     .square-chart .btn-group {
       flex-wrap: wrap;
@@ -478,6 +480,8 @@ const DEFAULT_CATEGORIES = [
   { key: "insurance", label: "Insurance" }
 ];
 
+const CARD_LINE_COLORS = ["#000", "#333", "#555", "#777", "#9a0000", "#0057b8", "#2d6b2d", "#aa5500", "#990099"];
+
 let categories = DEFAULT_CATEGORIES;
 
 const num = (val) => {
@@ -677,6 +681,16 @@ function refreshYearlyVisualization() {
   renderYearlyChart();
 }
 
+function syncSquareChartHeight() {
+  const calendar = dom.calendarContainer;
+  const square = document.querySelector(".cards-section .square-chart");
+  if (!calendar || !square) return;
+  const height = calendar.getBoundingClientRect().height;
+  if (height > 0) {
+    square.style.height = `${height}px`;
+  }
+}
+
 function renderYearlyCardSelector() {
   if (!dom.yearlyCardSelector) return;
   syncSelectedCardIds();
@@ -696,36 +710,78 @@ function renderYearlyCardSelector() {
 
 function renderYearlyChart() {
   if (!dom.yearlyDebtChart) return;
-  const sums = MONTH_KEYS.map((month) => {
+  const cardSeries = {};
+  MONTH_KEYS.forEach((month, monthIndex) => {
     const rows = yearlyCardData[month] || [];
-    const total = rows.reduce((acc, row) => (selectedCardIds.has(row.id) ? acc + num(row.debt) : acc), 0);
-    return { month, total };
+    rows.forEach((row) => {
+      if (!cardSeries[row.id]) {
+        cardSeries[row.id] = {
+          name: row.name || "Card",
+          values: Array(MONTH_KEYS.length).fill(0)
+        };
+      }
+      cardSeries[row.id].values[monthIndex] = num(row.debt);
+    });
   });
-  const max = Math.max(1, ...sums.map((item) => item.total));
-  const points = sums.map((item, index) => {
-    const x = (index / (sums.length - 1)) * 100;
-    const y = 100 - (item.total / max) * 100;
-    return { ...item, x, y };
+  const seriesList = Object.entries(cardSeries)
+    .filter(([id]) => selectedCardIds.has(id))
+    .map(([id, data], idx) => ({
+      id,
+      name: data.name || "Card",
+      values: data.values,
+      color: CARD_LINE_COLORS[idx % CARD_LINE_COLORS.length]
+    }));
+  if (!seriesList.length) {
+    dom.yearlyDebtChart.innerHTML = "";
+    renderYearlyLegend([]);
+    return;
+  }
+  const max = Math.max(
+    1,
+    ...seriesList.flatMap((series) => series.values)
+  );
+  const pointsPerSeries = seriesList.map((series) => {
+    const points = series.values.map((value, index) => {
+      const x = (index / (MONTH_KEYS.length - 1)) * 100;
+      const y = 100 - (value / max) * 100;
+      return { ...series, x, y, total: value, month: MONTH_KEYS[index] };
+    });
+    return { ...series, points };
   });
-  const pathPoints = points.map((p) => `${p.x},${p.y}`).join(" ");
-  const axisLines = [25, 50, 75].map((percentage) => (
-    `<line x1="0" y1="${100 - percentage}" x2="100" y2="${100 - percentage}" stroke="#000" stroke-opacity="0.2" stroke-width="0.5"></line>`
-  )).join("");
-  const circleElems = points.map((p) => `<circle cx="${p.x}" cy="${p.y}" r="1.5"></circle>`).join("");
+  const axisLines = [25, 50, 75]
+    .map((percentage) => (
+      `<line x1="0" y1="${100 - percentage}" x2="100" y2="${100 - percentage}" stroke="#000" stroke-opacity="0.2" stroke-width="0.5"></line>`
+    ))
+    .join("");
+  const pathElements = pointsPerSeries
+    .map((series) => {
+      const pointsAttr = series.points.map((p) => `${p.x},${p.y}`).join(" ");
+      return `<polyline points="${pointsAttr}" fill="none" stroke="${series.color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline>`;
+    })
+    .join("");
+  const circleElements = pointsPerSeries
+    .map((series) => series.points.map((p) => `<circle cx="${p.x}" cy="${p.y}" r="1.5" fill="${series.color}"></circle>`).join(""))
+    .join("");
+  const monthLabels = MONTH_KEYS.map((month, index) => {
+    const x = (index / (MONTH_KEYS.length - 1)) * 100;
+    return `<text x="${x}" y="98" text-anchor="middle" font-size="2" fill="black">${MONTHS[month]}</text>`;
+  }).join("");
   dom.yearlyDebtChart.innerHTML = `
     <svg viewBox="0 0 100 100" preserveAspectRatio="none">
       ${axisLines}
-      <polyline points="${pathPoints}" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline>
-      ${circleElems}
-      ${points.map((p) => `<text x="${p.x}" y="${p.y - 3}" text-anchor="middle" font-size="2" fill="black">${Math.round(p.total)}</text>`).join("")}
+      ${pathElements}
+      ${circleElements}
+      ${monthLabels}
     </svg>
   `;
-  renderYearlyLegend(points);
+  renderYearlyLegend(pointsPerSeries);
 }
 
-function renderYearlyLegend(points) {
+function renderYearlyLegend(seriesList) {
   if (!dom.yearlyLegend) return;
-  dom.yearlyLegend.innerHTML = points.map((p) => `<span>${MONTHS[p.month]}</span>`).join("");
+  dom.yearlyLegend.innerHTML = seriesList
+    .map((series) => `<span style="color:${series.color}">${series.name}</span>`)
+    .join("");
 }
 
 async function loadYearlyCardData() {
@@ -1167,6 +1223,7 @@ function renderCalendar() {
         lines.map((line) => `<div>${line}</div>`).join("");
     });
   });
+  syncSquareChartHeight();
 }
 
 function renderCards() {
@@ -1486,6 +1543,7 @@ window.onDateChange = async () => {
 dom.yearSelect.addEventListener("change", window.onDateChange);
 dom.monthSelect.addEventListener("change", window.onDateChange);
 window.onDateChange();
+window.addEventListener("resize", syncSquareChartHeight);
 </script>
 </body>
 </html>
