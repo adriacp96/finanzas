@@ -367,6 +367,7 @@
                 <div class="hidden sm:flex items-center gap-4 text-xs font-bold text-slate-400">
                     <span class="flex items-center gap-1"><div class="w-3 h-3 rounded-full bg-indigo-500"></div> Real</span>
                     <span class="flex items-center gap-1"><div class="w-3 h-3 rounded-full bg-amber-400 border-2 border-slate-800"></div> Proyección</span>
+                    <span class="flex items-center gap-1"><div class="w-4 border-t-2 border-dashed border-slate-400"></div> Media</span>
                 </div>
             </div>
             
@@ -573,7 +574,7 @@
                 document.getElementById('textoBotonGuardar').innerText = "Guardar Proyección en Supabase";
                 document.getElementById('desgloseSimulacion').classList.remove('hidden');
             } else {
-                document.getElementById('btnModoReal').className = "flex-1 sm:w-48 py-3 text-sm font-black bg-emerald-500/20 text-emerald-400 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2";
+                document.getElementById('btnModoReal').className = "flex-1 sm:w-48 py-3 text-sm font-black bg-teal-500/20 text-teal-400 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2";
                 document.getElementById('btnModoSim').className = "flex-1 sm:w-48 py-3 text-sm font-black text-slate-400 hover:text-slate-200 rounded-xl transition-all flex items-center justify-center gap-2";
                 
                 document.getElementById('panelSimulacion').classList.add('hidden');
@@ -585,7 +586,7 @@
                 document.getElementById('tituloIngresos').innerText = "Ingreso Real";
                 
                 document.getElementById('tipoRegistroBadge').innerHTML = `<i class="fa-solid fa-money-check-dollar"></i> DATO REAL`;
-                document.getElementById('tipoRegistroBadge').className = "bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-extrabold px-3.5 py-1.5 rounded-lg uppercase tracking-wider inline-flex items-center gap-2";
+                document.getElementById('tipoRegistroBadge').className = "bg-teal-500/20 border border-teal-500/30 text-teal-400 text-xs font-extrabold px-3.5 py-1.5 rounded-lg uppercase tracking-wider inline-flex items-center gap-2";
                 document.getElementById('textoBotonGuardar').innerText = "Guardar Dato Real en Supabase";
                 document.getElementById('desgloseSimulacion').classList.add('hidden');
             }
@@ -796,6 +797,10 @@
             const values = combinedData.map(d => d.valor);
             const pointColors = combinedData.map(d => d.tipo === 'Proyección' ? '#fbbf24' : '#ffffff');
 
+            const total = values.reduce((acc, val) => acc + val, 0);
+            const media = values.length > 0 ? total / values.length : 0;
+            const averageData = Array(labels.length).fill(media);
+
             const ctx = document.getElementById('incomeHistoryChart').getContext('2d');
             const gradient = ctx.createLinearGradient(0, 0, 0, 350);
             gradient.addColorStop(0, 'rgba(99, 102, 241, 0.4)');
@@ -806,15 +811,63 @@
                 type: 'line',
                 data: {
                     labels: labels,
-                    datasets: [{
-                        label: 'Ingreso Neto (AED)', data: values, borderColor: '#6366f1', borderWidth: 3, backgroundColor: gradient,
-                        fill: true, tension: 0.4, pointBackgroundColor: pointColors, pointBorderColor: '#6366f1', pointBorderWidth: 2, pointRadius: 4, pointHoverRadius: 6
-                    }]
+                    datasets: [
+                        {
+                            label: 'Ingreso Neto (AED)', 
+                            data: values, 
+                            borderColor: '#6366f1', 
+                            borderWidth: 3, 
+                            backgroundColor: gradient,
+                            fill: true, 
+                            tension: 0.4, 
+                            pointBackgroundColor: pointColors, 
+                            pointBorderColor: '#6366f1', 
+                            pointBorderWidth: 2, 
+                            pointRadius: 4, 
+                            pointHoverRadius: 6,
+                            order: 2
+                        },
+                        {
+                            label: 'Media Histórica',
+                            data: averageData,
+                            borderColor: '#94a3b8',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            fill: false,
+                            pointRadius: 0,
+                            pointHoverRadius: 0,
+                            order: 1
+                        }
+                    ]
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false }, tooltip: { backgroundColor: '#0f172a', padding: 12, titleFont: { size: 13 }, bodyFont: { size: 14, weight: 'bold' }, callbacks: { label: function(context) { return ` ${combinedData[context.dataIndex].tipo}: ${context.raw.toLocaleString()} AED`; } } } },
-                    scales: { y: { beginAtZero: true, grid: { color: '#1e293b', drawBorder: false }, ticks: { color: '#94a3b8', font: { size: 11, weight: 'bold' }, callback: function(value) { return value / 1000 + 'k'; } } }, x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10, weight: 'bold' }, maxTicksLimit: 12 } } },
+                    plugins: { 
+                        legend: { display: false }, 
+                        tooltip: { 
+                            backgroundColor: '#0f172a', 
+                            padding: 12, 
+                            titleFont: { size: 13 }, 
+                            bodyFont: { size: 14, weight: 'bold' }, 
+                            callbacks: { 
+                                label: function(context) { 
+                                    if (context.datasetIndex === 1) return ` Media: ${Math.floor(context.raw).toLocaleString()} AED`;
+                                    return ` ${combinedData[context.dataIndex].tipo}: ${context.raw.toLocaleString()} AED`; 
+                                } 
+                            } 
+                        } 
+                    },
+                    scales: { 
+                        y: { 
+                            beginAtZero: true, 
+                            grid: { color: '#1e293b', drawBorder: false }, 
+                            ticks: { color: '#94a3b8', font: { size: 11, weight: 'bold' }, callback: function(value) { return value / 1000 + 'k'; } } 
+                        }, 
+                        x: { 
+                            grid: { display: false }, 
+                            ticks: { color: '#94a3b8', font: { size: 10, weight: 'bold' }, maxTicksLimit: 12 } 
+                        } 
+                    },
                     interaction: { mode: 'index', intersect: false }
                 }
             });
