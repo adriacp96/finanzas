@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #0f172a; } /* slate-900 */
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; } 
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
@@ -18,25 +18,25 @@
         input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none; height: 26px; width: 26px; border-radius: 50%;
             background: #ffffff; cursor: pointer; margin-top: -9px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 0 0 4px rgba(79, 70, 229, 0.15);
-            border: 3px solid #4f46e5; transition: transform 0.1s;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 0 0 4px rgba(99, 102, 241, 0.3);
+            border: 3px solid #6366f1; transition: transform 0.1s;
         }
         input[type=range]::-webkit-slider-thumb:active { transform: scale(1.1); }
         input[type=range]::-webkit-slider-runnable-track {
-            width: 100%; height: 8px; cursor: pointer; background: #e2e8f0;
+            width: 100%; height: 8px; cursor: pointer; background: #334155;
             border-radius: 999px; border: none;
         }
         input[type=range]:focus { outline: none; }
         
         .glass-card {
-            background: rgba(255, 255, 255, 0.85);
+            background: rgba(30, 41, 59, 0.6);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
         }
     </style>
 </head>
-<body class="text-slate-800 antialiased selection:bg-indigo-100 selection:text-indigo-900">
+<body class="text-slate-300 antialiased selection:bg-indigo-500/30 selection:text-indigo-200">
 
     <!-- FONDO FIJO GLOBAL -->
     <div class="fixed top-0 left-0 w-full h-full z-0 pointer-events-none overflow-hidden">
@@ -45,7 +45,7 @@
         <div class="absolute bottom-10 right-1/4 w-80 h-80 bg-indigo-500 rounded-full mix-blend-screen filter blur-[100px] opacity-20"></div>
     </div>
 
-    <!-- HEADER / HERO SECTION (ahora sin fondo propio para aprovechar el global) -->
+    <!-- HEADER / HERO SECTION -->
     <div class="text-white pb-32 pt-8 px-4 relative z-10">
         <div class="max-w-7xl mx-auto relative z-10">
             <header class="flex justify-between items-center mb-12">
@@ -67,20 +67,20 @@
 
             <!-- Global KPIs -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-                <div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/10 shadow-inner hover:bg-white/15 transition duration-300">
-                    <p class="text-indigo-200 text-xs uppercase font-extrabold tracking-widest mb-1.5 flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Deuda Total</p>
+                <div class="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/10 shadow-inner hover:bg-white/10 transition duration-300">
+                    <p class="text-indigo-300 text-xs uppercase font-extrabold tracking-widest mb-1.5 flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Deuda Total</p>
                     <p class="text-3xl font-black text-white" id="kpiTotalDebt">--- AED</p>
                 </div>
-                <div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/10 shadow-inner hover:bg-white/15 transition duration-300">
-                    <p class="text-emerald-300 text-xs uppercase font-extrabold tracking-widest mb-1.5 flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg> Libertad Est.</p>
+                <div class="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/10 shadow-inner hover:bg-white/10 transition duration-300">
+                    <p class="text-emerald-400 text-xs uppercase font-extrabold tracking-widest mb-1.5 flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg> Libertad Est.</p>
                     <p class="text-3xl font-black text-emerald-400" id="kpiMonthsFree">--- Meses</p>
                 </div>
-                <div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/10 shadow-inner hover:bg-white/15 transition duration-300">
-                    <p class="text-slate-300 text-xs uppercase font-extrabold tracking-widest mb-1.5 flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Fijo Neto</p>
+                <div class="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/10 shadow-inner hover:bg-white/10 transition duration-300">
+                    <p class="text-slate-400 text-xs uppercase font-extrabold tracking-widest mb-1.5 flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Fijo Neto</p>
                     <p class="text-3xl font-black text-white">11,165 AED</p>
                 </div>
-                <div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/10 shadow-inner cursor-help group relative hover:bg-white/15 transition duration-300">
-                    <p class="text-slate-300 text-xs uppercase font-extrabold tracking-widest mb-1.5 flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg> Costes Fijos</p>
+                <div class="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/10 shadow-inner cursor-help group relative hover:bg-white/10 transition duration-300">
+                    <p class="text-slate-400 text-xs uppercase font-extrabold tracking-widest mb-1.5 flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg> Costes Fijos</p>
                     <p class="text-3xl font-black text-white group-hover:text-indigo-300 transition" id="kpiCostesFijos">8,721 AED</p>
                     <div class="absolute bottom-full right-0 mb-3 w-64 bg-slate-900 border border-slate-700 text-white text-xs rounded-xl p-4 shadow-2xl opacity-0 group-hover:opacity-100 transition-all pointer-events-none z-50">
                         <p class="text-slate-400 font-bold uppercase tracking-widest mb-3 border-b border-slate-700 pb-2">Desglose Fijos Obligatorios</p>
@@ -100,11 +100,11 @@
 
         <!-- TOGGLE MODO -->
         <div class="flex justify-center -mt-6 mb-2">
-            <div class="bg-white p-1 rounded-2xl shadow-xl border border-slate-100 inline-flex w-full sm:w-auto">
-                <button id="btnModoSim" onclick="setModo('simulacion')" class="flex-1 sm:w-48 py-3 text-sm font-black bg-indigo-50 text-indigo-700 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2">
+            <div class="bg-slate-800/80 p-1 rounded-2xl shadow-xl border border-slate-700 inline-flex w-full sm:w-auto backdrop-blur-md">
+                <button id="btnModoSim" onclick="setModo('simulacion')" class="flex-1 sm:w-48 py-3 text-sm font-black bg-indigo-500/20 text-indigo-400 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2">
                     <i class="fa-solid fa-hat-wizard"></i> Proyección
                 </button>
-                <button id="btnModoReal" onclick="setModo('real')" class="flex-1 sm:w-48 py-3 text-sm font-black text-slate-400 hover:text-slate-700 rounded-xl transition-all flex items-center justify-center gap-2">
+                <button id="btnModoReal" onclick="setModo('real')" class="flex-1 sm:w-48 py-3 text-sm font-black text-slate-400 hover:text-slate-200 rounded-xl transition-all flex items-center justify-center gap-2">
                     <i class="fa-solid fa-money-check-dollar"></i> Dato Real
                 </button>
             </div>
@@ -114,26 +114,26 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             
             <!-- PASO 1: INGRESOS -->
-            <div class="glass-card rounded-3xl p-8 border border-white relative z-10">
+            <div class="glass-card rounded-3xl p-8 z-10 relative">
                 <div class="flex items-center justify-between mb-8">
                     <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center font-black">1</div>
-                        <h2 class="text-xl font-black text-slate-800 tracking-tight" id="tituloIngresos">Simulador de Ingresos</h2>
+                        <div class="w-8 h-8 rounded-lg bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 flex items-center justify-center font-black">1</div>
+                        <h2 class="text-xl font-black text-white tracking-tight" id="tituloIngresos">Simulador de Ingresos</h2>
                     </div>
                 </div>
 
                 <!-- MODO SIMULACIÓN -->
                 <div id="panelSimulacion">
-                    <div class="mb-10 bg-slate-50 p-6 rounded-2xl border border-slate-100 shadow-inner">
+                    <div class="mb-10 bg-slate-800/50 p-6 rounded-2xl border border-slate-700 shadow-inner">
                         <div class="flex justify-between items-end mb-4">
                             <div>
-                                <label class="text-xs font-bold text-slate-500 uppercase tracking-widest">Horas de Vuelo (Block)</label>
-                                <p class="text-xs font-bold text-indigo-500 mt-1 bg-indigo-50 inline-block px-2 py-1 rounded">~68.32 AED/h</p>
+                                <label class="text-xs font-bold text-slate-400 uppercase tracking-widest">Horas de Vuelo (Block)</label>
+                                <p class="text-xs font-bold text-indigo-400 mt-1 bg-indigo-500/10 border border-indigo-500/20 inline-block px-2 py-1 rounded">~68.32 AED/h</p>
                             </div>
-                            <span id="sliderValue" class="text-4xl font-black text-indigo-600 tracking-tighter">80<span class="text-xl text-indigo-400">h</span></span>
+                            <span id="sliderValue" class="text-4xl font-black text-white tracking-tighter">80<span class="text-xl text-indigo-400">h</span></span>
                         </div>
                         <input type="range" id="blockHoursSlider" min="0" max="130" value="80" oninput="actualizarSlider()" class="mt-2">
-                        <div class="flex justify-between text-[10px] uppercase font-extrabold text-slate-400 mt-3 tracking-wider">
+                        <div class="flex justify-between text-[10px] uppercase font-extrabold text-slate-500 mt-3 tracking-wider">
                             <span>0h</span>
                             <span>Normal (80h)</span>
                             <span>Overtime (130h)</span>
@@ -141,18 +141,18 @@
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
-                        <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 transition-all">
+                        <div class="bg-slate-800/50 p-5 rounded-2xl border border-slate-700 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 transition-all">
                             <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Dietas (Meal)</label>
                             <div class="flex items-center">
-                                <span class="text-slate-400 font-bold mr-2 text-sm">AED</span>
-                                <input type="number" id="mealAllowance" value="1500" oninput="calcularTodo()" class="w-full bg-transparent text-2xl font-black text-slate-800 focus:outline-none placeholder-slate-300">
+                                <span class="text-slate-500 font-bold mr-2 text-sm">AED</span>
+                                <input type="number" id="mealAllowance" value="1500" oninput="calcularTodo()" class="w-full bg-transparent text-2xl font-black text-white focus:outline-none placeholder-slate-600">
                             </div>
                         </div>
-                        <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 transition-all">
+                        <div class="bg-slate-800/50 p-5 rounded-2xl border border-slate-700 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 transition-all">
                             <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Turnarounds</label>
                             <div class="flex items-center">
-                                <span class="text-slate-400 font-bold mr-2 text-sm">AED</span>
-                                <input type="number" id="turnarounds" value="300" oninput="calcularTodo()" class="w-full bg-transparent text-2xl font-black text-slate-800 focus:outline-none placeholder-slate-300">
+                                <span class="text-slate-500 font-bold mr-2 text-sm">AED</span>
+                                <input type="number" id="turnarounds" value="300" oninput="calcularTodo()" class="w-full bg-transparent text-2xl font-black text-white focus:outline-none placeholder-slate-600">
                             </div>
                         </div>
                     </div>
@@ -160,38 +160,35 @@
 
                 <!-- MODO REAL -->
                 <div id="panelReal" class="hidden">
-                    <div class="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-8 text-center mt-4">
-                        <label class="block text-xs font-black text-emerald-600 uppercase tracking-widest mb-4">Introduce tu nómina final exacta</label>
+                    <div class="bg-emerald-900/20 border-2 border-emerald-800/50 rounded-2xl p-8 text-center mt-4">
+                        <label class="block text-xs font-black text-emerald-500 uppercase tracking-widest mb-4">Introduce tu nómina final exacta</label>
                         <div class="flex items-center justify-center gap-2">
                             <span class="text-emerald-500 font-bold text-2xl">AED</span>
-                            <input type="number" id="salarioRealInput" oninput="calcularTodo()" class="bg-transparent text-5xl font-black text-slate-800 focus:outline-none w-2/3 text-center border-b-2 border-emerald-300 pb-2" placeholder="0.00">
+                            <input type="number" id="salarioRealInput" oninput="calcularTodo()" class="bg-transparent text-5xl font-black text-white focus:outline-none w-2/3 text-center border-b-2 border-emerald-700 pb-2" placeholder="0.00">
                         </div>
-                        <p class="text-xs font-semibold text-slate-500 mt-6">Este valor anulará la base fija y las horas de vuelo. Se tomará como el ingreso neto total del mes.</p>
+                        <p class="text-xs font-semibold text-slate-400 mt-6">Este valor anulará la base fija y las horas de vuelo. Se tomará como el ingreso neto total del mes.</p>
                     </div>
                 </div>
             </div>
 
             <!-- PASO 2: GASTOS DINÁMICOS -->
-            <div class="bg-slate-900 rounded-3xl p-8 shadow-xl relative overflow-hidden border border-slate-800 z-10">
-                <div class="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -mr-20 -mt-20 blur-3xl pointer-events-none"></div>
-
+            <div class="glass-card rounded-3xl p-8 relative overflow-hidden z-10">
                 <div class="relative z-10 h-full flex flex-col justify-between">
                     <div>
                         <div class="flex items-center gap-3 mb-8">
-                            <div class="w-8 h-8 rounded-lg bg-yellow-400/20 text-yellow-400 border border-yellow-400/30 flex items-center justify-center font-black">2</div>
+                            <div class="w-8 h-8 rounded-lg bg-yellow-500/20 border border-yellow-500/30 text-yellow-400 flex items-center justify-center font-black">2</div>
                             <h2 class="text-xl font-black text-white tracking-tight">Gastos Dinámicos</h2>
                         </div>
                         
                         <!-- EMAAR CARD -->
-                        <div class="mb-6 bg-gradient-to-r from-slate-800 to-slate-800/40 p-6 rounded-2xl border border-slate-700/50 relative overflow-hidden">
-                            <!-- Imagen integrada con sus dimensiones originales -->
+                        <div class="mb-6 bg-slate-800/50 p-6 rounded-2xl border border-slate-700 relative overflow-hidden">
                             <img src="emaar-family_card.png" alt="Emaar Card" class="absolute -right-16 sm:-right-8 top-1/2 transform -translate-y-1/2 w-64 sm:w-72 object-contain drop-shadow-2xl pointer-events-none opacity-80 sm:opacity-100 -rotate-12 mix-blend-lighten" style="aspect-ratio: 880/552;">
                             
                             <div class="relative z-10 w-3/4 sm:w-2/3">
                                 <label class="block text-xs font-bold text-yellow-400 uppercase tracking-widest mb-3">Tarjeta Emaar</label>
                                 <div class="flex items-center border-b-2 border-slate-600 focus-within:border-yellow-400 transition-colors pb-2">
-                                    <span class="text-slate-400 font-bold mr-3 text-2xl">AED</span>
-                                    <input type="number" id="gastoEmaar" value="2000" oninput="actualizarGastos()" class="w-full bg-transparent text-4xl font-black text-white focus:outline-none placeholder-slate-700" placeholder="0">
+                                    <span class="text-slate-500 font-bold mr-3 text-2xl">AED</span>
+                                    <input type="number" id="gastoEmaar" value="2000" oninput="actualizarGastos()" class="w-full bg-transparent text-4xl font-black text-white focus:outline-none placeholder-slate-600" placeholder="0">
                                 </div>
                                 <p class="text-[10px] text-slate-400 mt-2 font-medium">Saldo a liquidar para evitar intereses.</p>
                             </div>
@@ -199,22 +196,22 @@
 
                         <!-- DEWA CALCULATOR -->
                         <!-- Simulación DEWA -->
-                        <div id="dewaSimulacionPanel" class="bg-cyan-900/40 p-5 rounded-2xl border border-cyan-800/50 backdrop-blur-sm">
+                        <div id="dewaSimulacionPanel" class="bg-cyan-900/20 p-5 rounded-2xl border border-cyan-800/50">
                             <label class="block text-xs font-bold text-cyan-400 uppercase tracking-widest mb-3">DEWA (Proyección)</label>
-                            <div class="flex justify-between items-center mb-2 text-xs text-slate-300">
+                            <div class="flex justify-between items-center mb-2 text-xs text-slate-400">
                                 <span>Housing + Sewerage (Fijos)</span>
-                                <span class="font-bold">~236 AED</span>
+                                <span class="font-bold text-slate-300">~236 AED</span>
                             </div>
-                            <div class="flex justify-between items-center text-xs text-slate-300 mb-2">
+                            <div class="flex justify-between items-center text-xs text-slate-400 mb-2">
                                 <span>Luz (kWh)</span>
                                 <div class="flex items-center gap-1">
-                                    <input type="number" id="dewaKwh" value="385" oninput="actualizarGastos()" class="w-20 bg-slate-800/80 border border-slate-600 rounded-lg text-right p-1.5 font-bold text-white focus:outline-none focus:border-cyan-400">
+                                    <input type="number" id="dewaKwh" value="385" oninput="actualizarGastos()" class="w-20 bg-slate-900/80 border border-slate-700 rounded-lg text-right p-1.5 font-bold text-white focus:outline-none focus:border-cyan-400">
                                 </div>
                             </div>
-                            <div class="flex justify-between items-center text-xs text-slate-300 mb-4">
+                            <div class="flex justify-between items-center text-xs text-slate-400 mb-4">
                                 <span>Agua (m³)</span>
                                 <div class="flex items-center gap-1">
-                                    <input type="number" id="dewaM3" value="2.3" step="0.1" oninput="actualizarGastos()" class="w-20 bg-slate-800/80 border border-slate-600 rounded-lg text-right p-1.5 font-bold text-white focus:outline-none focus:border-cyan-400">
+                                    <input type="number" id="dewaM3" value="2.3" step="0.1" oninput="actualizarGastos()" class="w-20 bg-slate-900/80 border border-slate-700 rounded-lg text-right p-1.5 font-bold text-white focus:outline-none focus:border-cyan-400">
                                 </div>
                             </div>
                             <div class="border-t border-cyan-800/50 pt-3 flex justify-between items-center">
@@ -224,10 +221,10 @@
                         </div>
 
                         <!-- Real DEWA -->
-                        <div id="dewaRealPanel" class="hidden bg-cyan-900/40 p-5 rounded-2xl border border-cyan-800/50 backdrop-blur-sm">
+                        <div id="dewaRealPanel" class="hidden bg-cyan-900/20 p-5 rounded-2xl border border-cyan-800/50">
                             <label class="block text-xs font-bold text-cyan-400 uppercase tracking-widest mb-3">Factura DEWA (Dato Real)</label>
                             <div class="flex items-center border-b-2 border-slate-600 focus-within:border-cyan-400 transition-colors pb-2">
-                                <span class="text-slate-400 font-bold mr-3 text-2xl">AED</span>
+                                <span class="text-slate-500 font-bold mr-3 text-2xl">AED</span>
                                 <input type="number" id="dewaRealInput" placeholder="381.58" oninput="actualizarGastos()" class="w-full bg-transparent text-4xl font-black text-white focus:outline-none placeholder-slate-600">
                             </div>
                             <p class="text-[10px] text-slate-400 mt-2 font-medium">Introduce el importe final de la factura (incluye Housing).</p>
@@ -239,14 +236,14 @@
         </div>
 
         <!-- FILA 2: BALANCE Y ESTRATEGIA -->
-        <div class="glass-card rounded-[2.5rem] p-8 sm:p-10 border border-white shadow-xl relative overflow-hidden bg-white/95 z-10">
+        <div class="glass-card rounded-[2.5rem] p-8 sm:p-10 relative overflow-hidden z-10">
             
-            <div class="flex items-center justify-between mb-10 border-b border-slate-100 pb-6">
+            <div class="flex items-center justify-between mb-10 border-b border-slate-700 pb-6">
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center font-black">3</div>
-                    <h2 class="text-2xl font-black text-slate-900 tracking-tight">Estrategia de Excedente</h2>
+                    <div class="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center font-black">3</div>
+                    <h2 class="text-2xl font-black text-white tracking-tight">Estrategia de Excedente</h2>
                 </div>
-                <span id="tipoRegistroBadge" class="bg-indigo-100 text-indigo-600 text-xs font-extrabold px-3.5 py-1.5 rounded-lg uppercase tracking-wider inline-flex items-center gap-2"><i class="fa-solid fa-hat-wizard"></i> PROYECCIÓN</span>
+                <span id="tipoRegistroBadge" class="bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 text-xs font-extrabold px-3.5 py-1.5 rounded-lg uppercase tracking-wider inline-flex items-center gap-2"><i class="fa-solid fa-hat-wizard"></i> PROYECCIÓN</span>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
@@ -255,34 +252,34 @@
                 <div class="lg:col-span-4 space-y-6">
                     <div>
                         <p class="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-1">Total Ingresos Netos</p>
-                        <h3 class="text-4xl font-black text-emerald-500 tracking-tighter val-salario">18,430 AED</h3>
+                        <h3 class="text-4xl font-black text-emerald-400 tracking-tighter val-salario">18,430 AED</h3>
                     </div>
                     
                     <div id="desgloseSimulacion" class="space-y-1 mt-2">
-                        <div class="flex justify-between text-xs text-slate-500 font-medium"><span>Base Fija:</span><span>11,165 AED</span></div>
-                        <div class="flex justify-between text-xs text-slate-500 font-medium"><span>Vuelos:</span><span id="pagoVueloDisplay">5,465 AED</span></div>
-                        <div class="flex justify-between text-xs text-slate-500 font-medium"><span>Variables:</span><span id="dietasDisplay">1,800 AED</span></div>
+                        <div class="flex justify-between text-xs text-slate-400 font-medium"><span>Base Fija:</span><span class="text-slate-200">11,165 AED</span></div>
+                        <div class="flex justify-between text-xs text-slate-400 font-medium"><span>Vuelos:</span><span id="pagoVueloDisplay" class="text-slate-200">5,465 AED</span></div>
+                        <div class="flex justify-between text-xs text-slate-400 font-medium"><span>Variables:</span><span id="dietasDisplay" class="text-slate-200">1,800 AED</span></div>
                     </div>
                     
-                    <div class="h-px w-full bg-slate-200 my-4"></div>
+                    <div class="h-px w-full bg-slate-700 my-4"></div>
                     
                     <div>
                         <p class="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-2">Obligaciones a Pagar</p>
                         <div class="space-y-3">
-                            <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                <span class="text-sm font-semibold text-slate-600">Costes Fijos (Casa/Coche/DEWA)</span>
-                                <span class="font-black text-slate-800" id="resumenFijos">-8,721 AED</span>
+                            <div class="flex justify-between items-center bg-slate-800/50 p-3 rounded-xl border border-slate-700">
+                                <span class="text-sm font-semibold text-slate-300">Costes Fijos</span>
+                                <span class="font-black text-white" id="resumenFijos">-8,721 AED</span>
                             </div>
-                            <div class="flex justify-between items-center bg-yellow-50 p-3 rounded-xl border border-yellow-100">
-                                <span class="text-sm font-semibold text-yellow-700">Tarjeta Emaar</span>
-                                <span class="font-black text-yellow-700 val-emaar">-2,000 AED</span>
+                            <div class="flex justify-between items-center bg-yellow-900/20 p-3 rounded-xl border border-yellow-800/50">
+                                <span class="text-sm font-semibold text-yellow-400">Tarjeta Emaar</span>
+                                <span class="font-black text-yellow-400 val-emaar">-2,000 AED</span>
                             </div>
                         </div>
                     </div>
                     
                     <div class="pt-2">
                         <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Línea de Vida Total</p>
-                        <p class="text-xl font-black text-slate-800 val-base">10,721 AED</p>
+                        <p class="text-xl font-black text-white val-base">10,721 AED</p>
                     </div>
                 </div>
 
@@ -293,13 +290,13 @@
                         <!-- Texto central del gráfico -->
                         <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-2">
                             <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Excedente Libre</span>
-                            <span class="text-2xl font-black text-emerald-500 mt-0.5 val-excedente">7,709 AED</span>
+                            <span class="text-2xl font-black text-emerald-400 mt-0.5 val-excedente">7,709 AED</span>
                         </div>
                     </div>
-                    <div id="sinExcedente" class="hidden absolute inset-0 flex items-center justify-center bg-white/90 backdrop-blur-sm rounded-full">
+                    <div id="sinExcedente" class="hidden absolute inset-0 flex items-center justify-center bg-slate-900/90 backdrop-blur-sm rounded-full">
                         <div class="text-center px-4">
                             <p class="text-amber-500 text-3xl mb-2">⚠️</p>
-                            <p class="text-sm font-bold text-amber-600">Sin Excedente</p>
+                            <p class="text-sm font-bold text-amber-500">Sin Excedente</p>
                         </div>
                     </div>
                 </div>
@@ -308,25 +305,25 @@
                 <div class="lg:col-span-4 space-y-5" id="panelExcedente">
                     <p class="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-1 text-center lg:text-left">Distribución (70/30)</p>
                     
-                    <div class="bg-white border-2 border-rose-100 p-5 rounded-2xl shadow-sm relative overflow-hidden">
+                    <div class="bg-slate-800/50 border border-rose-900/50 p-5 rounded-2xl shadow-sm relative overflow-hidden">
                         <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-rose-500"></div>
-                        <p class="text-[10px] font-extrabold text-rose-500 uppercase tracking-widest mb-1">Ataque Extra a Deuda (70%)</p>
-                        <p class="text-3xl font-black text-rose-600 tracking-tight val-deuda">5,396 AED</p>
-                        <p class="text-[10px] font-semibold text-slate-500 mt-2">Súmalo a la cuota mensual de Supabase.</p>
+                        <p class="text-[10px] font-extrabold text-rose-400 uppercase tracking-widest mb-1">Ataque Extra a Deuda (70%)</p>
+                        <p class="text-3xl font-black text-rose-500 tracking-tight val-deuda">5,396 AED</p>
+                        <p class="text-[10px] font-semibold text-slate-400 mt-2">Súmalo a la cuota mensual de Supabase.</p>
                     </div>
                     
-                    <div class="bg-white border-2 border-blue-100 p-5 rounded-2xl shadow-sm relative overflow-hidden">
+                    <div class="bg-slate-800/50 border border-blue-900/50 p-5 rounded-2xl shadow-sm relative overflow-hidden">
                         <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-500"></div>
-                        <p class="text-[10px] font-extrabold text-blue-500 uppercase tracking-widest mb-1">Fondo de Emergencia (30%)</p>
-                        <p class="text-3xl font-black text-blue-600 tracking-tight val-fondo">2,313 AED</p>
-                        <p class="text-[10px] font-semibold text-slate-500 mt-2">Guárdalo para meses de vacaciones o reservas.</p>
+                        <p class="text-[10px] font-extrabold text-blue-400 uppercase tracking-widest mb-1">Fondo de Emergencia (30%)</p>
+                        <p class="text-3xl font-black text-blue-500 tracking-tight val-fondo">2,313 AED</p>
+                        <p class="text-[10px] font-semibold text-slate-400 mt-2">Guárdalo para meses de vacaciones o reservas.</p>
                     </div>
                 </div>
             </div>
 
             <!-- Botón Guardar -->
-            <div class="mt-12 pt-8 border-t border-slate-100 flex flex-col items-center">
-                <button onclick="guardarMes()" class="w-full sm:w-auto bg-slate-900 text-white py-4 px-12 rounded-2xl font-black text-lg shadow-2xl shadow-slate-900/30 hover:bg-slate-800 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3 group">
+            <div class="mt-12 pt-8 border-t border-slate-700 flex flex-col items-center">
+                <button onclick="guardarMes()" class="w-full sm:w-auto bg-indigo-600 text-white py-4 px-12 rounded-2xl font-black text-lg shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3 group">
                     <span id="textoBotonGuardar">Guardar Proyección en Supabase</span>
                     <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                 </button>
@@ -335,18 +332,18 @@
         </div>
 
         <!-- FILA 3: HISTÓRICO DE INGRESOS -->
-        <div class="glass-card rounded-[2.5rem] p-8 sm:p-10 border border-white shadow-xl relative overflow-hidden bg-white/95 z-10">
-            <div class="flex justify-between items-end mb-8 border-b border-slate-100 pb-6">
+        <div class="glass-card rounded-[2.5rem] p-8 sm:p-10 relative overflow-hidden z-10">
+            <div class="flex justify-between items-end mb-8 border-b border-slate-700 pb-6">
                 <div>
-                    <h2 class="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-                        <svg class="w-6 h-6 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
+                    <h2 class="text-2xl font-black text-white tracking-tight flex items-center gap-3">
+                        <svg class="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
                         Evolución de Ingresos
                     </h2>
-                    <p class="text-sm font-semibold text-slate-500 mt-2">Nóminas Reales + Proyecciones de Supabase</p>
+                    <p class="text-sm font-semibold text-slate-400 mt-2">Nóminas Reales + Proyecciones de Supabase</p>
                 </div>
                 <div class="hidden sm:flex items-center gap-4 text-xs font-bold text-slate-400">
                     <span class="flex items-center gap-1"><div class="w-3 h-3 rounded-full bg-indigo-500"></div> Real</span>
-                    <span class="flex items-center gap-1"><div class="w-3 h-3 rounded-full bg-amber-400 border-2 border-white"></div> Proyección</span>
+                    <span class="flex items-center gap-1"><div class="w-3 h-3 rounded-full bg-amber-400 border-2 border-slate-800"></div> Proyección</span>
                 </div>
             </div>
             
@@ -365,7 +362,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
                 
                 <!-- Vehículo Dinámico -->
-                <div class="lg:col-span-1 bg-gradient-to-b from-slate-900 to-black rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden border border-slate-800 h-full flex flex-col justify-between min-h-[380px]">
+                <div class="lg:col-span-1 glass-card rounded-[2.5rem] p-8 relative overflow-hidden h-full flex flex-col justify-between min-h-[380px]">
                     <div class="absolute top-0 right-0 w-64 h-64 bg-emerald-500 opacity-20 rounded-full -mr-20 -mt-20 blur-[60px] pointer-events-none"></div>
                     <div class="relative z-10">
                         <div class="flex justify-between items-start mb-4">
@@ -379,10 +376,10 @@
                                 <p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-1">Lo que queda</p>
                                 <p id="carWidgetSaldo" class="text-3xl font-black text-white">--- AED</p>
                             </div>
-                            <div class="flex justify-between items-end border-t border-slate-800 pt-4">
+                            <div class="flex justify-between items-end border-t border-slate-700 pt-4">
                                 <div>
-                                    <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest mb-1">Cuota Fija</p>
-                                    <p class="text-lg font-black text-slate-300">1,741.67 AED</p>
+                                    <p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-1">Cuota Fija</p>
+                                    <p class="text-lg font-black text-slate-200">1,741.67 AED</p>
                                 </div>
                                 <span id="carWidgetMeses" class="text-xs font-bold text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded-md">---</span>
                             </div>
@@ -392,7 +389,7 @@
                 </div>
 
                 <!-- Tarjetas Supabase -->
-                <div class="lg:col-span-2 glass-card rounded-[2.5rem] p-8 shadow-sm h-full border border-white">
+                <div class="lg:col-span-2 glass-card rounded-[2.5rem] p-8 h-full">
                     <div class="flex justify-between items-end mb-8">
                         <p class="text-xs font-extrabold text-slate-400 uppercase tracking-widest">Base de Datos en Tiempo Real</p>
                     </div>
@@ -418,7 +415,7 @@
         const COSTES_FIJOS_BASE = 8320.67; 
 
         let gastoVariableEmaar = 2000.00;
-        let gastoDewa = 382.00; // Valor inicial calculado en base a inputs default
+        let gastoDewa = 382.00; 
         let lineaBaseDinamica = COSTES_FIJOS_BASE + gastoVariableEmaar + gastoDewa;
         let salarioEstimadoCalculado = 0;
         let excedente = 0, pagoDeuda = 0, fondoEmergencia = 0, deudaTotal = 0;
@@ -455,8 +452,8 @@
         function setModo(modo) {
             modoActual = modo;
             if (modo === 'simulacion') {
-                document.getElementById('btnModoSim').className = "flex-1 sm:w-48 py-3 text-sm font-black bg-indigo-50 text-indigo-700 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2";
-                document.getElementById('btnModoReal').className = "flex-1 sm:w-48 py-3 text-sm font-black text-slate-400 hover:text-slate-700 rounded-xl transition-all flex items-center justify-center gap-2";
+                document.getElementById('btnModoSim').className = "flex-1 sm:w-48 py-3 text-sm font-black bg-indigo-500/20 text-indigo-400 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2";
+                document.getElementById('btnModoReal').className = "flex-1 sm:w-48 py-3 text-sm font-black text-slate-400 hover:text-slate-200 rounded-xl transition-all flex items-center justify-center gap-2";
                 
                 document.getElementById('panelSimulacion').classList.remove('hidden');
                 document.getElementById('panelReal').classList.add('hidden');
@@ -467,12 +464,12 @@
                 document.getElementById('tituloIngresos').innerText = "Simulador de Ingresos";
                 
                 document.getElementById('tipoRegistroBadge').innerHTML = `<i class="fa-solid fa-hat-wizard"></i> PROYECCIÓN`;
-                document.getElementById('tipoRegistroBadge').className = "bg-indigo-100 text-indigo-600 text-xs font-extrabold px-3.5 py-1.5 rounded-lg uppercase tracking-wider inline-flex items-center gap-2";
+                document.getElementById('tipoRegistroBadge').className = "bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 text-xs font-extrabold px-3.5 py-1.5 rounded-lg uppercase tracking-wider inline-flex items-center gap-2";
                 document.getElementById('textoBotonGuardar').innerText = "Guardar Proyección en Supabase";
                 document.getElementById('desgloseSimulacion').classList.remove('hidden');
             } else {
-                document.getElementById('btnModoReal').className = "flex-1 sm:w-48 py-3 text-sm font-black bg-emerald-50 text-emerald-700 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2";
-                document.getElementById('btnModoSim').className = "flex-1 sm:w-48 py-3 text-sm font-black text-slate-400 hover:text-slate-700 rounded-xl transition-all flex items-center justify-center gap-2";
+                document.getElementById('btnModoReal').className = "flex-1 sm:w-48 py-3 text-sm font-black bg-emerald-500/20 text-emerald-400 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2";
+                document.getElementById('btnModoSim').className = "flex-1 sm:w-48 py-3 text-sm font-black text-slate-400 hover:text-slate-200 rounded-xl transition-all flex items-center justify-center gap-2";
                 
                 document.getElementById('panelSimulacion').classList.add('hidden');
                 document.getElementById('panelReal').classList.remove('hidden');
@@ -483,7 +480,7 @@
                 document.getElementById('tituloIngresos').innerText = "Ingreso Real";
                 
                 document.getElementById('tipoRegistroBadge').innerHTML = `<i class="fa-solid fa-money-check-dollar"></i> DATO REAL`;
-                document.getElementById('tipoRegistroBadge').className = "bg-emerald-100 text-emerald-600 text-xs font-extrabold px-3.5 py-1.5 rounded-lg uppercase tracking-wider inline-flex items-center gap-2";
+                document.getElementById('tipoRegistroBadge').className = "bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-extrabold px-3.5 py-1.5 rounded-lg uppercase tracking-wider inline-flex items-center gap-2";
                 document.getElementById('textoBotonGuardar').innerText = "Guardar Dato Real en Supabase";
                 document.getElementById('desgloseSimulacion').classList.add('hidden');
             }
@@ -498,7 +495,7 @@
             const val = document.getElementById('blockHoursSlider').value;
             document.getElementById('sliderValue').innerHTML = `${val}<span class="text-xl text-indigo-400">h</span>`;
             const percentage = (val / 130) * 100;
-            document.getElementById('blockHoursSlider').style.background = `linear-gradient(to right, #4f46e5 0%, #4f46e5 ${percentage}%, #e2e8f0 ${percentage}%, #e2e8f0 100%)`;
+            document.getElementById('blockHoursSlider').style.background = `linear-gradient(to right, #6366f1 0%, #6366f1 ${percentage}%, #334155 ${percentage}%, #334155 100%)`;
             calcularTodo();
         }
 
@@ -593,7 +590,12 @@
                     type: 'doughnut',
                     data: {
                         labels: ['Costes + Tarjeta', 'Ataque Deuda', 'Fondo'],
-                        datasets: [{ data: [base, deuda, fondo], backgroundColor: ['#e2e8f0', '#f43f5e', '#3b82f6'], borderWidth: 0, hoverOffset: 5 }]
+                        datasets: [{ 
+                            data: [base, deuda, fondo], 
+                            backgroundColor: ['#334155', '#f43f5e', '#3b82f6'], 
+                            borderWidth: 0, 
+                            hoverOffset: 5 
+                        }]
                     },
                     options: { responsive: true, maintainAspectRatio: false, cutout: '80%', plugins: { legend: { display: false }, tooltip: { enabled: true } }, animation: { duration: 400, easing: 'easeOutQuart' } }
                 });
@@ -613,7 +615,7 @@
         async function cargarDeudas() {
             const { data, error } = await supabaseClient.from('deudas').select('*').order('id', { ascending: true });
             const container = document.getElementById('debtCardsContainer');
-            if (error) { container.innerHTML = `<div class="text-red-500 font-bold">Error: ${error.message}</div>`; return; }
+            if (error) { container.innerHTML = `<div class="text-rose-500 font-bold">Error: ${error.message}</div>`; return; }
 
             container.innerHTML = '';
             deudaTotal = 0;
@@ -637,24 +639,24 @@
                     const porcentaje = (saldo / maxDeuda) * 100;
                     const isCreditCard = deuda.nombre.toLowerCase().includes('tarjeta') || deuda.nombre.includes('2811');
                     const colorClass = isCreditCard ? 'bg-emerald-500' : 'bg-rose-500';
-                    const mesesTxt = cuota > 0 && saldo > 0 ? `<span class="text-indigo-500 font-black ml-1">(~${Math.ceil(saldo/cuota)} meses)</span>` : '';
+                    const mesesTxt = cuota > 0 && saldo > 0 ? `<span class="text-indigo-400 font-black ml-1">(~${Math.ceil(saldo/cuota)} meses)</span>` : '';
 
                     container.innerHTML += `
-                        <div class="bg-white border border-slate-100 p-6 rounded-3xl shadow-sm hover:shadow-lg transition-all duration-300 group flex flex-col justify-between">
+                        <div class="bg-slate-800/50 border border-slate-700 p-6 rounded-3xl shadow-sm hover:shadow-lg hover:shadow-slate-900/50 transition-all duration-300 group flex flex-col justify-between">
                             <div>
                                 <div class="flex justify-between items-start mb-4">
-                                    <h3 class="font-bold text-slate-800 leading-tight pr-2">${deuda.nombre}</h3>
-                                    <button onclick="actualizarSaldo(${deuda.id}, ${deuda.saldo})" class="text-[10px] uppercase font-bold tracking-wider text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 hover:text-indigo-800 transition">Editar</button>
+                                    <h3 class="font-bold text-white leading-tight pr-2">${deuda.nombre}</h3>
+                                    <button onclick="actualizarSaldo(${deuda.id}, ${deuda.saldo})" class="text-[10px] uppercase font-bold tracking-wider text-indigo-400 bg-indigo-500/20 px-3 py-1.5 rounded-lg hover:bg-indigo-500/40 transition">Editar</button>
                                 </div>
                                 <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Lo que queda</p>
-                                <p class="text-3xl font-black text-slate-900 tracking-tight mb-2">${saldo.toLocaleString('en-US', {minimumFractionDigits: 2})} <span class="text-sm font-bold text-slate-400">AED</span></p>
+                                <p class="text-3xl font-black text-white tracking-tight mb-2">${saldo.toLocaleString('en-US', {minimumFractionDigits: 2})} <span class="text-sm font-bold text-slate-500">AED</span></p>
                             </div>
                             <div class="mt-4">
                                 <div class="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
                                     <span>Progreso / Peso</span>
                                     <span>Cuota: ${cuota.toLocaleString()} AED ${mesesTxt}</span>
                                 </div>
-                                <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                <div class="w-full bg-slate-700 rounded-full h-1.5 overflow-hidden">
                                     <div class="${colorClass} h-full rounded-full transition-all duration-1000" style="width: ${porcentaje}%"></div>
                                 </div>
                             </div>
@@ -708,8 +710,8 @@
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1e293b', padding: 12, titleFont: { size: 13 }, bodyFont: { size: 14, weight: 'bold' }, callbacks: { label: function(context) { return ` ${combinedData[context.dataIndex].tipo}: ${context.raw.toLocaleString()} AED`; } } } },
-                    scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9', drawBorder: false }, ticks: { color: '#94a3b8', font: { size: 11, weight: 'bold' }, callback: function(value) { return value / 1000 + 'k'; } } }, x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10, weight: 'bold' }, maxTicksLimit: 12 } } },
+                    plugins: { legend: { display: false }, tooltip: { backgroundColor: '#0f172a', padding: 12, titleFont: { size: 13 }, bodyFont: { size: 14, weight: 'bold' }, callbacks: { label: function(context) { return ` ${combinedData[context.dataIndex].tipo}: ${context.raw.toLocaleString()} AED`; } } } },
+                    scales: { y: { beginAtZero: true, grid: { color: '#1e293b', drawBorder: false }, ticks: { color: '#94a3b8', font: { size: 11, weight: 'bold' }, callback: function(value) { return value / 1000 + 'k'; } } }, x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10, weight: 'bold' }, maxTicksLimit: 12 } } },
                     interaction: { mode: 'index', intersect: false }
                 }
             });
@@ -744,10 +746,10 @@
 
             if (error) {
                 status.innerText = "Error: " + error.message;
-                status.className = "text-sm font-bold text-center text-rose-500 mt-4";
+                status.className = "text-sm font-bold text-center text-rose-400 mt-4";
             } else {
                 status.innerText = `✅ ¡Registro de ${mesFormateado} guardado/actualizado con éxito!`;
-                status.className = "text-sm font-bold text-center text-emerald-600 mt-4";
+                status.className = "text-sm font-bold text-center text-emerald-400 mt-4";
                 cargarHistorialIngresos(); 
                 setTimeout(() => { status.classList.add('hidden'); }, 4000);
             }
