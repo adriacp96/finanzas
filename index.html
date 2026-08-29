@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
@@ -97,8 +98,12 @@
         <!-- TOGGLE MODO -->
         <div class="flex justify-center -mt-6 mb-2">
             <div class="bg-white p-1 rounded-2xl shadow-xl border border-slate-100 inline-flex w-full sm:w-auto">
-                <button id="btnModoSim" onclick="setModo('simulacion')" class="flex-1 sm:w-48 py-3 text-sm font-black bg-indigo-50 text-indigo-700 rounded-xl transition-all shadow-sm">🔮 Proyección</button>
-                <button id="btnModoReal" onclick="setModo('real')" class="flex-1 sm:w-48 py-3 text-sm font-black text-slate-400 hover:text-slate-700 rounded-xl transition-all">✅ Dato Real</button>
+                <button id="btnModoSim" onclick="setModo('simulacion')" class="flex-1 sm:w-48 py-3 text-sm font-black bg-indigo-50 text-indigo-700 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-hat-wizard"></i> Proyección
+                </button>
+                <button id="btnModoReal" onclick="setModo('real')" class="flex-1 sm:w-48 py-3 text-sm font-black text-slate-400 hover:text-slate-700 rounded-xl transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-money-check-dollar"></i> Dato Real
+                </button>
             </div>
         </div>
 
@@ -199,7 +204,7 @@
                     <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center font-black">3</div>
                     <h2 class="text-2xl font-black text-slate-900 tracking-tight">Estrategia de Excedente</h2>
                 </div>
-                <span id="tipoRegistroBadge" class="bg-indigo-100 text-indigo-600 text-[10px] font-bold px-3 py-1.5 rounded-lg uppercase tracking-wider">🔮 PROYECCIÓN</span>
+                <span id="tipoRegistroBadge" class="bg-indigo-100 text-indigo-600 text-xs font-extrabold px-3.5 py-1.5 rounded-lg uppercase tracking-wider inline-flex items-center gap-2"><i class="fa-solid fa-hat-wizard"></i> PROYECCIÓN</span>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
@@ -405,27 +410,27 @@
         function setModo(modo) {
             modoActual = modo;
             if (modo === 'simulacion') {
-                document.getElementById('btnModoSim').className = "flex-1 sm:w-48 py-3 text-sm font-black bg-indigo-50 text-indigo-700 rounded-xl transition-all shadow-sm";
-                document.getElementById('btnModoReal').className = "flex-1 sm:w-48 py-3 text-sm font-black text-slate-400 hover:text-slate-700 rounded-xl transition-all";
+                document.getElementById('btnModoSim').className = "flex-1 sm:w-48 py-3 text-sm font-black bg-indigo-50 text-indigo-700 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2";
+                document.getElementById('btnModoReal').className = "flex-1 sm:w-48 py-3 text-sm font-black text-slate-400 hover:text-slate-700 rounded-xl transition-all flex items-center justify-center gap-2";
                 document.getElementById('panelSimulacion').classList.remove('hidden');
                 document.getElementById('panelReal').classList.add('hidden');
                 document.getElementById('tituloIngresos').innerText = "Simulador de Ingresos";
                 document.getElementById('labelEmaar').innerText = "Estimación Tarjeta Emaar";
                 
-                document.getElementById('tipoRegistroBadge').innerText = "<i class="fa-solid fa-hat-wizard"></i> PROYECCIÓN";
-                document.getElementById('tipoRegistroBadge').className = "bg-indigo-100 text-indigo-600 text-[10px] font-bold px-3 py-1.5 rounded-lg uppercase tracking-wider";
+                document.getElementById('tipoRegistroBadge').innerHTML = `<i class="fa-solid fa-hat-wizard"></i> PROYECCIÓN`;
+                document.getElementById('tipoRegistroBadge').className = "bg-indigo-100 text-indigo-600 text-xs font-extrabold px-3.5 py-1.5 rounded-lg uppercase tracking-wider inline-flex items-center gap-2";
                 document.getElementById('textoBotonGuardar').innerText = "Guardar Proyección en Supabase";
                 document.getElementById('desgloseSimulacion').classList.remove('hidden');
             } else {
-                document.getElementById('btnModoReal').className = "flex-1 sm:w-48 py-3 text-sm font-black bg-emerald-50 text-emerald-700 rounded-xl transition-all shadow-sm";
-                document.getElementById('btnModoSim').className = "flex-1 sm:w-48 py-3 text-sm font-black text-slate-400 hover:text-slate-700 rounded-xl transition-all";
+                document.getElementById('btnModoReal').className = "flex-1 sm:w-48 py-3 text-sm font-black bg-emerald-50 text-emerald-700 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2";
+                document.getElementById('btnModoSim').className = "flex-1 sm:w-48 py-3 text-sm font-black text-slate-400 hover:text-slate-700 rounded-xl transition-all flex items-center justify-center gap-2";
                 document.getElementById('panelSimulacion').classList.add('hidden');
                 document.getElementById('panelReal').classList.remove('hidden');
                 document.getElementById('tituloIngresos').innerText = "Ingreso Real";
                 document.getElementById('labelEmaar').innerText = "Extracto Final Emaar Card";
                 
-                document.getElementById('tipoRegistroBadge').innerText = "<i class="fa-solid fa-thumbs-up"></i> DATO REAL";
-                document.getElementById('tipoRegistroBadge').className = "bg-emerald-100 text-emerald-600 text-[10px] font-bold px-3 py-1.5 rounded-lg uppercase tracking-wider";
+                document.getElementById('tipoRegistroBadge').innerHTML = `<i class="fa-solid fa-money-check-dollar"></i> DATO REAL`;
+                document.getElementById('tipoRegistroBadge').className = "bg-emerald-100 text-emerald-600 text-xs font-extrabold px-3.5 py-1.5 rounded-lg uppercase tracking-wider inline-flex items-center gap-2";
                 document.getElementById('textoBotonGuardar').innerText = "Guardar Dato Real en Supabase";
                 document.getElementById('desgloseSimulacion').classList.add('hidden');
             }
