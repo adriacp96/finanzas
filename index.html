@@ -540,7 +540,6 @@
                 deudaTotal += saldo;
                 
                 if (deuda.nombre.toLowerCase().includes('coche')) {
-                    // Update Car Widget Dynamically
                     const carSaldoEl = document.getElementById('carWidgetSaldo');
                     const carEditBtn = document.getElementById('carWidgetEditBtn');
                     const carMesesEl = document.getElementById('carWidgetMeses');
@@ -643,10 +642,11 @@
             btn.innerHTML = `<svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> <span>Sincronizando...</span>`;
             btn.disabled = true;
 
-            const { error } = await supabaseClient.from('historial_meses').insert([{
+            const { error } = await supabaseClient.from('historial_meses').upsert([{
                 mes: mesFormateado, salario: Math.floor(salarioEstimadoCalculado), linea_base: Math.floor(lineaBaseDinamica),
-                excedente: Math.floor(excedente), pago_extra_deuda: Math.floor(pagoDeuda), fondo_emergencia: Math.floor(fondoEmergencia), tipo: modoActual === 'simulacion' ? 'Proyección' : 'Real'
-            }]);
+                excedente: Math.floor(excedente), pago_extra_deuda: Math.floor(pagoDeuda), fondo_emergencia: Math.floor(fondoEmergencia), 
+                tipo: modoActual === 'simulacion' ? 'Proyección' : 'Real'
+            }], { onConflict: 'mes' });
 
             const status = document.getElementById('saveStatus');
             status.classList.remove('hidden');
@@ -655,7 +655,7 @@
                 status.innerText = "Error: " + error.message;
                 status.className = "text-sm font-bold text-center text-rose-500 mt-4";
             } else {
-                status.innerText = `✅ ¡${modoActual === 'simulacion' ? 'Proyección' : 'Registro Real'} de ${mesFormateado} guardado!`;
+                status.innerText = `✅ ¡Registro de ${mesFormateado} guardado/actualizado con éxito!`;
                 status.className = "text-sm font-bold text-center text-emerald-600 mt-4";
                 cargarHistorialIngresos(); 
                 setTimeout(() => { status.classList.add('hidden'); }, 4000);
