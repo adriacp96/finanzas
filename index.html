@@ -42,7 +42,6 @@
 
     <!-- HEADER / HERO SECTION -->
     <div class="bg-slate-900 text-white pb-24 pt-6 px-4 rounded-b-[2.5rem] shadow-xl relative overflow-hidden">
-        <!-- Abstract background elements -->
         <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
             <div class="absolute -top-24 -right-24 w-96 h-96 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
             <div class="absolute top-12 -left-24 w-72 h-72 bg-emerald-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
@@ -76,17 +75,15 @@
                     <p class="text-2xl font-black text-emerald-400" id="kpiMonthsFree">--- Meses</p>
                 </div>
                 <div class="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/10">
-                    <p class="text-slate-400 text-xs uppercase font-bold tracking-wider mb-1">Fijo Neto</p>
+                    <p class="text-slate-400 text-xs uppercase font-bold tracking-wider mb-1">Fijo Neto Garantizado</p>
                     <p class="text-2xl font-black text-white">11,165 AED</p>
                 </div>
                 <div class="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/10 cursor-help group relative">
-                    <p class="text-slate-400 text-xs uppercase font-bold tracking-wider mb-1">Línea Base</p>
-                    <p class="text-2xl font-black text-white group-hover:text-indigo-300 transition">8,979 AED</p>
-                    <!-- Tooltip -->
+                    <p class="text-slate-400 text-xs uppercase font-bold tracking-wider mb-1">Costes Fijos (Sin Tarjeta)</p>
+                    <p class="text-2xl font-black text-white group-hover:text-indigo-300 transition">6,979 AED</p>
                     <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-white text-slate-800 text-xs rounded-xl p-3 shadow-xl opacity-0 group-hover:opacity-100 transition pointer-events-none border border-slate-200 z-50">
-                        <div class="flex justify-between mb-1"><span>Alquiler:</span><span class="font-bold">3,033</span></div>
-                        <div class="flex justify-between mb-1"><span>Comida/Transp:</span><span class="font-bold">2,000</span></div>
-                        <div class="flex justify-between mb-1"><span>Servicios:</span><span class="font-bold">600</span></div>
+                        <div class="flex justify-between mb-1"><span>Alquiler (Provisión):</span><span class="font-bold">3,033</span></div>
+                        <div class="flex justify-between mb-1"><span>Servicios (DU/DEWA):</span><span class="font-bold">600</span></div>
                         <div class="flex justify-between"><span>Préstamo NBD:</span><span class="font-bold">3,346</span></div>
                     </div>
                 </div>
@@ -99,19 +96,19 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
-            <!-- LEFT PANEL: SIMULATOR & INPUTS -->
+            <!-- LEFT PANEL: SIMULATOR & EMAAR CARD -->
             <div class="lg:col-span-7 space-y-6">
                 
+                <!-- Roster Simulator -->
                 <div class="glass-card rounded-3xl p-6 sm:p-8 shadow-sm">
                     <div class="flex justify-between items-center mb-8">
                         <h2 class="text-lg font-extrabold text-slate-800 flex items-center gap-2">
                             <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
-                            Simulador de Roster
+                            Ingresos: Simulador de Roster
                         </h2>
                         <input type="month" id="mesSelector" class="rounded-lg border-slate-200 bg-white text-sm font-bold text-indigo-600 focus:ring-0 focus:border-indigo-500 p-2 shadow-sm cursor-pointer">
                     </div>
 
-                    <!-- Slider de Horas -->
                     <div class="mb-10 p-5 bg-slate-50 rounded-2xl border border-slate-100">
                         <div class="flex justify-between items-end mb-4">
                             <div>
@@ -122,13 +119,12 @@
                         </div>
                         <input type="range" id="blockHoursSlider" min="0" max="130" value="80" oninput="actualizarSlider()">
                         <div class="flex justify-between text-[10px] uppercase font-bold text-slate-400 mt-3">
-                            <span>0h (Vacaciones)</span>
+                            <span>0h</span>
                             <span>Roster Normal</span>
                             <span>Overtime (130h+)</span>
                         </div>
                     </div>
 
-                    <!-- Variables Extra -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 transition">
                             <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Dietas (Meal Allowance)</label>
@@ -147,118 +143,130 @@
                     </div>
                 </div>
 
-                <!-- Botón de Guardado Flotante -->
-                <button onclick="guardarMes()" class="w-full bg-slate-900 text-white py-4 px-6 rounded-2xl font-bold text-lg shadow-xl shadow-slate-900/20 hover:bg-slate-800 hover:-translate-y-1 transition-all flex items-center justify-center gap-3 group">
-                    <span>Guardar Distribución 70/30</span>
+                <!-- EMAAR FAMILY CARD EXPENSE -->
+                <div class="bg-gradient-to-br from-slate-900 to-black rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden border border-slate-800">
+                    <!-- Efectos de luz y la imagen de la tarjeta -->
+                    <div class="absolute top-0 right-0 w-48 h-48 bg-white opacity-5 rounded-full -mr-10 -mt-10 blur-3xl pointer-events-none"></div>
+                    <img src="emaar-family_card.png" alt="Emaar Card" class="absolute -right-16 top-1/2 transform -translate-y-1/2 w-64 opacity-50 drop-shadow-2xl mix-blend-lighten pointer-events-none" style="filter: brightness(0.8) contrast(1.2);">
+
+                    <div class="relative z-10">
+                        <div class="flex justify-between items-start mb-6">
+                            <h2 class="text-lg font-extrabold text-white flex items-center gap-2">
+                                <svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                                Gastos: Emaar Family Card
+                            </h2>
+                            <span class="bg-yellow-400/20 text-yellow-400 border border-yellow-400/30 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">Acumulando Puntos</span>
+                        </div>
+
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Gasto Variable del Mes a Pagar (100%)</label>
+                        <div class="flex items-center border-b-2 border-slate-700 focus-within:border-yellow-400 transition-colors pb-2 w-full sm:w-1/2">
+                            <span class="text-slate-400 font-bold mr-2 text-2xl">AED</span>
+                            <input type="number" id="gastoEmaar" value="2000" oninput="actualizarGastos()" class="w-full bg-transparent text-3xl font-black text-white focus:outline-none placeholder-slate-600" placeholder="0">
+                        </div>
+                        <p class="text-[10px] text-slate-500 mt-2 font-medium">Introduce el saldo de tu tarjeta para este mes. Se deducirá del salario para liquidarla entera y evitar intereses.</p>
+                    </div>
+                </div>
+
+                <button onclick="guardarMes()" class="w-full bg-indigo-600 text-white py-4 px-6 rounded-2xl font-bold text-lg shadow-xl shadow-indigo-600/20 hover:bg-indigo-500 hover:-translate-y-1 transition-all flex items-center justify-center gap-3 group">
+                    <span>Guardar Flujo del Mes</span>
                     <svg class="w-5 h-5 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                 </button>
                 <p id="saveStatus" class="text-sm font-bold text-center hidden"></p>
 
             </div>
 
-            <!-- RIGHT PANEL: THE FINANCIAL RECEIPT & CHARTS -->
+            <!-- RIGHT PANEL: FINANCIAL RECEIPT & CHARTS -->
             <div class="lg:col-span-5 space-y-6">
                 
-                <!-- El Recibo Financiero -->
                 <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-md border border-slate-200 relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500"></div>
+                    <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-500 via-indigo-500 to-yellow-400"></div>
                     
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest text-center mb-6">Proyección del Mes</h3>
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest text-center mb-6">Balance del Mes</h3>
                     
                     <div class="text-center mb-8">
-                        <p class="text-sm font-semibold text-slate-500 mb-1">Neto Total Estimado</p>
+                        <p class="text-sm font-semibold text-slate-500 mb-1">Ingreso Neto Total</p>
                         <h2 class="text-4xl sm:text-5xl font-black text-slate-900 tracking-tighter" id="salarioEstimadoDisplay">18,430</h2>
                         <p class="text-sm font-bold text-slate-400 mt-1">AED</p>
                     </div>
 
-                    <div class="space-y-3 mb-8">
-                        <div class="flex justify-between items-center text-sm font-medium text-slate-600 border-b border-dashed border-slate-200 pb-2">
-                            <span>Base Fija Garantizada</span>
-                            <span class="font-bold text-slate-800">11,165 AED</span>
+                    <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 mb-6">
+                        <div class="flex justify-between items-center text-sm mb-2">
+                            <span class="font-medium text-slate-500">Obligaciones Fijas (Alquiler, NBD)</span>
+                            <span class="font-bold text-slate-800">-6,979 AED</span>
                         </div>
-                        <div class="flex justify-between items-center text-sm font-medium text-slate-600 border-b border-dashed border-slate-200 pb-2">
-                            <span>Pago de Vuelo (Estimado)</span>
-                            <span id="pagoVueloDisplay" class="font-bold text-slate-800">5,465 AED</span>
+                        <div class="flex justify-between items-center text-sm mb-3">
+                            <span class="font-medium text-yellow-600">Pago Tarjeta Emaar (100%)</span>
+                            <span class="font-bold text-yellow-600" id="displayPagoEmaar">-2,000 AED</span>
                         </div>
-                        <div class="flex justify-between items-center text-sm font-medium text-slate-600 border-b border-dashed border-slate-200 pb-2">
-                            <span>Dietas y Turnarounds</span>
-                            <span id="dietasDisplay" class="font-bold text-slate-800">1,800 AED</span>
+                        <div class="flex justify-between items-center pt-3 border-t border-slate-200">
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Línea Base Dinámica</span>
+                            <span id="displayLineaBase" class="text-lg font-black text-slate-700">8,979 AED</span>
                         </div>
                     </div>
 
                     <!-- Breakdown 70/30 -->
-                    <div id="panelExcedente" class="bg-slate-50 rounded-2xl p-5 border border-slate-100">
-                        <div class="flex justify-between items-center mb-4">
-                            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Excedente Libre</span>
-                            <span id="excedenteTotal" class="text-lg font-black text-slate-800">9,451 AED</span>
+                    <div id="panelExcedente">
+                        <div class="flex justify-between items-center mb-4 px-2">
+                            <span class="text-xs font-bold uppercase tracking-wider text-emerald-600">Excedente Generado</span>
+                            <span id="excedenteTotal" class="text-xl font-black text-emerald-600">9,451 AED</span>
                         </div>
                         
-                        <div class="space-y-3">
-                            <div class="relative overflow-hidden rounded-xl bg-white border border-rose-100 p-4 shadow-sm flex justify-between items-center group">
-                                <div class="absolute left-0 top-0 bottom-0 w-1 bg-rose-500"></div>
-                                <div>
-                                    <p class="text-xs font-bold text-rose-500 uppercase tracking-wider">Ataque Deuda</p>
-                                    <p class="text-[10px] font-medium text-slate-400">70% a tarjeta o préstamo</p>
-                                </div>
-                                <span id="pagoDeuda" class="text-xl font-black text-rose-600">6,616 AED</span>
+                        <!-- Doughnut Chart (70/30) -->
+                        <div class="relative w-full max-w-[180px] mx-auto aspect-square mb-6">
+                            <canvas id="distributionChart"></canvas>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="relative overflow-hidden rounded-xl bg-white border border-rose-100 p-4 shadow-sm text-center">
+                                <p class="text-[10px] font-bold text-rose-500 uppercase tracking-wider mb-1">Ataque Deuda (70%)</p>
+                                <span id="pagoDeuda" class="text-lg font-black text-rose-600">6,616 AED</span>
                             </div>
                             
-                            <div class="relative overflow-hidden rounded-xl bg-white border border-blue-100 p-4 shadow-sm flex justify-between items-center">
-                                <div class="absolute left-0 top-0 bottom-0 w-1 bg-blue-500"></div>
-                                <div>
-                                    <p class="text-xs font-bold text-blue-500 uppercase tracking-wider">Fondo Reserva</p>
-                                    <p class="text-[10px] font-medium text-slate-400">30% ahorro colchón</p>
-                                </div>
-                                <span id="fondoEmergencia" class="text-xl font-black text-blue-600">2,835 AED</span>
+                            <div class="relative overflow-hidden rounded-xl bg-white border border-blue-100 p-4 shadow-sm text-center">
+                                <p class="text-[10px] font-bold text-blue-500 uppercase tracking-wider mb-1">Fondo Reserva (30%)</p>
+                                <span id="fondoEmergencia" class="text-lg font-black text-blue-600">2,835 AED</span>
                             </div>
                         </div>
                     </div>
                     
-                    <div id="sinExcedente" class="hidden mt-6 p-4 bg-amber-50 border border-amber-100 rounded-2xl text-center">
-                        <p class="text-amber-800 font-bold text-sm">⚠️ Modo Supervivencia</p>
-                        <p class="text-amber-600 text-xs mt-1 font-medium">El ingreso no supera la línea base (8,979 AED). Cubre fijos y pausa pagos extra.</p>
+                    <div id="sinExcedente" class="hidden mt-4 p-4 bg-amber-50 border border-amber-100 rounded-2xl text-center">
+                        <p class="text-amber-800 font-bold text-sm">⚠️ Sin Excedente</p>
+                        <p class="text-amber-600 text-xs mt-1 font-medium">El ingreso no supera los gastos fijos + la tarjeta Emaar. Tira de fondo de emergencia si es necesario.</p>
                     </div>
                 </div>
-            </div>
 
-        </div>
-
-        <!-- SECCIÓN 3: PORTAFOLIO DE PASIVOS -->
-        <div class="glass-card rounded-3xl p-6 sm:p-8 shadow-sm">
-            <div class="flex justify-between items-end mb-6">
-                <div>
-                    <h2 class="text-lg font-extrabold text-slate-800">Portafolio de Pasivos</h2>
-                    <p class="text-xs font-medium text-slate-500 mt-1">Sincronizado en tiempo real con Supabase</p>
+                <!-- Debt Portfolio -->
+                <div class="glass-card rounded-3xl p-6 sm:p-8 shadow-sm">
+                    <h2 class="text-lg font-extrabold text-slate-800 mb-6">Portafolio de Pasivos</h2>
+                    <div id="debtCardsContainer" class="space-y-4">
+                        <div class="text-center text-sm font-bold text-slate-400 py-8">Cargando base de datos...</div>
+                    </div>
                 </div>
-                <div class="hidden sm:block">
-                    <canvas id="miniDebtChart" class="h-10 w-24"></canvas>
-                </div>
-            </div>
 
-            <div id="debtCardsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="text-center text-sm font-bold text-slate-400 py-8 col-span-2">Cargando base de datos...</div>
             </div>
         </div>
-
     </main>
 
     <script>
-        // Configuración Supabase
+        // Supabase Init
         const supabaseUrl = 'https://jgvgabkrriedaquqehpb.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndmdhYmtycmllZGFxdXFlaHBiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5OTYzNDQsImV4cCI6MjEwMzU3MjM0NH0.jdq2xaDtJ0YO-8zpQYqQPu5e2dkyCl8XjXtw_cGhqko';
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
         const BASE_FIJA_NETA = 11165.00; 
         const TARIFA_HORA_VUELO = 68.32;  
-        const LINEA_BASE = 8979.00;       
+        const GASTOS_FIJOS_OBLIGATORIOS = 6979.00; // Alquiler + DEWA/DU + NBD Loan
 
+        let gastoVariableEmaar = 2000.00;
+        let lineaBaseDinamica = GASTOS_FIJOS_OBLIGATORIOS + gastoVariableEmaar;
+        
         let salarioEstimadoCalculado = 0;
         let excedente = 0;
         let pagoDeuda = 0;
         let fondoEmergencia = 0;
         let deudaTotal = 0;
         
-        let miniChartInstance = null;
+        let distChartInstance = null;
 
         window.onload = () => {
             const today = new Date();
@@ -274,11 +282,21 @@
             const val = document.getElementById('blockHoursSlider').value;
             document.getElementById('sliderValue').innerHTML = `${val} <span class="text-lg text-indigo-400">h</span>`;
             
-            // Efecto visual dinámico en el slider
             const percentage = (val / 130) * 100;
             document.getElementById('blockHoursSlider').style.background = `linear-gradient(to right, #4f46e5 0%, #4f46e5 ${percentage}%, #e2e8f0 ${percentage}%, #e2e8f0 100%)`;
             
             calcularTodo();
+        }
+
+        function actualizarGastos() {
+            const inputEmaar = document.getElementById('gastoEmaar').value;
+            gastoVariableEmaar = parseFloat(inputEmaar) || 0;
+            lineaBaseDinamica = GASTOS_FIJOS_OBLIGATORIOS + gastoVariableEmaar;
+            
+            document.getElementById('displayPagoEmaar').innerText = '-' + Math.floor(gastoVariableEmaar).toLocaleString() + ' AED';
+            document.getElementById('displayLineaBase').innerText = Math.floor(lineaBaseDinamica).toLocaleString() + ' AED';
+            
+            calcularExcedente();
         }
 
         function calcularTodo() {
@@ -287,28 +305,22 @@
             const turnarounds = parseFloat(document.getElementById('turnarounds').value) || 0;
 
             const pagoVuelo = hours * TARIFA_HORA_VUELO;
-            const dietasYExtras = meals + turnarounds;
-            salarioEstimadoCalculado = BASE_FIJA_NETA + pagoVuelo + dietasYExtras;
+            salarioEstimadoCalculado = BASE_FIJA_NETA + pagoVuelo + meals + turnarounds;
 
-            document.getElementById('pagoVueloDisplay').innerText = Math.floor(pagoVuelo).toLocaleString() + ' AED';
-            document.getElementById('dietasDisplay').innerText = Math.floor(dietasYExtras).toLocaleString() + ' AED';
-            
-            // Animación suave de números
             animateValue('salarioEstimadoDisplay', salarioEstimadoCalculado);
             calcularExcedente();
         }
 
         function animateValue(id, end) {
-            const obj = document.getElementById(id);
-            obj.innerText = Math.floor(end).toLocaleString();
+            document.getElementById(id).innerText = Math.floor(end).toLocaleString();
         }
 
         function calcularExcedente() {
             const panelExcedente = document.getElementById('panelExcedente');
             const panelSinExcedente = document.getElementById('sinExcedente');
             
-            if (salarioEstimadoCalculado > LINEA_BASE) {
-                excedente = salarioEstimadoCalculado - LINEA_BASE;
+            if (salarioEstimadoCalculado > lineaBaseDinamica) {
+                excedente = salarioEstimadoCalculado - lineaBaseDinamica;
                 pagoDeuda = excedente * 0.70;
                 fondoEmergencia = excedente * 0.30;
 
@@ -318,17 +330,40 @@
                 
                 panelExcedente.style.display = 'block';
                 panelSinExcedente.classList.add('hidden');
+                actualizarGraficoDistribucion(lineaBaseDinamica, pagoDeuda, fondoEmergencia);
             } else {
                 excedente = 0; pagoDeuda = 0; fondoEmergencia = 0;
                 panelExcedente.style.display = 'none';
                 panelSinExcedente.classList.remove('hidden');
+                actualizarGraficoDistribucion(salarioEstimadoCalculado, 0, 0);
             }
             actualizarKpiProyeccion();
         }
 
+        function actualizarGraficoDistribucion(base, deuda, fondo) {
+            const ctx = document.getElementById('distributionChart').getContext('2d');
+            if (distChartInstance) distChartInstance.destroy();
+
+            distChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Costes + Tarjeta', 'Ataque Deuda (70%)', 'Fondo (30%)'],
+                    datasets: [{
+                        data: [base, deuda, fondo],
+                        backgroundColor: ['#e2e8f0', '#f43f5e', '#3b82f6'],
+                        borderWidth: 0, hoverOffset: 5
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, cutout: '75%',
+                    plugins: { legend: { display: false }, tooltip: { enabled: true } }
+                }
+            });
+        }
+
         function actualizarKpiProyeccion() {
             if (deudaTotal > 0 && pagoDeuda > 0) {
-                const pagoMensualEstimado = pagoDeuda + 3346; // Asume pago mínimo del NBD
+                const pagoMensualEstimado = pagoDeuda + 3346; 
                 const meses = Math.ceil(deudaTotal / pagoMensualEstimado);
                 document.getElementById('kpiMonthsFree').innerText = `~${meses} Meses`;
             } else {
@@ -347,17 +382,11 @@
 
             container.innerHTML = '';
             deudaTotal = 0;
-            const nombres = [];
-            const saldos = [];
-
             const maxDeuda = Math.max(...data.map(d => parseFloat(d.saldo)));
 
             data.forEach(deuda => {
                 const saldo = parseFloat(deuda.saldo);
                 deudaTotal += saldo;
-                nombres.push(deuda.nombre.substring(0, 10) + '...');
-                saldos.push(saldo);
-
                 const porcentaje = (saldo / maxDeuda) * 100;
                 const colorClass = saldo < 5000 ? 'bg-emerald-500' : 'bg-rose-500';
 
@@ -366,12 +395,11 @@
                         <div class="flex justify-between items-start mb-4">
                             <div>
                                 <h3 class="font-bold text-slate-800">${deuda.nombre}</h3>
-                                <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mt-0.5">Cuota Base: ${parseFloat(deuda.cuota_minima).toLocaleString()} AED</p>
+                                <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mt-0.5">Cuota Fija: ${parseFloat(deuda.cuota_minima).toLocaleString()} AED</p>
                             </div>
                             <button onclick="actualizarSaldo(${deuda.id}, ${deuda.saldo})" class="text-[10px] uppercase font-bold tracking-wider text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg hover:bg-slate-200 hover:text-slate-800 transition">Editar</button>
                         </div>
                         <p class="text-2xl font-black text-slate-900 mb-3">${saldo.toLocaleString('en-US', {minimumFractionDigits: 2})} <span class="text-sm font-bold text-slate-400">AED</span></p>
-                        
                         <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
                             <div class="${colorClass} h-full rounded-full transition-all duration-1000" style="width: ${porcentaje}%"></div>
                         </div>
@@ -381,25 +409,6 @@
 
             document.getElementById('kpiTotalDebt').innerText = Math.floor(deudaTotal).toLocaleString() + ' AED';
             actualizarKpiProyeccion();
-            renderMiniChart(nombres, saldos);
-        }
-
-        function renderMiniChart(labels, data) {
-            const ctx = document.getElementById('miniDebtChart').getContext('2d');
-            if (miniChartInstance) miniChartInstance.destroy();
-
-            miniChartInstance = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{ data: data, backgroundColor: '#cbd5e1', borderRadius: 2 }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false }, tooltip: { enabled: false } },
-                    scales: { x: { display: false }, y: { display: false } }
-                }
-            });
         }
 
         async function actualizarSaldo(id, saldoActual) {
@@ -426,7 +435,7 @@
             const { error } = await supabaseClient.from('historial_meses').insert([{
                 mes: mesFormateado,
                 salario: Math.floor(salarioEstimadoCalculado),
-                linea_base: LINEA_BASE,
+                linea_base: Math.floor(lineaBaseDinamica),
                 excedente: Math.floor(excedente),
                 pago_extra_deuda: Math.floor(pagoDeuda),
                 fondo_emergencia: Math.floor(fondoEmergencia)
@@ -438,17 +447,13 @@
             if (error) {
                 status.innerText = "Error: " + error.message;
                 status.className = "text-sm font-bold text-center text-rose-500 mt-3";
-                btn.innerHTML = originalContent;
-                btn.disabled = false;
             } else {
                 status.innerText = `✅ ¡Distribución de ${mesFormateado} guardada!`;
                 status.className = "text-sm font-bold text-center text-emerald-600 mt-3";
-                setTimeout(() => { 
-                    status.classList.add('hidden'); 
-                    btn.innerHTML = originalContent;
-                    btn.disabled = false;
-                }, 2500);
+                setTimeout(() => { status.classList.add('hidden'); }, 3000);
             }
+            btn.innerHTML = originalContent;
+            btn.disabled = false;
         }
     </script>
 </body>
