@@ -175,7 +175,7 @@
 
             </div>
 
-            <!-- RIGHT PANEL: FINANCIAL RECEIPT & DEBT PORTFOLIO -->
+            <!-- RIGHT PANEL: FINANCIAL RECEIPT & CHARTS -->
             <div class="lg:col-span-5 space-y-6">
                 
                 <!-- El Recibo Financiero -->
@@ -186,8 +186,7 @@
                     
                     <div class="text-center mb-8">
                         <p class="text-sm font-semibold text-slate-500 mb-1">Ingreso Neto Total</p>
-                        <h2 class="text-4xl sm:text-5xl font-black text-slate-900 tracking-tighter" id="salarioEstimadoDisplay">18,430</h2>
-                        <p class="text-sm font-bold text-slate-400 mt-1">AED</p>
+                        <h2 class="text-4xl sm:text-5xl font-black text-slate-900 tracking-tighter val-salario">18,430 AED</h2>
                     </div>
 
                     <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 mb-6">
@@ -197,11 +196,11 @@
                         </div>
                         <div class="flex justify-between items-center text-sm mb-3">
                             <span class="font-medium text-yellow-600">Pago Tarjeta Emaar (100%)</span>
-                            <span class="font-bold text-yellow-600" id="displayPagoEmaar">-2,000 AED</span>
+                            <span class="font-bold text-yellow-600 val-emaar">-2,000 AED</span>
                         </div>
                         <div class="flex justify-between items-center pt-3 border-t border-slate-200">
                             <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Línea Base Dinámica</span>
-                            <span id="displayLineaBase" class="text-lg font-black text-slate-700">10,721 AED</span>
+                            <span class="text-lg font-black text-slate-700 val-base">10,721 AED</span>
                         </div>
                     </div>
 
@@ -209,9 +208,10 @@
                     <div id="panelExcedente">
                         <div class="flex justify-between items-center mb-4 px-2">
                             <span class="text-xs font-bold uppercase tracking-wider text-emerald-600">Excedente Generado</span>
-                            <span id="excedenteTotal" class="text-xl font-black text-emerald-600">7,709 AED</span>
+                            <span class="text-xl font-black text-emerald-600 val-excedente">7,709 AED</span>
                         </div>
                         
+                        <!-- Doughnut Chart (70/30) -->
                         <div class="relative w-full max-w-[180px] mx-auto aspect-square mb-6">
                             <canvas id="distributionChart"></canvas>
                         </div>
@@ -219,12 +219,12 @@
                         <div class="grid grid-cols-2 gap-3">
                             <div class="relative overflow-hidden rounded-xl bg-white border border-rose-100 p-4 shadow-sm text-center">
                                 <p class="text-[10px] font-bold text-rose-500 uppercase tracking-wider mb-1">Ataque Deuda (70%)</p>
-                                <span id="pagoDeuda" class="text-lg font-black text-rose-600">5,396 AED</span>
+                                <span class="text-lg font-black text-rose-600 val-deuda">5,396 AED</span>
                             </div>
                             
                             <div class="relative overflow-hidden rounded-xl bg-white border border-blue-100 p-4 shadow-sm text-center">
                                 <p class="text-[10px] font-bold text-blue-500 uppercase tracking-wider mb-1">Fondo Reserva (30%)</p>
-                                <span id="fondoEmergencia" class="text-lg font-black text-blue-600">2,313 AED</span>
+                                <span class="text-lg font-black text-blue-600 val-fondo">2,313 AED</span>
                             </div>
                         </div>
                     </div>
@@ -250,8 +250,6 @@
                     <!-- NEW CAR WIDGET (Murabaha) -->
                     <div class="bg-gradient-to-br from-slate-900 to-black rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden border border-slate-800 mb-6">
                         <div class="absolute top-0 right-0 w-64 h-64 bg-emerald-500 opacity-10 rounded-full -mr-10 -mt-10 blur-3xl pointer-events-none"></div>
-                        
-                        <!-- Imagen del Coche -->
                         <img src="dashing.png" alt="Jetour Dashing" class="absolute -right-4 sm:-right-8 top-1/2 transform -translate-y-1/2 w-56 sm:w-72 drop-shadow-2xl pointer-events-none z-0">
 
                         <div class="relative z-10 w-2/3 md:w-1/2">
@@ -259,10 +257,8 @@
                                 <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
                                 <h2 class="text-sm font-extrabold text-white uppercase tracking-wider">Activo Financiado</h2>
                             </div>
-                            
                             <h3 class="text-white font-bold text-xl sm:text-2xl tracking-tight leading-tight mb-1">Jetour Dashing '25</h3>
                             <p class="text-slate-400 text-xs font-medium mb-6">Emirates Islamic Murabaha</p>
-                            
                             <div>
                                 <p class="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-1">Cuota Fija Mensual</p>
                                 <p class="text-2xl sm:text-3xl font-black text-white">1,741<span class="text-base text-slate-500 font-bold">.67 AED</span></p>
@@ -288,7 +284,6 @@
 
         const BASE_FIJA_NETA = 11165.00; 
         const TARIFA_HORA_VUELO = 68.32;  
-        // 3033 (Alquiler) + 600 (Servicios) + 3346 (NBD Loan) + 1741.67 (Coche)
         const GASTOS_FIJOS_OBLIGATORIOS = 8720.67; 
 
         let gastoVariableEmaar = 2000.00;
@@ -313,6 +308,11 @@
             actualizarSlider(); 
         };
 
+        // Función auxiliar para actualizar múltiples elementos con la misma clase
+        function updateTexts(className, text) {
+            document.querySelectorAll('.' + className).forEach(el => el.innerText = text);
+        }
+
         function actualizarSlider() {
             const val = document.getElementById('blockHoursSlider').value;
             document.getElementById('sliderValue').innerHTML = `${val} <span class="text-lg text-indigo-400">h</span>`;
@@ -328,8 +328,8 @@
             gastoVariableEmaar = parseFloat(inputEmaar) || 0;
             lineaBaseDinamica = GASTOS_FIJOS_OBLIGATORIOS + gastoVariableEmaar;
             
-            document.getElementById('displayPagoEmaar').innerText = '-' + Math.floor(gastoVariableEmaar).toLocaleString() + ' AED';
-            document.getElementById('displayLineaBase').innerText = Math.floor(lineaBaseDinamica).toLocaleString() + ' AED';
+            updateTexts('val-emaar', '-' + Math.floor(gastoVariableEmaar).toLocaleString() + ' AED');
+            updateTexts('val-base', Math.floor(lineaBaseDinamica).toLocaleString() + ' AED');
             
             calcularExcedente();
         }
@@ -339,18 +339,10 @@
             const meals = parseFloat(document.getElementById('mealAllowance').value) || 0;
             const turnarounds = parseFloat(document.getElementById('turnarounds').value) || 0;
 
-            const pagoVuelo = hours * TARIFA_HORA_VUELO;
-            salarioEstimadoCalculado = BASE_FIJA_NETA + pagoVuelo + meals + turnarounds;
+            salarioEstimadoCalculado = BASE_FIJA_NETA + (hours * TARIFA_HORA_VUELO) + meals + turnarounds;
 
-            document.getElementById('pagoVueloDisplay').innerText = Math.floor(pagoVuelo).toLocaleString() + ' AED';
-            document.getElementById('dietasDisplay').innerText = Math.floor(meals + turnarounds).toLocaleString() + ' AED';
-            
-            animateValue('salarioEstimadoDisplay', salarioEstimadoCalculado);
+            updateTexts('val-salario', Math.floor(salarioEstimadoCalculado).toLocaleString() + ' AED');
             calcularExcedente();
-        }
-
-        function animateValue(id, end) {
-            document.getElementById(id).innerText = Math.floor(end).toLocaleString();
         }
 
         function calcularExcedente() {
@@ -362,9 +354,9 @@
                 pagoDeuda = excedente * 0.70;
                 fondoEmergencia = excedente * 0.30;
 
-                document.getElementById('excedenteTotal').innerText = Math.floor(excedente).toLocaleString() + ' AED';
-                document.getElementById('pagoDeuda').innerText = Math.floor(pagoDeuda).toLocaleString() + ' AED';
-                document.getElementById('fondoEmergencia').innerText = Math.floor(fondoEmergencia).toLocaleString() + ' AED';
+                updateTexts('val-excedente', Math.floor(excedente).toLocaleString() + ' AED');
+                updateTexts('val-deuda', Math.floor(pagoDeuda).toLocaleString() + ' AED');
+                updateTexts('val-fondo', Math.floor(fondoEmergencia).toLocaleString() + ' AED');
                 
                 panelExcedente.style.display = 'block';
                 panelSinExcedente.classList.add('hidden');
@@ -379,29 +371,33 @@
         }
 
         function actualizarGraficoDistribucion(base, deuda, fondo) {
-            const ctx = document.getElementById('distributionChart').getContext('2d');
-            if (distChartInstance) distChartInstance.destroy();
-
-            distChartInstance = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Costes + Tarjeta', 'Ataque Deuda (70%)', 'Fondo (30%)'],
-                    datasets: [{
-                        data: [base, deuda, fondo],
-                        backgroundColor: ['#e2e8f0', '#f43f5e', '#3b82f6'],
-                        borderWidth: 0, hoverOffset: 5
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false, cutout: '75%',
-                    plugins: { legend: { display: false }, tooltip: { enabled: true } }
-                }
-            });
+            if (distChartInstance) {
+                // Actualiza el gráfico sin destruirlo para una animación fluida
+                distChartInstance.data.datasets[0].data = [base, deuda, fondo];
+                distChartInstance.update();
+            } else {
+                const ctx = document.getElementById('distributionChart').getContext('2d');
+                distChartInstance = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Costes + Tarjeta', 'Ataque Deuda', 'Fondo'],
+                        datasets: [{
+                            data: [base, deuda, fondo],
+                            backgroundColor: ['#e2e8f0', '#f43f5e', '#3b82f6'],
+                            borderWidth: 0, hoverOffset: 5
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false, cutout: '75%',
+                        plugins: { legend: { display: false }, tooltip: { enabled: true } },
+                        animation: { duration: 300, easing: 'easeOutQuart' }
+                    }
+                });
+            }
         }
 
         function actualizarKpiProyeccion() {
             if (deudaTotal > 0 && pagoDeuda > 0) {
-                // Pagos mínimos fijos a sumar al excedente (NBD: 3346 + Coche: 1742)
                 const pagoMensualEstimado = pagoDeuda + 3346 + 1741.67; 
                 const meses = Math.ceil(deudaTotal / pagoMensualEstimado);
                 document.getElementById('kpiMonthsFree').innerText = `~${meses} Meses`;
@@ -423,32 +419,39 @@
             deudaTotal = 0;
             const nombres = [];
             const saldos = [];
-            const maxDeuda = Math.max(...data.map(d => parseFloat(d.saldo)));
+            
+            // Ignorar el préstamo del coche para el gráfico y cálculo de maxDeuda de las tarjetas abajo
+            const deudasVisibles = data.filter(d => !d.nombre.toLowerCase().includes('coche'));
+            const maxDeuda = Math.max(...deudasVisibles.map(d => parseFloat(d.saldo)), 1);
 
             data.forEach(deuda => {
                 const saldo = parseFloat(deuda.saldo);
                 deudaTotal += saldo;
-                nombres.push(deuda.nombre.substring(0, 10) + '...');
-                saldos.push(saldo);
+                
+                // No mostramos la tarjeta si es el préstamo del coche, ya que tiene su propio widget premium
+                if (!deuda.nombre.toLowerCase().includes('coche')) {
+                    nombres.push(deuda.nombre.substring(0, 10) + '...');
+                    saldos.push(saldo);
 
-                const porcentaje = (saldo / maxDeuda) * 100;
-                const colorClass = saldo < 10000 ? 'bg-emerald-500' : 'bg-rose-500';
+                    const porcentaje = (saldo / maxDeuda) * 100;
+                    const colorClass = saldo < 10000 ? 'bg-emerald-500' : 'bg-rose-500';
 
-                container.innerHTML += `
-                    <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm hover:shadow-md transition group">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <h3 class="font-bold text-slate-800">${deuda.nombre}</h3>
-                                <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mt-0.5">Cuota: ${parseFloat(deuda.cuota_minima).toLocaleString()} AED</p>
+                    container.innerHTML += `
+                        <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm hover:shadow-md transition group">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="font-bold text-slate-800">${deuda.nombre}</h3>
+                                    <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mt-0.5">Cuota: ${parseFloat(deuda.cuota_minima).toLocaleString()} AED</p>
+                                </div>
+                                <button onclick="actualizarSaldo(${deuda.id}, ${deuda.saldo})" class="text-[10px] uppercase font-bold tracking-wider text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg hover:bg-slate-200 hover:text-slate-800 transition">Editar</button>
                             </div>
-                            <button onclick="actualizarSaldo(${deuda.id}, ${deuda.saldo})" class="text-[10px] uppercase font-bold tracking-wider text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg hover:bg-slate-200 hover:text-slate-800 transition">Editar</button>
+                            <p class="text-2xl font-black text-slate-900 mb-3">${saldo.toLocaleString('en-US', {minimumFractionDigits: 2})} <span class="text-sm font-bold text-slate-400">AED</span></p>
+                            <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                                <div class="${colorClass} h-full rounded-full transition-all duration-1000" style="width: ${porcentaje}%"></div>
+                            </div>
                         </div>
-                        <p class="text-2xl font-black text-slate-900 mb-3">${saldo.toLocaleString('en-US', {minimumFractionDigits: 2})} <span class="text-sm font-bold text-slate-400">AED</span></p>
-                        <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                            <div class="${colorClass} h-full rounded-full transition-all duration-1000" style="width: ${porcentaje}%"></div>
-                        </div>
-                    </div>
-                `;
+                    `;
+                }
             });
 
             document.getElementById('kpiTotalDebt').innerText = Math.floor(deudaTotal).toLocaleString() + ' AED';
