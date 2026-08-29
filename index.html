@@ -70,7 +70,7 @@
                         <button onclick="cambiarMes(-1)" class="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
                             <i class="fa-solid fa-chevron-left"></i>
                         </button>
-                        <input type="month" id="mesSelector" class="bg-transparent text-sm font-bold text-white text-center focus:ring-0 border-none outline-none cursor-pointer [color-scheme:dark] w-32 px-1">
+                        <input type="month" id="mesSelector" onchange="cargarDatosMes()" class="bg-transparent text-sm font-bold text-white text-center focus:ring-0 border-none outline-none cursor-pointer [color-scheme:dark] w-32 px-1">
                         <button onclick="cambiarMes(1)" class="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
                             <i class="fa-solid fa-chevron-right"></i>
                         </button>
@@ -341,13 +341,13 @@
                 </div>
             </div>
 
-            <!-- Botón Guardar -->
+            <!-- Botón Guardar / Estado -->
             <div class="mt-12 pt-8 border-t border-slate-700 flex flex-col items-center">
                 <button onclick="guardarMes()" class="w-full sm:w-auto bg-indigo-600 text-white py-4 px-12 rounded-2xl font-black text-lg shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3 group">
                     <span id="textoBotonGuardar">Guardar Proyección en Supabase</span>
                     <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                 </button>
-                <p id="saveStatus" class="text-sm font-bold text-center hidden mt-4"></p>
+                <p id="saveStatus" class="text-sm font-bold text-center hidden mt-4 transition-all"></p>
             </div>
         </div>
 
@@ -431,8 +431,7 @@
 
         const BASE_FIJA_NETA = 11165.00; 
         const TARIFA_HORA_VUELO = 68.32;  
-        // 3033 (Alquiler) + 3346 (NBD) + 1741.67 (Jetour) + 200 (DU Fijo)
-        const COSTES_FIJOS_BASE = 8320.67; 
+        const COSTES_FIJOS_BASE = 8320.67; // Alquiler + Préstamos + Internet Fijo
 
         let gastoVariableEmaar = 2000.00;
         let gastoDewa = 382.00; 
@@ -463,13 +462,20 @@
         window.onload = () => {
             const today = new Date();
             document.getElementById('mesSelector').value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+            
+            // Pintar slider inicial (evitamos que esté vacío al recargar)
+            const val = document.getElementById('blockHoursSlider').value;
+            const percentage = (val / 130) * 100;
+            document.getElementById('blockHoursSlider').style.background = `linear-gradient(to right, #6366f1 0%, #6366f1 ${percentage}%, #334155 ${percentage}%, #334155 100%)`;
+
             cargarDeudas();
-            actualizarGastos(); 
-            actualizarSlider(); 
             cargarHistorialIngresos();
+            
+            // Cargar datos del mes actual en lugar de calcular por defecto
+            cargarDatosMes(); 
         };
 
-        // Función para cambiar de mes dinámicamente con las flechas
+        // Función dinámica para cambiar meses con las flechas
         function cambiarMes(offset) {
             const selector = document.getElementById('mesSelector');
             if (!selector.value) return;
@@ -481,9 +487,106 @@
             const newMonth = String(date.getMonth() + 1).padStart(2, '0');
             
             selector.value = `${newYear}-${newMonth}`;
+            cargarDatosMes(); // <-- Consulta a la base de datos automáticamente
         }
 
-        function setModo(modo) {
+        async function cargarDatosMes() {
+            const mesRaw = document.getElementById('mesSelector').value;
+            if (!mesRaw) return;
+            
+            const dateObj = new Date(mesRaw + '-05'); // Forzamos el día 5 para evitar saltos de mes por UTC
+            const mesFormateado = dateObj.toLocaleString('es-ES', { month: 'long', year: 'numeric' });
+            const status = document.getElementById('saveStatus');
+            
+            // UI visual feedback (indicando carga)
+            const oldText = document.querySelector('.val-salario').innerText;
+            document.querySelector('.val-salario').innerHTML = '<i class="fa-solid fa-spinner fa-spin text-emerald-400"></i>';
+            
+            const { data, error } = await supabaseClient
+                .from('historial_meses')
+                .select('*')
+                .eq('mes', mesFormateado)
+                .single();
+                
+            if (data) {
+                // Hay un registro, recuperamos el modo
+                const isReal = data.tipo === 'Real';
+                
+                // Aplicamos modo sin trigger de recalculo automático para inyectar datos
+                setModo(isReal ? 'real' : 'simulacion', false);
+                
+                // Deducción de Emaar Card (ya que no la guardábamos en columna aparte)
+                const emaarCalculado = data.linea_base - COSTES_FIJOS_BASE - (data.dewa || 382);
+                document.getElementById('gastoEmaar').value = emaarCalculado > 0 ? emaarCalculado : 2000;
+                
+                if (isReal) {
+                    document.getElementById('salarioRealInput').value = data.salario;
+                    if(data.dewa) document.getElementById('dewaRealInput').value = data.dewa;
+                    actualizarGastos(); // Recalcula todo con los inputs exactos
+                } else {
+                    // Si es simulación, no podemos saber las dietas ni horas exactas (salvo que añadas esas columnas en Supabase)
+                    // Por lo tanto, inyectamos la 'foto' exacta de la BD en las variables globales y textos finales.
+                    gastoVariableEmaar = emaarCalculado > 0 ? emaarCalculado : 2000;
+                    gastoDewa = data.dewa || 382;
+                    salarioEstimadoCalculado = data.salario;
+                    lineaBaseDinamica = data.linea_base;
+                    excedente = data.excedente;
+                    pagoDeuda = data.pago_extra_deuda;
+                    fondoEmergencia = data.fondo_emergencia;
+                    
+                    // Actualizamos textos a la fuerza
+                    updateTexts('val-salario', Math.floor(salarioEstimadoCalculado).toLocaleString() + ' AED');
+                    updateTexts('val-base', Math.floor(lineaBaseDinamica).toLocaleString() + ' AED');
+                    updateTexts('val-excedente', Math.floor(excedente).toLocaleString() + ' AED');
+                    updateTexts('val-deuda', Math.floor(pagoDeuda).toLocaleString() + ' AED');
+                    updateTexts('val-fondo', Math.floor(fondoEmergencia).toLocaleString() + ' AED');
+                    updateTexts('val-emaar', '-' + Math.floor(gastoVariableEmaar).toLocaleString() + ' AED');
+                    updateTexts('val-dewa-tooltip', Math.floor(gastoDewa).toLocaleString() + ' AED');
+                    
+                    document.getElementById('resumenFijos').innerText = '-' + Math.floor(COSTES_FIJOS_BASE + gastoDewa).toLocaleString() + ' AED';
+                    document.getElementById('kpiCostesFijos').innerText = Math.floor(COSTES_FIJOS_BASE + gastoDewa).toLocaleString() + ' AED';
+                    document.getElementById('dewaTotalSimDisplay').innerText = Math.floor(gastoDewa) + ' AED';
+                    
+                    // Activar panel excedente si hay
+                    const panelExcedente = document.getElementById('panelExcedente');
+                    const panelSinExcedente = document.getElementById('sinExcedente');
+                    if (excedente > 0) {
+                        panelExcedente.style.opacity = '1';
+                        panelExcedente.style.pointerEvents = 'auto';
+                        panelSinExcedente.classList.add('hidden');
+                    } else {
+                        panelExcedente.style.opacity = '0.1';
+                        panelExcedente.style.pointerEvents = 'none';
+                        panelSinExcedente.classList.remove('hidden');
+                    }
+                    
+                    actualizarGraficoDistribucion(lineaBaseDinamica, pagoDeuda, fondoEmergencia);
+                    actualizarKpiProyeccion();
+                }
+                
+                status.innerHTML = `<span><i class="fa-solid fa-cloud-arrow-down"></i> Se ha cargado el estado de ${mesFormateado}</span>`;
+                status.className = "text-sm font-bold text-center text-indigo-400 mt-4";
+                status.classList.remove('hidden');
+                setTimeout(() => { status.classList.add('hidden'); }, 3000);
+                
+            } else {
+                // No hay datos, reiniciamos a estado por defecto
+                if (modoActual === 'real') {
+                    document.getElementById('salarioRealInput').value = '';
+                    document.getElementById('dewaRealInput').value = '';
+                }
+                document.querySelector('.val-salario').innerText = oldText; // Previene que se quede el spinner
+                actualizarGastos(); 
+                
+                status.innerHTML = `<span>✨ Nuevo registro: ${mesFormateado}</span>`;
+                status.className = "text-sm font-bold text-center text-slate-500 mt-4";
+                status.classList.remove('hidden');
+                setTimeout(() => { status.classList.add('hidden'); }, 2000);
+            }
+        }
+
+        // Se ha añadido el trigger opcional para evitar bucles de render en la carga inicial
+        function setModo(modo, triggerCalc = true) {
             modoActual = modo;
             if (modo === 'simulacion') {
                 document.getElementById('btnModoSim').className = "flex-1 sm:w-48 py-3 text-sm font-black bg-indigo-500/20 text-indigo-400 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2";
@@ -518,7 +621,7 @@
                 document.getElementById('textoBotonGuardar').innerText = "Guardar Dato Real en Supabase";
                 document.getElementById('desgloseSimulacion').classList.add('hidden');
             }
-            actualizarGastos(); 
+            if (triggerCalc) actualizarGastos(); 
         }
 
         function updateTexts(className, text) {
@@ -530,7 +633,7 @@
             document.getElementById('sliderValue').innerHTML = `${val}<span class="text-xl text-indigo-400">h</span>`;
             const percentage = (val / 130) * 100;
             document.getElementById('blockHoursSlider').style.background = `linear-gradient(to right, #6366f1 0%, #6366f1 ${percentage}%, #334155 ${percentage}%, #334155 100%)`;
-            calcularTodo();
+            calcularTodo(); // Si el usuario toca el slider, sobreescribirá la vista cargada en directo
         }
 
         function actualizarGastos() {
@@ -780,7 +883,7 @@
                 status.innerText = "Error: " + error.message;
                 status.className = "text-sm font-bold text-center text-rose-400 mt-4";
             } else {
-                status.innerText = `✅ ¡Registro de ${mesFormateado} guardado/actualizado con éxito!`;
+                status.innerHTML = `<span>✅ ¡Registro de ${mesFormateado} actualizado con éxito!</span>`;
                 status.className = "text-sm font-bold text-center text-emerald-400 mt-4";
                 cargarHistorialIngresos(); 
                 setTimeout(() => { status.classList.add('hidden'); }, 4000);
