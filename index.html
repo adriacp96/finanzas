@@ -911,14 +911,42 @@
             status.classList.remove('hidden');
 
             if (error) {
-                status.innerText = "Error: " + error.message;
+                status.innerText = "Error al guardar mes: " + error.message;
                 status.className = "text-sm font-bold text-center text-rose-400 mt-4";
             } else {
-                status.innerHTML = `<span>✅ ¡Registro de ${mesFormateado} actualizado con éxito!</span>`;
+                // ACTUALIZACIÓN AUTOMÁTICA DE TODAS LAS DEUDAS
+                const { data: deudasActuales, error: errorDeudas } = await supabaseClient.from('deudas').select('*');
+                
+                if (!errorDeudas && deudasActuales) {
+                    const deudasActualizadas = deudasActuales.map(deuda => {
+                        const saldoAntiguo = parseFloat(deuda.saldo);
+                        const cuota = parseFloat(deuda.cuota_minima);
+                        
+                        // Restar cuota mínima evitando saldo negativo
+                        let nuevoSaldo = Math.max(0, saldoAntiguo - cuota);
+
+                        // Opcional: Destinar el excedente (pagoDeuda) a un préstamo en concreto
+                        // if (deuda.nombre.includes('Emirates NBD')) { nuevoSaldo = Math.max(0, nuevoSaldo - pagoDeuda); }
+
+                        return {
+                            ...deuda,
+                            saldo: nuevoSaldo
+                        };
+                    });
+
+                    const { error: errorUpsertDeudas } = await supabaseClient.from('deudas').upsert(deudasActualizadas);
+                    
+                    if (!errorUpsertDeudas) {
+                        cargarDeudas();
+                    }
+                }
+
+                status.innerHTML = `<span>✅ ¡Registro de ${mesFormateado} y saldos de deuda actualizados!</span>`;
                 status.className = "text-sm font-bold text-center text-emerald-400 mt-4";
                 cargarHistorialIngresos(); 
                 setTimeout(() => { status.classList.add('hidden'); }, 4000);
             }
+            
             btn.innerHTML = originalContent;
             btn.disabled = false;
         }
