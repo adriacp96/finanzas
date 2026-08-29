@@ -28,7 +28,7 @@
         }
         input[type=range]:focus { outline: none; }
         
-        /* Ocultar el icono de calendario por defecto en WebKit para un look más limpio */
+        /* Ocultar el icono de calendario por defecto en WebKit */
         input[type="month"]::-webkit-calendar-picker-indicator {
             filter: invert(1); opacity: 0.5; cursor: pointer; padding: 0px; margin: 0px;
         }
@@ -54,7 +54,6 @@
     <div class="text-white pb-32 pt-8 px-4 relative z-10">
         <div class="max-w-7xl mx-auto relative z-10">
             
-            <!-- HEADER REDISEÑADO PARA MÓVIL Y NAVEGACIÓN DINÁMICA -->
             <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 sm:mb-12 gap-5 sm:gap-0">
                 <div class="flex items-center gap-4">
                     <div class="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-400 to-purple-600 flex items-center justify-center font-black text-xl shadow-lg border-2 border-white/20">AC</div>
@@ -65,7 +64,6 @@
                 </div>
                 
                 <div class="flex items-center justify-between w-full sm:w-auto gap-3">
-                    <!-- Selector de mes dinámico con flechas -->
                     <div class="flex items-center bg-white/5 backdrop-blur-md rounded-xl border border-white/10 p-1 shadow-inner">
                         <button onclick="cambiarMes(-1)" class="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
                             <i class="fa-solid fa-chevron-left"></i>
@@ -76,7 +74,6 @@
                         </button>
                     </div>
                     
-                    <!-- Badge Supabase Adaptativo -->
                     <div class="inline-flex items-center gap-2 bg-white/5 px-3 py-2 sm:px-4 sm:py-3 rounded-xl backdrop-blur-md border border-white/10 shadow-inner h-[44px]">
                         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
                         <span class="text-[10px] sm:text-xs font-bold text-slate-300 uppercase tracking-wider hidden sm:inline">Supabase Live</span>
@@ -431,7 +428,7 @@
 
         const BASE_FIJA_NETA = 11165.00; 
         const TARIFA_HORA_VUELO = 68.32;  
-        const COSTES_FIJOS_BASE = 8320.67; // Alquiler + Préstamos + Internet Fijo
+        const COSTES_FIJOS_BASE = 8320.67; 
 
         let gastoVariableEmaar = 2000.00;
         let gastoDewa = 382.00; 
@@ -463,19 +460,12 @@
             const today = new Date();
             document.getElementById('mesSelector').value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
             
-            // Pintar slider inicial (evitamos que esté vacío al recargar)
-            const val = document.getElementById('blockHoursSlider').value;
-            const percentage = (val / 130) * 100;
-            document.getElementById('blockHoursSlider').style.background = `linear-gradient(to right, #6366f1 0%, #6366f1 ${percentage}%, #334155 ${percentage}%, #334155 100%)`;
-
             cargarDeudas();
             cargarHistorialIngresos();
             
-            // Cargar datos del mes actual en lugar de calcular por defecto
             cargarDatosMes(); 
         };
 
-        // Función dinámica para cambiar meses con las flechas
         function cambiarMes(offset) {
             const selector = document.getElementById('mesSelector');
             if (!selector.value) return;
@@ -487,20 +477,16 @@
             const newMonth = String(date.getMonth() + 1).padStart(2, '0');
             
             selector.value = `${newYear}-${newMonth}`;
-            cargarDatosMes(); // <-- Consulta a la base de datos automáticamente
+            cargarDatosMes(); 
         }
 
         async function cargarDatosMes() {
             const mesRaw = document.getElementById('mesSelector').value;
             if (!mesRaw) return;
             
-            const dateObj = new Date(mesRaw + '-05'); // Forzamos el día 5 para evitar saltos de mes por UTC
+            const dateObj = new Date(mesRaw + '-05');
             const mesFormateado = dateObj.toLocaleString('es-ES', { month: 'long', year: 'numeric' });
             const status = document.getElementById('saveStatus');
-            
-            // UI visual feedback (indicando carga)
-            const oldText = document.querySelector('.val-salario').innerText;
-            document.querySelector('.val-salario').innerHTML = '<i class="fa-solid fa-spinner fa-spin text-emerald-400"></i>';
             
             const { data, error } = await supabaseClient
                 .from('historial_meses')
@@ -509,60 +495,29 @@
                 .single();
                 
             if (data) {
-                // Hay un registro, recuperamos el modo
                 const isReal = data.tipo === 'Real';
                 
-                // Aplicamos modo sin trigger de recalculo automático para inyectar datos
-                setModo(isReal ? 'real' : 'simulacion', false);
+                // Inyectamos valores guardados
+                document.getElementById('blockHoursSlider').value = data.horas_vuelo ?? 80;
+                document.getElementById('mealAllowance').value = data.dietas ?? 1500;
+                document.getElementById('turnarounds').value = data.turnarounds ?? 300;
+                document.getElementById('gastoEmaar').value = data.gasto_emaar ?? 2000;
+                document.getElementById('dewaKwh').value = data.dewa_kwh ?? 385;
+                document.getElementById('dewaM3').value = data.dewa_m3 ?? 2.3;
                 
-                // Deducción de Emaar Card (ya que no la guardábamos en columna aparte)
-                const emaarCalculado = data.linea_base - COSTES_FIJOS_BASE - (data.dewa || 382);
-                document.getElementById('gastoEmaar').value = emaarCalculado > 0 ? emaarCalculado : 2000;
+                if (data.dewa_real) document.getElementById('dewaRealInput').value = data.dewa_real;
+                else document.getElementById('dewaRealInput').value = '';
                 
-                if (isReal) {
-                    document.getElementById('salarioRealInput').value = data.salario;
-                    if(data.dewa) document.getElementById('dewaRealInput').value = data.dewa;
-                    actualizarGastos(); // Recalcula todo con los inputs exactos
-                } else {
-                    // Si es simulación, no podemos saber las dietas ni horas exactas (salvo que añadas esas columnas en Supabase)
-                    // Por lo tanto, inyectamos la 'foto' exacta de la BD en las variables globales y textos finales.
-                    gastoVariableEmaar = emaarCalculado > 0 ? emaarCalculado : 2000;
-                    gastoDewa = data.dewa || 382;
-                    salarioEstimadoCalculado = data.salario;
-                    lineaBaseDinamica = data.linea_base;
-                    excedente = data.excedente;
-                    pagoDeuda = data.pago_extra_deuda;
-                    fondoEmergencia = data.fondo_emergencia;
-                    
-                    // Actualizamos textos a la fuerza
-                    updateTexts('val-salario', Math.floor(salarioEstimadoCalculado).toLocaleString() + ' AED');
-                    updateTexts('val-base', Math.floor(lineaBaseDinamica).toLocaleString() + ' AED');
-                    updateTexts('val-excedente', Math.floor(excedente).toLocaleString() + ' AED');
-                    updateTexts('val-deuda', Math.floor(pagoDeuda).toLocaleString() + ' AED');
-                    updateTexts('val-fondo', Math.floor(fondoEmergencia).toLocaleString() + ' AED');
-                    updateTexts('val-emaar', '-' + Math.floor(gastoVariableEmaar).toLocaleString() + ' AED');
-                    updateTexts('val-dewa-tooltip', Math.floor(gastoDewa).toLocaleString() + ' AED');
-                    
-                    document.getElementById('resumenFijos').innerText = '-' + Math.floor(COSTES_FIJOS_BASE + gastoDewa).toLocaleString() + ' AED';
-                    document.getElementById('kpiCostesFijos').innerText = Math.floor(COSTES_FIJOS_BASE + gastoDewa).toLocaleString() + ' AED';
-                    document.getElementById('dewaTotalSimDisplay').innerText = Math.floor(gastoDewa) + ' AED';
-                    
-                    // Activar panel excedente si hay
-                    const panelExcedente = document.getElementById('panelExcedente');
-                    const panelSinExcedente = document.getElementById('sinExcedente');
-                    if (excedente > 0) {
-                        panelExcedente.style.opacity = '1';
-                        panelExcedente.style.pointerEvents = 'auto';
-                        panelSinExcedente.classList.add('hidden');
-                    } else {
-                        panelExcedente.style.opacity = '0.1';
-                        panelExcedente.style.pointerEvents = 'none';
-                        panelSinExcedente.classList.remove('hidden');
-                    }
-                    
-                    actualizarGraficoDistribucion(lineaBaseDinamica, pagoDeuda, fondoEmergencia);
-                    actualizarKpiProyeccion();
-                }
+                if (data.salario_real) document.getElementById('salarioRealInput').value = data.salario_real;
+                else document.getElementById('salarioRealInput').value = '';
+                
+                // Actualizar barra de progreso del slider visualmente
+                const val = data.horas_vuelo ?? 80;
+                const percentage = (val / 130) * 100;
+                document.getElementById('blockHoursSlider').style.background = `linear-gradient(to right, #6366f1 0%, #6366f1 ${percentage}%, #334155 ${percentage}%, #334155 100%)`;
+                document.getElementById('sliderValue').innerHTML = `${val}<span class="text-xl text-indigo-400">h</span>`;
+
+                setModo(isReal ? 'real' : 'simulacion', true);
                 
                 status.innerHTML = `<span><i class="fa-solid fa-cloud-arrow-down"></i> Se ha cargado el estado de ${mesFormateado}</span>`;
                 status.className = "text-sm font-bold text-center text-indigo-400 mt-4";
@@ -570,13 +525,21 @@
                 setTimeout(() => { status.classList.add('hidden'); }, 3000);
                 
             } else {
-                // No hay datos, reiniciamos a estado por defecto
-                if (modoActual === 'real') {
-                    document.getElementById('salarioRealInput').value = '';
-                    document.getElementById('dewaRealInput').value = '';
-                }
-                document.querySelector('.val-salario').innerText = oldText; // Previene que se quede el spinner
-                actualizarGastos(); 
+                // Si no hay datos, volver a default settings
+                document.getElementById('blockHoursSlider').value = 80;
+                document.getElementById('mealAllowance').value = 1500;
+                document.getElementById('turnarounds').value = 300;
+                document.getElementById('gastoEmaar').value = 2000;
+                document.getElementById('dewaKwh').value = 385;
+                document.getElementById('dewaM3').value = 2.3;
+                document.getElementById('dewaRealInput').value = '';
+                document.getElementById('salarioRealInput').value = '';
+                
+                const percentage = (80 / 130) * 100;
+                document.getElementById('blockHoursSlider').style.background = `linear-gradient(to right, #6366f1 0%, #6366f1 ${percentage}%, #334155 ${percentage}%, #334155 100%)`;
+                document.getElementById('sliderValue').innerHTML = `80<span class="text-xl text-indigo-400">h</span>`;
+
+                setModo('simulacion', true);
                 
                 status.innerHTML = `<span>✨ Nuevo registro: ${mesFormateado}</span>`;
                 status.className = "text-sm font-bold text-center text-slate-500 mt-4";
@@ -585,7 +548,6 @@
             }
         }
 
-        // Se ha añadido el trigger opcional para evitar bucles de render en la carga inicial
         function setModo(modo, triggerCalc = true) {
             modoActual = modo;
             if (modo === 'simulacion') {
@@ -633,7 +595,7 @@
             document.getElementById('sliderValue').innerHTML = `${val}<span class="text-xl text-indigo-400">h</span>`;
             const percentage = (val / 130) * 100;
             document.getElementById('blockHoursSlider').style.background = `linear-gradient(to right, #6366f1 0%, #6366f1 ${percentage}%, #334155 ${percentage}%, #334155 100%)`;
-            calcularTodo(); // Si el usuario toca el slider, sobreescribirá la vista cargada en directo
+            calcularTodo();
         }
 
         function actualizarGastos() {
@@ -645,10 +607,10 @@
                 const m3 = parseFloat(document.getElementById('dewaM3').value) || 0;
                 
                 const elecSubtotal = (kwh * 0.230) + (kwh * 0.060) + 5.00;
-                const elecTotal = elecSubtotal * 1.05; // 5% VAT
+                const elecTotal = elecSubtotal * 1.05; 
                 
                 const waterSubtotal = (m3 * 7.700) + (m3 * 1.100) + 5.00;
-                const waterTotal = waterSubtotal * 1.05; // 5% VAT
+                const waterTotal = waterSubtotal * 1.05; 
                 
                 const fijoDubai = 236.08; 
 
@@ -865,7 +827,7 @@
             btn.innerHTML = `<svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> <span>Sincronizando...</span>`;
             btn.disabled = true;
 
-            const { error } = await supabaseClient.from('historial_meses').upsert([{
+            const payload = {
                 mes: mesFormateado, 
                 salario: Math.floor(salarioEstimadoCalculado), 
                 linea_base: Math.floor(lineaBaseDinamica),
@@ -873,8 +835,18 @@
                 pago_extra_deuda: Math.floor(pagoDeuda), 
                 fondo_emergencia: Math.floor(fondoEmergencia), 
                 tipo: modoActual === 'simulacion' ? 'Proyección' : 'Real',
-                dewa: Math.floor(gastoDewa)
-            }], { onConflict: 'mes' });
+                dewa: Math.floor(gastoDewa),
+                horas_vuelo: parseFloat(document.getElementById('blockHoursSlider').value) || 0,
+                dietas: parseFloat(document.getElementById('mealAllowance').value) || 0,
+                turnarounds: parseFloat(document.getElementById('turnarounds').value) || 0,
+                gasto_emaar: parseFloat(document.getElementById('gastoEmaar').value) || 0,
+                dewa_kwh: parseFloat(document.getElementById('dewaKwh').value) || 0,
+                dewa_m3: parseFloat(document.getElementById('dewaM3').value) || 0,
+                dewa_real: parseFloat(document.getElementById('dewaRealInput').value) || null,
+                salario_real: parseFloat(document.getElementById('salarioRealInput').value) || null
+            };
+
+            const { error } = await supabaseClient.from('historial_meses').upsert([payload], { onConflict: 'mes' });
 
             const status = document.getElementById('saveStatus');
             status.classList.remove('hidden');
