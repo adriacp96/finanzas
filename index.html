@@ -13,7 +13,6 @@
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        /* Custom Premium Slider */
         input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
         input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none; height: 26px; width: 26px; border-radius: 50%;
@@ -40,7 +39,6 @@
 
     <!-- HEADER / HERO SECTION -->
     <div class="bg-slate-900 text-white pb-32 pt-8 px-4 rounded-b-[3rem] shadow-2xl relative overflow-hidden">
-        <!-- Abstract Lights -->
         <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
             <div class="absolute -top-24 -right-24 w-96 h-96 bg-indigo-500 rounded-full mix-blend-screen filter blur-[80px] opacity-40"></div>
             <div class="absolute top-12 -left-24 w-72 h-72 bg-emerald-500 rounded-full mix-blend-screen filter blur-[80px] opacity-30"></div>
@@ -193,7 +191,7 @@
             </div>
         </div>
 
-        <!-- FILA 2: BALANCE, 70/30 Y GUARDAR (El Cerebro) -->
+        <!-- FILA 2: BALANCE Y ESTRATEGIA -->
         <div class="glass-card rounded-[2.5rem] p-8 sm:p-10 border border-white shadow-xl relative overflow-hidden bg-white/95">
             
             <div class="flex items-center justify-between mb-10 border-b border-slate-100 pb-6">
@@ -287,7 +285,6 @@
                 </button>
                 <p id="saveStatus" class="text-sm font-bold text-center hidden mt-4"></p>
             </div>
-
         </div>
 
         <!-- FILA 3: HISTÓRICO DE INGRESOS -->
@@ -320,18 +317,28 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
                 
-                <!-- Vehículo -->
-                <div class="lg:col-span-1 bg-gradient-to-b from-slate-900 to-black rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden border border-slate-800 h-full flex flex-col justify-between min-h-[360px]">
+                <!-- Vehículo Dinámico -->
+                <div class="lg:col-span-1 bg-gradient-to-b from-slate-900 to-black rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden border border-slate-800 h-full flex flex-col justify-between min-h-[380px]">
                     <div class="absolute top-0 right-0 w-64 h-64 bg-emerald-500 opacity-20 rounded-full -mr-20 -mt-20 blur-[60px] pointer-events-none"></div>
                     <div class="relative z-10">
                         <div class="flex justify-between items-start mb-4">
                             <span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Activo Fijo</span>
-                            <span class="text-slate-500 font-bold text-xs uppercase tracking-wider">Murabaha</span>
+                            <button id="carWidgetEditBtn" class="text-[10px] uppercase font-bold tracking-wider text-slate-400 bg-white/10 px-3 py-1.5 rounded-lg hover:bg-white/20 hover:text-white transition">Editar</button>
                         </div>
-                        <h3 class="text-white font-black text-3xl tracking-tight leading-tight mb-1">Jetour Dashing '25</h3>
-                        <div class="mt-8">
-                            <p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-1">Cuota Mensual Fija</p>
-                            <p class="text-4xl font-black text-white">1,741<span class="text-xl text-slate-500 font-bold">.67 AED</span></p>
+                        <h3 class="text-white font-black text-3xl tracking-tight leading-tight mb-8">Jetour Dashing '25</h3>
+                        
+                        <div class="space-y-5">
+                            <div>
+                                <p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-1">Lo que queda</p>
+                                <p id="carWidgetSaldo" class="text-3xl font-black text-white">--- AED</p>
+                            </div>
+                            <div class="flex justify-between items-end border-t border-slate-800 pt-4">
+                                <div>
+                                    <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest mb-1">Cuota Fija</p>
+                                    <p class="text-lg font-black text-slate-300">1,741.67 AED</p>
+                                </div>
+                                <span id="carWidgetMeses" class="text-xs font-bold text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded-md">---</span>
+                            </div>
                         </div>
                     </div>
                     <img src="dashing.png" alt="Jetour" class="absolute -bottom-6 -right-12 w-80 drop-shadow-2xl pointer-events-none z-0 transform scale-110">
@@ -354,7 +361,6 @@
     </main>
 
     <script>
-        // Supabase Init
         const supabaseUrl = 'https://jgvgabkrriedaquqehpb.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndmdhYmtycmllZGFxdXFlaHBiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5OTYzNDQsImV4cCI6MjEwMzU3MjM0NH0.jdq2xaDtJ0YO-8zpQYqQPu5e2dkyCl8XjXtw_cGhqko';
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
@@ -365,18 +371,13 @@
 
         let gastoVariableEmaar = 2000.00;
         let lineaBaseDinamica = GASTOS_FIJOS_OBLIGATORIOS + gastoVariableEmaar;
-        
         let salarioEstimadoCalculado = 0;
-        let excedente = 0;
-        let pagoDeuda = 0;
-        let fondoEmergencia = 0;
-        let deudaTotal = 0;
-        let modoActual = 'simulacion'; // 'simulacion' o 'real'
+        let excedente = 0, pagoDeuda = 0, fondoEmergencia = 0, deudaTotal = 0;
+        let modoActual = 'simulacion'; 
         
         let distChartInstance = null;
         let historyChartInstance = null;
 
-        // Histórico real previo
         const historicalIncome = [
             { mes: 'Ago 23', valor: 6617.6 }, { mes: 'Sep 23', valor: 3361.67 }, { mes: 'Oct 23', valor: 4482.8 },
             { mes: 'Nov 23', valor: 10353.51 }, { mes: 'Dic 23', valor: 12175.81 }, { mes: 'Ene 24', valor: 4167.82 },
@@ -395,16 +396,12 @@
 
         window.onload = () => {
             const today = new Date();
-            const yyyy = today.getFullYear();
-            const mm = String(today.getMonth() + 1).padStart(2, '0');
-            document.getElementById('mesSelector').value = `${yyyy}-${mm}`;
-            
+            document.getElementById('mesSelector').value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
             cargarDeudas();
             actualizarSlider(); 
             cargarHistorialIngresos();
         };
 
-        // --- SISTEMA DE MODOS (PROYECCIÓN VS REAL) ---
         function setModo(modo) {
             modoActual = modo;
             if (modo === 'simulacion') {
@@ -451,7 +448,6 @@
             const inputEmaar = document.getElementById('gastoEmaar').value;
             gastoVariableEmaar = parseFloat(inputEmaar) || 0;
             lineaBaseDinamica = GASTOS_FIJOS_OBLIGATORIOS + gastoVariableEmaar;
-            
             updateTexts('val-emaar', '-' + Math.floor(gastoVariableEmaar).toLocaleString() + ' AED');
             updateTexts('val-base', Math.floor(lineaBaseDinamica).toLocaleString() + ' AED');
             calcularExcedente();
@@ -462,16 +458,14 @@
                 const hours = parseFloat(document.getElementById('blockHoursSlider').value) || 0;
                 const meals = parseFloat(document.getElementById('mealAllowance').value) || 0;
                 const turnarounds = parseFloat(document.getElementById('turnarounds').value) || 0;
-
                 const pagoVuelo = hours * TARIFA_HORA_VUELO;
+                
                 salarioEstimadoCalculado = BASE_FIJA_NETA + pagoVuelo + meals + turnarounds;
-
                 document.getElementById('pagoVueloDisplay').innerText = Math.floor(pagoVuelo).toLocaleString() + ' AED';
                 document.getElementById('dietasDisplay').innerText = Math.floor(meals + turnarounds).toLocaleString() + ' AED';
             } else {
                 salarioEstimadoCalculado = parseFloat(document.getElementById('salarioRealInput').value) || 0;
             }
-
             updateTexts('val-salario', Math.floor(salarioEstimadoCalculado).toLocaleString() + ' AED');
             calcularExcedente();
         }
@@ -513,17 +507,9 @@
                     type: 'doughnut',
                     data: {
                         labels: ['Costes + Tarjeta', 'Ataque Deuda', 'Fondo'],
-                        datasets: [{
-                            data: [base, deuda, fondo],
-                            backgroundColor: ['#e2e8f0', '#f43f5e', '#3b82f6'],
-                            borderWidth: 0, hoverOffset: 5
-                        }]
+                        datasets: [{ data: [base, deuda, fondo], backgroundColor: ['#e2e8f0', '#f43f5e', '#3b82f6'], borderWidth: 0, hoverOffset: 5 }]
                     },
-                    options: {
-                        responsive: true, maintainAspectRatio: false, cutout: '80%',
-                        plugins: { legend: { display: false }, tooltip: { enabled: true } },
-                        animation: { duration: 400, easing: 'easeOutQuart' }
-                    }
+                    options: { responsive: true, maintainAspectRatio: false, cutout: '80%', plugins: { legend: { display: false }, tooltip: { enabled: true } }, animation: { duration: 400, easing: 'easeOutQuart' } }
                 });
             }
         }
@@ -550,12 +536,23 @@
 
             data.forEach(deuda => {
                 const saldo = parseFloat(deuda.saldo);
+                const cuota = parseFloat(deuda.cuota_minima);
                 deudaTotal += saldo;
                 
-                if (!deuda.nombre.toLowerCase().includes('coche')) {
+                if (deuda.nombre.toLowerCase().includes('coche')) {
+                    // Update Car Widget Dynamically
+                    const carSaldoEl = document.getElementById('carWidgetSaldo');
+                    const carEditBtn = document.getElementById('carWidgetEditBtn');
+                    const carMesesEl = document.getElementById('carWidgetMeses');
+                    
+                    if (carSaldoEl) carSaldoEl.innerHTML = `${saldo.toLocaleString('en-US', {minimumFractionDigits: 2})} <span class="text-lg text-slate-400">AED</span>`;
+                    if (carEditBtn) carEditBtn.onclick = () => actualizarSaldo(deuda.id, deuda.saldo);
+                    if (carMesesEl && cuota > 0 && saldo > 0) carMesesEl.innerText = `Quedan ~${Math.ceil(saldo/cuota)} meses`;
+                } else {
                     const porcentaje = (saldo / maxDeuda) * 100;
                     const isCreditCard = deuda.nombre.toLowerCase().includes('tarjeta') || deuda.nombre.includes('2811');
                     const colorClass = isCreditCard ? 'bg-emerald-500' : 'bg-rose-500';
+                    const mesesTxt = cuota > 0 && saldo > 0 ? `<span class="text-indigo-500 font-black ml-1">(~${Math.ceil(saldo/cuota)} meses)</span>` : '';
 
                     container.innerHTML += `
                         <div class="bg-white border border-slate-100 p-6 rounded-3xl shadow-sm hover:shadow-lg transition-all duration-300 group flex flex-col justify-between">
@@ -564,12 +561,13 @@
                                     <h3 class="font-bold text-slate-800 leading-tight pr-2">${deuda.nombre}</h3>
                                     <button onclick="actualizarSaldo(${deuda.id}, ${deuda.saldo})" class="text-[10px] uppercase font-bold tracking-wider text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 hover:text-indigo-800 transition">Editar</button>
                                 </div>
+                                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Lo que queda</p>
                                 <p class="text-3xl font-black text-slate-900 tracking-tight mb-2">${saldo.toLocaleString('en-US', {minimumFractionDigits: 2})} <span class="text-sm font-bold text-slate-400">AED</span></p>
                             </div>
                             <div class="mt-4">
                                 <div class="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
                                     <span>Progreso / Peso</span>
-                                    <span>Cuota: ${parseFloat(deuda.cuota_minima).toLocaleString()} AED</span>
+                                    <span>Cuota: ${cuota.toLocaleString()} AED ${mesesTxt}</span>
                                 </div>
                                 <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
                                     <div class="${colorClass} h-full rounded-full transition-all duration-1000" style="width: ${porcentaje}%"></div>
@@ -579,7 +577,6 @@
                     `;
                 }
             });
-
             document.getElementById('kpiTotalDebt').innerText = Math.floor(deudaTotal).toLocaleString() + ' AED';
             actualizarKpiProyeccion();
         }
@@ -595,8 +592,7 @@
 
         async function cargarHistorialIngresos() {
             const { data, error } = await supabaseClient.from('historial_meses').select('mes, salario, tipo').order('id', { ascending: true });
-            
-            let combinedData = [...historicalIncome.map(d => ({...d, tipo: 'Real'}))]; // Histórico antiguo siempre es 'Real'
+            let combinedData = [...historicalIncome.map(d => ({...d, tipo: 'Real'}))]; 
             
             if (!error && data) {
                 data.forEach(record => {
@@ -608,7 +604,7 @@
 
             const labels = combinedData.map(d => d.tipo === 'Proyección' ? d.mes + ' 🔮' : d.mes);
             const values = combinedData.map(d => d.valor);
-            const pointColors = combinedData.map(d => d.tipo === 'Proyección' ? '#fbbf24' : '#ffffff'); // Amarillo para proyecciones
+            const pointColors = combinedData.map(d => d.tipo === 'Proyección' ? '#fbbf24' : '#ffffff');
 
             const ctx = document.getElementById('incomeHistoryChart').getContext('2d');
             const gradient = ctx.createLinearGradient(0, 0, 0, 350);
@@ -616,45 +612,19 @@
             gradient.addColorStop(1, 'rgba(99, 102, 241, 0.0)');
 
             if (historyChartInstance) historyChartInstance.destroy();
-
             historyChartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Ingreso Neto (AED)',
-                        data: values,
-                        borderColor: '#6366f1',
-                        borderWidth: 3,
-                        backgroundColor: gradient,
-                        fill: true,
-                        tension: 0.4,
-                        pointBackgroundColor: pointColors,
-                        pointBorderColor: '#6366f1',
-                        pointBorderWidth: 2,
-                        pointRadius: 4,
-                        pointHoverRadius: 6
+                        label: 'Ingreso Neto (AED)', data: values, borderColor: '#6366f1', borderWidth: 3, backgroundColor: gradient,
+                        fill: true, tension: 0.4, pointBackgroundColor: pointColors, pointBorderColor: '#6366f1', pointBorderWidth: 2, pointRadius: 4, pointHoverRadius: 6
                     }]
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { display: false }, 
-                        tooltip: { 
-                            backgroundColor: '#1e293b', padding: 12, titleFont: { size: 13 }, bodyFont: { size: 14, weight: 'bold' },
-                            callbacks: {
-                                label: function(context) {
-                                    const rawVal = context.raw.toLocaleString();
-                                    const t = combinedData[context.dataIndex].tipo;
-                                    return ` ${t}: ${rawVal} AED`;
-                                }
-                            }
-                        } 
-                    },
-                    scales: {
-                        y: { beginAtZero: true, grid: { color: '#f1f5f9', drawBorder: false }, ticks: { color: '#94a3b8', font: { size: 11, weight: 'bold' }, callback: function(value) { return value / 1000 + 'k'; } } },
-                        x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10, weight: 'bold' }, maxTicksLimit: 12 } }
-                    },
+                    plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1e293b', padding: 12, titleFont: { size: 13 }, bodyFont: { size: 14, weight: 'bold' }, callbacks: { label: function(context) { return ` ${combinedData[context.dataIndex].tipo}: ${context.raw.toLocaleString()} AED`; } } } },
+                    scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9', drawBorder: false }, ticks: { color: '#94a3b8', font: { size: 11, weight: 'bold' }, callback: function(value) { return value / 1000 + 'k'; } } }, x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10, weight: 'bold' }, maxTicksLimit: 12 } } },
                     interaction: { mode: 'index', intersect: false }
                 }
             });
@@ -674,13 +644,8 @@
             btn.disabled = true;
 
             const { error } = await supabaseClient.from('historial_meses').insert([{
-                mes: mesFormateado,
-                salario: Math.floor(salarioEstimadoCalculado),
-                linea_base: Math.floor(lineaBaseDinamica),
-                excedente: Math.floor(excedente),
-                pago_extra_deuda: Math.floor(pagoDeuda),
-                fondo_emergencia: Math.floor(fondoEmergencia),
-                tipo: modoActual === 'simulacion' ? 'Proyección' : 'Real'
+                mes: mesFormateado, salario: Math.floor(salarioEstimadoCalculado), linea_base: Math.floor(lineaBaseDinamica),
+                excedente: Math.floor(excedente), pago_extra_deuda: Math.floor(pagoDeuda), fondo_emergencia: Math.floor(fondoEmergencia), tipo: modoActual === 'simulacion' ? 'Proyección' : 'Real'
             }]);
 
             const status = document.getElementById('saveStatus');
