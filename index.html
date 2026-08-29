@@ -40,6 +40,7 @@
 
     <!-- HEADER / HERO SECTION -->
     <div class="bg-slate-900 text-white pb-32 pt-8 px-4 rounded-b-[3rem] shadow-2xl relative overflow-hidden">
+        <!-- Abstract Lights -->
         <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
             <div class="absolute -top-24 -right-24 w-96 h-96 bg-indigo-500 rounded-full mix-blend-screen filter blur-[80px] opacity-40"></div>
             <div class="absolute top-12 -left-24 w-72 h-72 bg-emerald-500 rounded-full mix-blend-screen filter blur-[80px] opacity-30"></div>
@@ -95,46 +96,71 @@
     <!-- MAIN DASHBOARD CONTENT -->
     <main class="max-w-7xl mx-auto px-4 -mt-20 relative z-20 space-y-8 pb-24">
 
+        <!-- TOGGLE MODO -->
+        <div class="flex justify-center -mt-6 mb-2">
+            <div class="bg-white p-1 rounded-2xl shadow-xl border border-slate-100 inline-flex w-full sm:w-auto">
+                <button id="btnModoSim" onclick="setModo('simulacion')" class="flex-1 sm:w-48 py-3 text-sm font-black bg-indigo-50 text-indigo-700 rounded-xl transition-all shadow-sm">🔮 Proyección</button>
+                <button id="btnModoReal" onclick="setModo('real')" class="flex-1 sm:w-48 py-3 text-sm font-black text-slate-400 hover:text-slate-700 rounded-xl transition-all">✅ Dato Real</button>
+            </div>
+        </div>
+
         <!-- FILA 1: ENTRADAS DE DATOS -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             
             <!-- PASO 1: INGRESOS -->
             <div class="glass-card rounded-3xl p-8 border border-white">
-                <div class="flex items-center gap-3 mb-8">
-                    <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center font-black">1</div>
-                    <h2 class="text-xl font-black text-slate-800 tracking-tight">Simulador de Ingresos</h2>
-                </div>
-
-                <div class="mb-10 bg-slate-50 p-6 rounded-2xl border border-slate-100 shadow-inner">
-                    <div class="flex justify-between items-end mb-4">
-                        <div>
-                            <label class="text-xs font-bold text-slate-500 uppercase tracking-widest">Horas de Vuelo (Block)</label>
-                            <p class="text-xs font-bold text-indigo-500 mt-1 bg-indigo-50 inline-block px-2 py-1 rounded">~68.32 AED/h</p>
-                        </div>
-                        <span id="sliderValue" class="text-4xl font-black text-indigo-600 tracking-tighter">80<span class="text-xl text-indigo-400">h</span></span>
-                    </div>
-                    <input type="range" id="blockHoursSlider" min="0" max="130" value="80" oninput="actualizarSlider()" class="mt-2">
-                    <div class="flex justify-between text-[10px] uppercase font-extrabold text-slate-400 mt-3 tracking-wider">
-                        <span>0h</span>
-                        <span>Normal (80h)</span>
-                        <span>Overtime (130h)</span>
+                <div class="flex items-center justify-between mb-8">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center font-black">1</div>
+                        <h2 class="text-xl font-black text-slate-800 tracking-tight" id="tituloIngresos">Simulador de Ingresos</h2>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 transition-all">
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Dietas (Meal)</label>
-                        <div class="flex items-center">
-                            <span class="text-slate-400 font-bold mr-2 text-sm">AED</span>
-                            <input type="number" id="mealAllowance" value="1500" oninput="calcularTodo()" class="w-full bg-transparent text-2xl font-black text-slate-800 focus:outline-none placeholder-slate-300">
+                <!-- MODO SIMULACIÓN -->
+                <div id="panelSimulacion">
+                    <div class="mb-10 bg-slate-50 p-6 rounded-2xl border border-slate-100 shadow-inner">
+                        <div class="flex justify-between items-end mb-4">
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-widest">Horas de Vuelo (Block)</label>
+                                <p class="text-xs font-bold text-indigo-500 mt-1 bg-indigo-50 inline-block px-2 py-1 rounded">~68.32 AED/h</p>
+                            </div>
+                            <span id="sliderValue" class="text-4xl font-black text-indigo-600 tracking-tighter">80<span class="text-xl text-indigo-400">h</span></span>
+                        </div>
+                        <input type="range" id="blockHoursSlider" min="0" max="130" value="80" oninput="actualizarSlider()" class="mt-2">
+                        <div class="flex justify-between text-[10px] uppercase font-extrabold text-slate-400 mt-3 tracking-wider">
+                            <span>0h</span>
+                            <span>Normal (80h)</span>
+                            <span>Overtime (130h)</span>
                         </div>
                     </div>
-                    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 transition-all">
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Turnarounds</label>
-                        <div class="flex items-center">
-                            <span class="text-slate-400 font-bold mr-2 text-sm">AED</span>
-                            <input type="number" id="turnarounds" value="300" oninput="calcularTodo()" class="w-full bg-transparent text-2xl font-black text-slate-800 focus:outline-none placeholder-slate-300">
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 transition-all">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Dietas (Meal)</label>
+                            <div class="flex items-center">
+                                <span class="text-slate-400 font-bold mr-2 text-sm">AED</span>
+                                <input type="number" id="mealAllowance" value="1500" oninput="calcularTodo()" class="w-full bg-transparent text-2xl font-black text-slate-800 focus:outline-none placeholder-slate-300">
+                            </div>
                         </div>
+                        <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 transition-all">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Turnarounds</label>
+                            <div class="flex items-center">
+                                <span class="text-slate-400 font-bold mr-2 text-sm">AED</span>
+                                <input type="number" id="turnarounds" value="300" oninput="calcularTodo()" class="w-full bg-transparent text-2xl font-black text-slate-800 focus:outline-none placeholder-slate-300">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODO REAL -->
+                <div id="panelReal" class="hidden">
+                    <div class="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-8 text-center mt-4">
+                        <label class="block text-xs font-black text-emerald-600 uppercase tracking-widest mb-4">Introduce tu nómina final exacta</label>
+                        <div class="flex items-center justify-center gap-2">
+                            <span class="text-emerald-500 font-bold text-2xl">AED</span>
+                            <input type="number" id="salarioRealInput" oninput="calcularTodo()" class="bg-transparent text-5xl font-black text-slate-800 focus:outline-none w-2/3 text-center border-b-2 border-emerald-300 pb-2" placeholder="0.00">
+                        </div>
+                        <p class="text-xs font-semibold text-slate-500 mt-6">Este valor anulará la base fija y las horas de vuelo. Se tomará como el ingreso neto total del mes.</p>
                     </div>
                 </div>
             </div>
@@ -152,42 +178,54 @@
                         </div>
                         
                         <div class="mb-4">
-                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Saldo Emaar Family Card</label>
+                            <label id="labelEmaar" class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Estimación Tarjeta Emaar</label>
                             <div class="flex items-center border-b-2 border-slate-700 focus-within:border-yellow-400 transition-colors pb-3 w-full sm:w-2/3">
                                 <span class="text-slate-500 font-bold mr-3 text-3xl">AED</span>
                                 <input type="number" id="gastoEmaar" value="2000" oninput="actualizarGastos()" class="w-full bg-transparent text-5xl font-black text-white focus:outline-none placeholder-slate-700" placeholder="0">
                             </div>
                         </div>
                     </div>
-                    <p class="text-xs text-slate-400 font-medium max-w-xs mt-8 bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
-                        Saldo a deducir del salario para liquidar la tarjeta entera a fin de mes y acumular <span class="text-yellow-400 font-bold">Upoints</span> sin pagar intereses.
+                    
+                    <p class="text-xs text-slate-400 font-medium leading-relaxed max-w-xs mt-8 bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
+                        Saldo a deducir de la nómina para liquidar la tarjeta Emaar entera y acumular <span class="text-yellow-400 font-bold">Upoints</span> sin pagar intereses.
                     </p>
                 </div>
             </div>
         </div>
 
-        <!-- FILA 2: BALANCE Y GUARDAR (El Cerebro) -->
+        <!-- FILA 2: BALANCE, 70/30 Y GUARDAR (El Cerebro) -->
         <div class="glass-card rounded-[2.5rem] p-8 sm:p-10 border border-white shadow-xl relative overflow-hidden bg-white/95">
             
-            <div class="flex items-center gap-3 mb-10">
-                <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center font-black">3</div>
-                <h2 class="text-2xl font-black text-slate-900 tracking-tight">Estrategia de Excedente 70/30</h2>
+            <div class="flex items-center justify-between mb-10 border-b border-slate-100 pb-6">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center font-black">3</div>
+                    <h2 class="text-2xl font-black text-slate-900 tracking-tight">Estrategia de Excedente</h2>
+                </div>
+                <span id="tipoRegistroBadge" class="bg-indigo-100 text-indigo-600 text-[10px] font-bold px-3 py-1.5 rounded-lg uppercase tracking-wider">🔮 PROYECCIÓN</span>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
                 
-                <!-- Izquierda: Ingresos vs Gastos -->
+                <!-- Columna Izquierda: Ingresos vs Gastos -->
                 <div class="lg:col-span-4 space-y-6">
                     <div>
                         <p class="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-1">Total Ingresos Netos</p>
                         <h3 class="text-4xl font-black text-emerald-500 tracking-tighter val-salario">18,430 AED</h3>
                     </div>
-                    <div class="h-px w-full bg-slate-100"></div>
+                    
+                    <div id="desgloseSimulacion" class="space-y-1 mt-2">
+                        <div class="flex justify-between text-xs text-slate-500 font-medium"><span>Base Fija:</span><span>11,165 AED</span></div>
+                        <div class="flex justify-between text-xs text-slate-500 font-medium"><span>Vuelos:</span><span id="pagoVueloDisplay">5,465 AED</span></div>
+                        <div class="flex justify-between text-xs text-slate-500 font-medium"><span>Variables:</span><span id="dietasDisplay">1,800 AED</span></div>
+                    </div>
+                    
+                    <div class="h-px w-full bg-slate-200 my-4"></div>
+                    
                     <div>
                         <p class="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-2">Obligaciones a Pagar</p>
                         <div class="space-y-3">
                             <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                <span class="text-sm font-semibold text-slate-600">Costes Fijos</span>
+                                <span class="text-sm font-semibold text-slate-600">Costes Fijos (Casa/Coche)</span>
                                 <span class="font-black text-slate-800">-8,721 AED</span>
                             </div>
                             <div class="flex justify-between items-center bg-yellow-50 p-3 rounded-xl border border-yellow-100">
@@ -196,16 +234,18 @@
                             </div>
                         </div>
                     </div>
+                    
                     <div class="pt-2">
                         <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Línea de Vida Total</p>
                         <p class="text-xl font-black text-slate-800 val-base">10,721 AED</p>
                     </div>
                 </div>
 
-                <!-- Centro: Gráfico 70/30 -->
+                <!-- Columna Central: Gráfico -->
                 <div class="lg:col-span-4 relative flex flex-col items-center justify-center">
                     <div class="relative w-full max-w-[240px] aspect-square">
                         <canvas id="distributionChart"></canvas>
+                        <!-- Texto central del gráfico -->
                         <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-2">
                             <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Excedente Libre</span>
                             <span class="text-2xl font-black text-emerald-500 mt-0.5 val-excedente">7,709 AED</span>
@@ -213,26 +253,28 @@
                     </div>
                     <div id="sinExcedente" class="hidden absolute inset-0 flex items-center justify-center bg-white/90 backdrop-blur-sm rounded-full">
                         <div class="text-center px-4">
-                            <p class="text-amber-500 text-2xl mb-1">⚠️</p>
+                            <p class="text-amber-500 text-3xl mb-2">⚠️</p>
                             <p class="text-sm font-bold text-amber-600">Sin Excedente</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Derecha: Destino del Dinero -->
+                <!-- Columna Derecha: Destino del Excedente -->
                 <div class="lg:col-span-4 space-y-5" id="panelExcedente">
-                    <p class="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-1 text-center lg:text-left">Destino del Dinero</p>
+                    <p class="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-1 text-center lg:text-left">Distribución (70/30)</p>
                     
                     <div class="bg-white border-2 border-rose-100 p-5 rounded-2xl shadow-sm relative overflow-hidden">
                         <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-rose-500"></div>
                         <p class="text-[10px] font-extrabold text-rose-500 uppercase tracking-widest mb-1">Ataque Extra a Deuda (70%)</p>
                         <p class="text-3xl font-black text-rose-600 tracking-tight val-deuda">5,396 AED</p>
+                        <p class="text-[10px] font-semibold text-slate-500 mt-2">Súmalo a la cuota mensual de Supabase.</p>
                     </div>
                     
                     <div class="bg-white border-2 border-blue-100 p-5 rounded-2xl shadow-sm relative overflow-hidden">
                         <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-500"></div>
                         <p class="text-[10px] font-extrabold text-blue-500 uppercase tracking-widest mb-1">Fondo de Emergencia (30%)</p>
                         <p class="text-3xl font-black text-blue-600 tracking-tight val-fondo">2,313 AED</p>
+                        <p class="text-[10px] font-semibold text-slate-500 mt-2">Guárdalo para meses de vacaciones o reservas.</p>
                     </div>
                 </div>
             </div>
@@ -240,14 +282,15 @@
             <!-- Botón Guardar -->
             <div class="mt-12 pt-8 border-t border-slate-100 flex flex-col items-center">
                 <button onclick="guardarMes()" class="w-full sm:w-auto bg-slate-900 text-white py-4 px-12 rounded-2xl font-black text-lg shadow-2xl shadow-slate-900/30 hover:bg-slate-800 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3 group">
-                    <span>Guardar Flujo en Supabase</span>
+                    <span id="textoBotonGuardar">Guardar Proyección en Supabase</span>
                     <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                 </button>
                 <p id="saveStatus" class="text-sm font-bold text-center hidden mt-4"></p>
             </div>
+
         </div>
 
-        <!-- FILA 3: HISTÓRICO DE INGRESOS (NUEVO) -->
+        <!-- FILA 3: HISTÓRICO DE INGRESOS -->
         <div class="glass-card rounded-[2.5rem] p-8 sm:p-10 border border-white shadow-xl relative overflow-hidden bg-white/95">
             <div class="flex justify-between items-end mb-8 border-b border-slate-100 pb-6">
                 <div>
@@ -255,7 +298,11 @@
                         <svg class="w-6 h-6 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
                         Evolución de Ingresos
                     </h2>
-                    <p class="text-sm font-semibold text-slate-500 mt-2">Histórico extraído de nóminas + registros de Supabase</p>
+                    <p class="text-sm font-semibold text-slate-500 mt-2">Nóminas Reales + Proyecciones de Supabase</p>
+                </div>
+                <div class="hidden sm:flex items-center gap-4 text-xs font-bold text-slate-400">
+                    <span class="flex items-center gap-1"><div class="w-3 h-3 rounded-full bg-indigo-500"></div> Real</span>
+                    <span class="flex items-center gap-1"><div class="w-3 h-3 rounded-full bg-amber-400 border-2 border-white"></div> Proyección</span>
                 </div>
             </div>
             
@@ -324,11 +371,12 @@
         let pagoDeuda = 0;
         let fondoEmergencia = 0;
         let deudaTotal = 0;
+        let modoActual = 'simulacion'; // 'simulacion' o 'real'
         
         let distChartInstance = null;
         let historyChartInstance = null;
 
-        // Histórico real de nóminas (Agosto 2023 - Agosto 2026)
+        // Histórico real previo
         const historicalIncome = [
             { mes: 'Ago 23', valor: 6617.6 }, { mes: 'Sep 23', valor: 3361.67 }, { mes: 'Oct 23', valor: 4482.8 },
             { mes: 'Nov 23', valor: 10353.51 }, { mes: 'Dic 23', valor: 12175.81 }, { mes: 'Ene 24', valor: 4167.82 },
@@ -356,6 +404,37 @@
             cargarHistorialIngresos();
         };
 
+        // --- SISTEMA DE MODOS (PROYECCIÓN VS REAL) ---
+        function setModo(modo) {
+            modoActual = modo;
+            if (modo === 'simulacion') {
+                document.getElementById('btnModoSim').className = "flex-1 sm:w-48 py-3 text-sm font-black bg-indigo-50 text-indigo-700 rounded-xl transition-all shadow-sm";
+                document.getElementById('btnModoReal').className = "flex-1 sm:w-48 py-3 text-sm font-black text-slate-400 hover:text-slate-700 rounded-xl transition-all";
+                document.getElementById('panelSimulacion').classList.remove('hidden');
+                document.getElementById('panelReal').classList.add('hidden');
+                document.getElementById('tituloIngresos').innerText = "Simulador de Ingresos";
+                document.getElementById('labelEmaar').innerText = "Estimación Tarjeta Emaar";
+                
+                document.getElementById('tipoRegistroBadge').innerText = "🔮 PROYECCIÓN";
+                document.getElementById('tipoRegistroBadge').className = "bg-indigo-100 text-indigo-600 text-[10px] font-bold px-3 py-1.5 rounded-lg uppercase tracking-wider";
+                document.getElementById('textoBotonGuardar').innerText = "Guardar Proyección en Supabase";
+                document.getElementById('desgloseSimulacion').classList.remove('hidden');
+            } else {
+                document.getElementById('btnModoReal').className = "flex-1 sm:w-48 py-3 text-sm font-black bg-emerald-50 text-emerald-700 rounded-xl transition-all shadow-sm";
+                document.getElementById('btnModoSim').className = "flex-1 sm:w-48 py-3 text-sm font-black text-slate-400 hover:text-slate-700 rounded-xl transition-all";
+                document.getElementById('panelSimulacion').classList.add('hidden');
+                document.getElementById('panelReal').classList.remove('hidden');
+                document.getElementById('tituloIngresos').innerText = "Ingreso Real";
+                document.getElementById('labelEmaar').innerText = "Extracto Final Emaar Card";
+                
+                document.getElementById('tipoRegistroBadge').innerText = "✅ DATO REAL";
+                document.getElementById('tipoRegistroBadge').className = "bg-emerald-100 text-emerald-600 text-[10px] font-bold px-3 py-1.5 rounded-lg uppercase tracking-wider";
+                document.getElementById('textoBotonGuardar').innerText = "Guardar Dato Real en Supabase";
+                document.getElementById('desgloseSimulacion').classList.add('hidden');
+            }
+            calcularTodo();
+        }
+
         function updateTexts(className, text) {
             document.querySelectorAll('.' + className).forEach(el => el.innerText = text);
         }
@@ -363,10 +442,8 @@
         function actualizarSlider() {
             const val = document.getElementById('blockHoursSlider').value;
             document.getElementById('sliderValue').innerHTML = `${val}<span class="text-xl text-indigo-400">h</span>`;
-            
             const percentage = (val / 130) * 100;
             document.getElementById('blockHoursSlider').style.background = `linear-gradient(to right, #4f46e5 0%, #4f46e5 ${percentage}%, #e2e8f0 ${percentage}%, #e2e8f0 100%)`;
-            
             calcularTodo();
         }
 
@@ -377,16 +454,23 @@
             
             updateTexts('val-emaar', '-' + Math.floor(gastoVariableEmaar).toLocaleString() + ' AED');
             updateTexts('val-base', Math.floor(lineaBaseDinamica).toLocaleString() + ' AED');
-            
             calcularExcedente();
         }
 
         function calcularTodo() {
-            const hours = parseFloat(document.getElementById('blockHoursSlider').value) || 0;
-            const meals = parseFloat(document.getElementById('mealAllowance').value) || 0;
-            const turnarounds = parseFloat(document.getElementById('turnarounds').value) || 0;
+            if (modoActual === 'simulacion') {
+                const hours = parseFloat(document.getElementById('blockHoursSlider').value) || 0;
+                const meals = parseFloat(document.getElementById('mealAllowance').value) || 0;
+                const turnarounds = parseFloat(document.getElementById('turnarounds').value) || 0;
 
-            salarioEstimadoCalculado = BASE_FIJA_NETA + (hours * TARIFA_HORA_VUELO) + meals + turnarounds;
+                const pagoVuelo = hours * TARIFA_HORA_VUELO;
+                salarioEstimadoCalculado = BASE_FIJA_NETA + pagoVuelo + meals + turnarounds;
+
+                document.getElementById('pagoVueloDisplay').innerText = Math.floor(pagoVuelo).toLocaleString() + ' AED';
+                document.getElementById('dietasDisplay').innerText = Math.floor(meals + turnarounds).toLocaleString() + ' AED';
+            } else {
+                salarioEstimadoCalculado = parseFloat(document.getElementById('salarioRealInput').value) || 0;
+            }
 
             updateTexts('val-salario', Math.floor(salarioEstimadoCalculado).toLocaleString() + ' AED');
             calcularExcedente();
@@ -411,7 +495,7 @@
                 actualizarGraficoDistribucion(lineaBaseDinamica, pagoDeuda, fondoEmergencia);
             } else {
                 excedente = 0; pagoDeuda = 0; fondoEmergencia = 0;
-                panelExcedente.style.opacity = '0.3';
+                panelExcedente.style.opacity = '0.1';
                 panelExcedente.style.pointerEvents = 'none';
                 panelSinExcedente.classList.remove('hidden');
                 actualizarGraficoDistribucion(salarioEstimadoCalculado, 0, 0);
@@ -428,7 +512,7 @@
                 distChartInstance = new Chart(ctx, {
                     type: 'doughnut',
                     data: {
-                        labels: ['Costes', 'Deuda', 'Fondo'],
+                        labels: ['Costes + Tarjeta', 'Ataque Deuda', 'Fondo'],
                         datasets: [{
                             data: [base, deuda, fondo],
                             backgroundColor: ['#e2e8f0', '#f43f5e', '#3b82f6'],
@@ -457,7 +541,6 @@
         async function cargarDeudas() {
             const { data, error } = await supabaseClient.from('deudas').select('*').order('id', { ascending: true });
             const container = document.getElementById('debtCardsContainer');
-            
             if (error) { container.innerHTML = `<div class="text-red-500 font-bold">Error: ${error.message}</div>`; return; }
 
             container.innerHTML = '';
@@ -510,28 +593,26 @@
             }
         }
 
-        // Carga historial estático + base de datos
         async function cargarHistorialIngresos() {
-            const { data, error } = await supabaseClient.from('historial_meses').select('mes, salario').order('id', { ascending: true });
+            const { data, error } = await supabaseClient.from('historial_meses').select('mes, salario, tipo').order('id', { ascending: true });
             
-            let combinedData = [...historicalIncome];
+            let combinedData = [...historicalIncome.map(d => ({...d, tipo: 'Real'}))]; // Histórico antiguo siempre es 'Real'
             
             if (!error && data) {
                 data.forEach(record => {
-                    // Evitar duplicar meses si el nombre coincide. Supabase devuelve "septiembre de 2026", convertimos a "Sep 26"
+                    const type = record.tipo || 'Real';
                     const mesAbrev = record.mes.substring(0,3).charAt(0).toUpperCase() + record.mes.substring(1,3).toLowerCase() + ' ' + record.mes.slice(-2);
-                    combinedData.push({ mes: mesAbrev, valor: parseFloat(record.salario) });
+                    combinedData.push({ mes: mesAbrev, valor: parseFloat(record.salario), tipo: type });
                 });
             }
 
-            const labels = combinedData.map(d => d.mes);
+            const labels = combinedData.map(d => d.tipo === 'Proyección' ? d.mes + ' 🔮' : d.mes);
             const values = combinedData.map(d => d.valor);
+            const pointColors = combinedData.map(d => d.tipo === 'Proyección' ? '#fbbf24' : '#ffffff'); // Amarillo para proyecciones
 
             const ctx = document.getElementById('incomeHistoryChart').getContext('2d');
-            
-            // Crear gradiente
             const gradient = ctx.createLinearGradient(0, 0, 0, 350);
-            gradient.addColorStop(0, 'rgba(99, 102, 241, 0.4)'); // indigo-500
+            gradient.addColorStop(0, 'rgba(99, 102, 241, 0.4)');
             gradient.addColorStop(1, 'rgba(99, 102, 241, 0.0)');
 
             if (historyChartInstance) historyChartInstance.destroy();
@@ -543,21 +624,33 @@
                     datasets: [{
                         label: 'Ingreso Neto (AED)',
                         data: values,
-                        borderColor: '#6366f1', // indigo-500
+                        borderColor: '#6366f1',
                         borderWidth: 3,
                         backgroundColor: gradient,
                         fill: true,
                         tension: 0.4,
-                        pointBackgroundColor: '#ffffff',
+                        pointBackgroundColor: pointColors,
                         pointBorderColor: '#6366f1',
                         pointBorderWidth: 2,
-                        pointRadius: 3,
+                        pointRadius: 4,
                         pointHoverRadius: 6
                     }]
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1e293b', padding: 12, titleFont: { size: 13 }, bodyFont: { size: 14, weight: 'bold' } } },
+                    plugins: { 
+                        legend: { display: false }, 
+                        tooltip: { 
+                            backgroundColor: '#1e293b', padding: 12, titleFont: { size: 13 }, bodyFont: { size: 14, weight: 'bold' },
+                            callbacks: {
+                                label: function(context) {
+                                    const rawVal = context.raw.toLocaleString();
+                                    const t = combinedData[context.dataIndex].tipo;
+                                    return ` ${t}: ${rawVal} AED`;
+                                }
+                            }
+                        } 
+                    },
                     scales: {
                         y: { beginAtZero: true, grid: { color: '#f1f5f9', drawBorder: false }, ticks: { color: '#94a3b8', font: { size: 11, weight: 'bold' }, callback: function(value) { return value / 1000 + 'k'; } } },
                         x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10, weight: 'bold' }, maxTicksLimit: 12 } }
@@ -570,6 +663,7 @@
         async function guardarMes() {
             const mesRaw = document.getElementById('mesSelector').value;
             if (!mesRaw) return alert("Selecciona el mes a registrar.");
+            if (salarioEstimadoCalculado <= 0) return alert("El ingreso debe ser mayor a 0.");
             
             const dateObj = new Date(mesRaw + '-05');
             const mesFormateado = dateObj.toLocaleString('es-ES', { month: 'long', year: 'numeric' });
@@ -585,7 +679,8 @@
                 linea_base: Math.floor(lineaBaseDinamica),
                 excedente: Math.floor(excedente),
                 pago_extra_deuda: Math.floor(pagoDeuda),
-                fondo_emergencia: Math.floor(fondoEmergencia)
+                fondo_emergencia: Math.floor(fondoEmergencia),
+                tipo: modoActual === 'simulacion' ? 'Proyección' : 'Real'
             }]);
 
             const status = document.getElementById('saveStatus');
@@ -595,9 +690,9 @@
                 status.innerText = "Error: " + error.message;
                 status.className = "text-sm font-bold text-center text-rose-500 mt-4";
             } else {
-                status.innerText = `✅ ¡Distribución de ${mesFormateado} guardada!`;
+                status.innerText = `✅ ¡${modoActual === 'simulacion' ? 'Proyección' : 'Registro Real'} de ${mesFormateado} guardado!`;
                 status.className = "text-sm font-bold text-center text-emerald-600 mt-4";
-                cargarHistorialIngresos(); // Refrescar el gráfico para mostrar el nuevo mes insertado
+                cargarHistorialIngresos(); 
                 setTimeout(() => { status.classList.add('hidden'); }, 4000);
             }
             btn.innerHTML = originalContent;
