@@ -6,191 +6,216 @@
     <title>Cabin Crew Salary & Debt Manager</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Ocultar scrollbar para el carrusel de meses */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans p-4 md:p-8">
-    <div class="max-w-5xl mx-auto space-y-8">
+    <div class="max-w-6xl mx-auto space-y-8">
         
         <!-- Encabezado -->
-        <header class="border-b pb-4 flex flex-col md:flex-row justify-between items-start md:items-end gap-2">
+        <header class="border-b border-gray-200 pb-5 flex flex-col md:flex-row justify-between items-start md:items-end gap-3">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900">Control Financiero & Estimador de Nómina</h1>
-                <p class="text-gray-500 mt-1">Gestión de salario variable para Tripulación de Cabina (Grado CC.03)</p>
+                <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Financial Dashboard</h1>
+                <p class="text-gray-500 mt-1 font-medium">Gestión de Excedentes y Deudas | Emirates CC.03</p>
             </div>
-            <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full">Base Fija Neta: 11,165.00 AED</span>
+            <div class="flex gap-2">
+                <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1.5 rounded-md">Línea Base: 8,979 AED</span>
+                <span class="bg-indigo-100 text-indigo-800 text-xs font-bold px-3 py-1.5 rounded-md">Fijo Neto: 11,165 AED</span>
+            </div>
         </header>
 
-        <!-- SECCIÓN 1: CALCULADORA DE SALARIO ESTIMADO (CC.03) -->
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 space-y-6">
-            <div class="flex items-center justify-between border-b pb-3">
-                <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
-                    ✈️ Estimador de Salario del Próximo Mes
-                </h2>
-                <span class="text-xs text-gray-500">Tarifa horaria: ~68.32 AED/h</span>
+        <!-- SECCIÓN 1: SELECCIÓN VISUAL DE MES Y ESTIMADOR -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Selector de Mes -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 lg:col-span-3">
+                <h2 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">1. Selecciona el Mes de la Nómina</h2>
+                <div id="monthSelector" class="flex space-x-3 overflow-x-auto hide-scrollbar pb-2">
+                    <!-- Los botones de los meses se generan por JavaScript -->
+                </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Entradas de datos -->
-                <div class="space-y-4 md:col-span-2">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Horas de Vuelo (Block Hours)</label>
-                            <input type="number" id="blockHours" oninput="calcularSalarioEstimado()" class="mt-1 block w-full rounded-md border-gray-300 border p-2 text-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Ej. 80">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Dietas / Escalas (AED)</label>
-                            <input type="number" id="mealAllowance" value="1500" oninput="calcularSalarioEstimado()" class="mt-1 block w-full rounded-md border-gray-300 border p-2 text-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Ej. 1500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Turnarounds / Ground Pay (AED)</label>
-                            <input type="number" id="turnarounds" value="300" oninput="calcularSalarioEstimado()" class="mt-1 block w-full rounded-md border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Ej. 300">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Deducciones Variables (Billetes, etc.)</label>
-                            <input type="number" id="deduccionesVar" value="0" oninput="calcularSalarioEstimado()" class="mt-1 block w-full rounded-md border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Ej. 350">
-                        </div>
-                    </div>
-
-                    <!-- Detalle de componentes fijos -->
-                    <div class="bg-gray-50 p-4 rounded-lg text-xs text-gray-600 space-y-1">
-                        <p class="font-semibold text-gray-700 mb-1">Componentes Fijos del Grado CC.03 (Incluidos en el cálculo):</p>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>• Basic Salary: 5,410.00 AED</div>
-                            <div>• Accommodation Allowance: 5,255.00 AED</div>
-                            <div>• Transport Allowance: 560.00 AED</div>
-                            <div>• Deducciones Fijas (Club/Card): -60.00 AED</div>
-                        </div>
-                    </div>
+            <!-- Calculadora de Salario Estimado -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 lg:col-span-3">
+                <div class="flex items-center justify-between border-b border-gray-100 pb-4 mb-4">
+                    <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                        ✈️ Estimador de Salario (Mes Seleccionado)
+                    </h2>
+                    <span class="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">Tarifa: ~68.32 AED/h</span>
                 </div>
 
-                <!-- Resultado de Estimación -->
-                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-100 flex flex-col justify-between">
-                    <div>
-                        <span class="text-xs uppercase tracking-wider text-blue-600 font-bold">Estimación Neto Total</span>
-                        <div id="salarioEstimadoDisplay" class="text-3xl font-extrabold text-blue-900 my-2">11,165.00 AED</div>
-                        <div class="text-xs text-blue-700 space-y-1 mt-3">
-                            <div class="flex justify-between"><span>Base Fija Neta:</span> <span>11,165.00 AED</span></div>
-                            <div class="flex justify-between"><span>Pago Vuelo Estimado:</span> <span id="pagoVueloDisplay">0.00 AED</span></div>
-                            <div class="flex justify-between"><span>Dietas y Turnarounds:</span> <span id="dietasDisplay">1,800.00 AED</span></div>
-                            <div class="flex justify-between"><span>Deducciones Extra:</span> <span id="deduccionesDisplay">-0.00 AED</span></div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase">Block Hours</label>
+                            <input type="number" id="blockHours" oninput="calcularSalarioEstimado()" class="mt-1 block w-full rounded-lg border-gray-300 border p-2.5 text-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Ej. 80">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase">Dietas / Meal (AED)</label>
+                            <input type="number" id="mealAllowance" value="1500" oninput="calcularSalarioEstimado()" class="mt-1 block w-full rounded-lg border-gray-300 border p-2.5 text-lg focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase">Turnarounds (AED)</label>
+                            <input type="number" id="turnarounds" value="300" oninput="calcularSalarioEstimado()" class="mt-1 block w-full rounded-lg border-gray-300 border p-2.5 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase">Deducciones (AED)</label>
+                            <input type="number" id="deduccionesVar" value="0" oninput="calcularSalarioEstimado()" class="mt-1 block w-full rounded-lg border-gray-300 border p-2.5 focus:ring-blue-500 focus:border-blue-500">
                         </div>
                     </div>
-                    <button onclick="usarEstimacionParaPlan()" class="mt-4 w-full bg-blue-600 text-white py-2.5 px-4 rounded-lg font-medium hover:bg-blue-700 transition shadow-sm text-sm">
-                        Usar esta cifra en el Plan de Deuda ↓
-                    </button>
+
+                    <!-- Resultado Estimación -->
+                    <div class="bg-gray-900 text-white p-5 rounded-xl flex flex-col justify-center items-center text-center shadow-md">
+                        <span class="text-xs uppercase tracking-wider text-gray-400 font-bold mb-1">Neto Estimado</span>
+                        <div id="salarioEstimadoDisplay" class="text-3xl font-extrabold text-white mb-4">11,165 AED</div>
+                        <button onclick="usarEstimacionParaPlan()" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-bold hover:bg-blue-500 transition text-sm">
+                            Fijar como Ingreso ↓
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- SECCIÓN 2: PLANIFICACIÓN DE EXCEDENTE Y DEUDAS -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Ingreso a Procesar -->
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                <h2 class="text-xl font-bold text-gray-800 mb-4">1. Salario del Mes a Distribuir</h2>
-                <div class="space-y-4">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Mes a Registrar</label>
-                            <input type="month" id="mesSelector" class="mt-1 block w-full rounded-md border-gray-300 border p-2 text-lg focus:ring-blue-500 focus:border-blue-500">
+        <!-- SECCIÓN 2: DISTRIBUCIÓN Y GRÁFICO 70/30 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            <!-- Panel de Cálculo -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col">
+                <h2 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">2. Ingreso a Distribuir</h2>
+                
+                <div class="mb-6">
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Salario Real / Estimado (AED)</label>
+                    <input type="number" id="salarioInput" oninput="calcularExcedente()" class="block w-full rounded-lg border-gray-300 border p-3 text-2xl font-bold text-blue-900 focus:ring-blue-500 focus:border-blue-500 bg-blue-50" placeholder="Ej. 18000">
+                </div>
+
+                <div id="resultados" class="hidden flex-1 flex flex-col justify-between">
+                    <div class="space-y-3 flex-1">
+                        <div class="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
+                            <span class="font-medium text-gray-600">Línea de Supervivencia</span>
+                            <span class="font-bold text-gray-800">8,979.00 AED</span>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Salario Neto (AED)</label>
-                            <input type="number" id="salarioInput" class="mt-1 block w-full rounded-md border-gray-300 border p-2 text-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Ej. 18000">
+                        <div class="flex justify-between items-center p-4 bg-red-50 rounded-xl border border-red-100">
+                            <div>
+                                <p class="font-bold text-red-700">Ataque a Deuda (70%)</p>
+                                <p class="text-xs text-red-500">Amortización extra</p>
+                            </div>
+                            <span id="pagoDeuda" class="font-extrabold text-red-700 text-xl">0.00 AED</span>
+                        </div>
+                        <div class="flex justify-between items-center p-4 bg-blue-50 rounded-xl border border-blue-100">
+                            <div>
+                                <p class="font-bold text-blue-700">Fondo Reserva (30%)</p>
+                                <p class="text-xs text-blue-500">Colchón de seguridad</p>
+                            </div>
+                            <span id="fondoEmergencia" class="font-extrabold text-blue-700 text-xl">0.00 AED</span>
                         </div>
                     </div>
-                    <div class="bg-gray-50 p-4 rounded-lg">
-                        <p class="text-sm text-gray-600 flex justify-between"><span>Línea Base (Supervivencia):</span> <span class="font-semibold text-gray-800">8,979.00 AED</span></p>
-                        <ul class="text-xs text-gray-500 mt-2 space-y-1">
-                            <li>• Alquiler (Provisión): 3,033 AED</li>
-                            <li>• Comida y Transporte: 2,000 AED</li>
-                            <li>• Servicios (DU, DEWA, etc.): 600 AED</li>
-                            <li>• Cuota Préstamo NBD: 3,346 AED</li>
-                        </ul>
+                    <div class="mt-6">
+                        <button onclick="guardarMes()" class="w-full bg-green-500 text-white py-3 px-4 rounded-xl font-bold hover:bg-green-600 transition shadow-sm text-sm uppercase tracking-wider">
+                            Guardar Distribución en Supabase
+                        </button>
+                        <p id="saveStatus" class="text-sm font-medium text-center text-gray-500 hidden mt-2"></p>
                     </div>
-                    <button onclick="calcularExcedente()" class="w-full bg-gray-900 text-white py-2.5 px-4 rounded-lg font-medium hover:bg-black transition">Calcular Distribución 70/30</button>
+                </div>
+
+                <div id="sinExcedente" class="hidden p-6 bg-yellow-50 border border-yellow-100 text-yellow-800 rounded-xl text-sm font-medium mt-4">
+                    ⚠️ El salario no supera la línea base (8,979 AED). Cubre tus gastos fijos. No hay excedente para distribución.
                 </div>
             </div>
 
-            <!-- Panel de Resultados del Mes -->
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                <h2 class="text-xl font-bold text-gray-800 mb-4">2. Distribución del Excedente</h2>
-                <div id="resultados" class="hidden space-y-4">
-                    <div class="flex justify-between items-center p-3 bg-green-50 text-green-800 rounded-lg">
-                        <span>Excedente Disponible:</span>
-                        <span id="excedenteTotal" class="font-bold text-lg">0.00 AED</span>
-                    </div>
-                    <div class="space-y-2">
-                        <div class="flex justify-between items-center p-3 border rounded-lg">
-                            <div>
-                                <p class="font-medium text-red-700">Abono Extra a Deuda (70%)</p>
-                                <p class="text-xs text-gray-500">Destinado a la tarjeta 2811 o capital del préstamo</p>
-                            </div>
-                            <span id="pagoDeuda" class="font-bold text-red-600 text-lg">0.00 AED</span>
-                        </div>
-                        <div class="flex justify-between items-center p-3 border rounded-lg">
-                            <div>
-                                <p class="font-medium text-blue-700">Fondo de Colchón / Reserva (30%)</p>
-                                <p class="text-xs text-gray-500">Reserva para meses de pocos vuelos</p>
-                            </div>
-                            <span id="fondoEmergencia" class="font-bold text-blue-600 text-lg">0.00 AED</span>
-                        </div>
-                    </div>
-                    <button onclick="guardarMes()" class="w-full bg-green-600 text-white py-2.5 px-4 rounded-lg font-medium hover:bg-green-700 transition shadow-sm mt-2">Guardar Registro en Supabase</button>
-                    <p id="saveStatus" class="text-sm text-center text-gray-500 hidden"></p>
-                </div>
-                <div id="sinExcedente" class="hidden p-4 bg-yellow-50 text-yellow-800 rounded-lg text-sm">
-                    El salario ingresado no supera la línea base (8,979 AED). Cubre únicamente los gastos fijos y utiliza tu fondo de reserva si fuera necesario.
+            <!-- Gráfico de Distribución -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center">
+                <h2 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 w-full text-left">Visión del Flujo de Caja</h2>
+                <div class="relative w-full max-w-xs aspect-square">
+                    <canvas id="distributionChart"></canvas>
                 </div>
             </div>
         </div>
 
-        <!-- SECCIÓN 3: TABLA DE DEUDAS -->
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">3. Estado de Mis Deudas en Supabase</h2>
-            <div class="overflow-x-auto">
-                <table class="min-w-full text-left text-sm whitespace-nowrap">
-                    <thead class="uppercase tracking-wider border-b border-gray-200 bg-gray-50 text-gray-600 text-xs">
-                        <tr>
-                            <th class="px-4 py-3">Concepto</th>
-                            <th class="px-4 py-3">Saldo Restante</th>
-                            <th class="px-4 py-3">Cuota Base</th>
-                            <th class="px-4 py-3">Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody id="debtsTableBody" class="divide-y divide-gray-100">
-                        <tr><td colspan="4" class="px-4 py-4 text-center text-gray-500">Cargando datos desde Supabase...</td></tr>
-                    </tbody>
-                </table>
+        <!-- SECCIÓN 3: DASHBOARD DE DEUDAS -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <h2 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-6">3. Estado de Pasivos (Supabase)</h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Tarjetas de Deuda -->
+                <div id="debtCardsContainer" class="space-y-4">
+                    <div class="p-4 text-center text-gray-500">Cargando datos desde Supabase...</div>
+                </div>
+
+                <!-- Gráfico de Deudas -->
+                <div class="flex items-center justify-center p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <canvas id="debtsChart" class="w-full"></canvas>
+                </div>
             </div>
         </div>
 
     </div>
 
     <script>
-        // Configuración de Supabase
+        // Configuración Supabase
         const supabaseUrl = 'https://jgvgabkrriedaquqehpb.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndmdhYmtycmllZGFxdXFlaHBiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5OTYzNDQsImV4cCI6MjEwMzU3MjM0NH0.jdq2xaDtJ0YO-8zpQYqQPu5e2dkyCl8XjXtw_cGhqko';
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-        // Constantes Financieras
         const BASE_FIJA_NETA = 11165.00; 
         const TARIFA_HORA_VUELO = 68.32;  
         const LINEA_BASE = 8979.00;       
 
+        let mesSeleccionado = '';
         let datosCalculados = null;
         let salarioEstimadoCalculado = 11165.00;
+        
+        // Instancias de Chart.js
+        let distChartInstance = null;
+        let debtsChartInstance = null;
 
-        // Establecer el mes actual por defecto al cargar la página
         window.onload = () => {
-            const today = new Date();
-            const yyyy = today.getFullYear();
-            const mm = String(today.getMonth() + 1).padStart(2, '0');
-            document.getElementById('mesSelector').value = `${yyyy}-${mm}`;
-            
+            generarSelectorMeses();
             cargarDeudas();
             calcularSalarioEstimado();
+            calcularExcedente(); // Dibuja el gráfico vacío inicial
         };
 
-        // Calculadora de Salario para CC.03
+        // --- UI: SELECTOR DE MESES VISUAL ---
+        function generarSelectorMeses() {
+            const container = document.getElementById('monthSelector');
+            const today = new Date();
+            
+            // Generar los últimos 3 meses, el actual, y 1 futuro
+            for (let i = -3; i <= 1; i++) {
+                const date = new Date(today.getFullYear(), today.getMonth() + i, 1);
+                const monthStr = date.toLocaleString('es-ES', { month: 'long', year: 'numeric' });
+                const isCurrent = i === 0;
+                const valueStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                
+                const btn = document.createElement('button');
+                btn.className = `flex-shrink-0 px-5 py-2.5 rounded-xl text-sm font-bold capitalize tracking-wider transition-all duration-200 border-2 
+                    ${isCurrent ? 'bg-gray-900 text-white border-gray-900 shadow-md' : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400 hover:text-gray-800'}`;
+                btn.innerText = isCurrent ? `${monthStr} (Actual)` : monthStr;
+                btn.onclick = () => seleccionarMes(btn, monthStr);
+                
+                container.appendChild(btn);
+                
+                // Seleccionar el actual por defecto
+                if (isCurrent) {
+                    mesSeleccionado = monthStr;
+                }
+            }
+        }
+
+        function seleccionarMes(clickedBtn, mesTexto) {
+            mesSeleccionado = mesTexto;
+            const botones = document.getElementById('monthSelector').children;
+            for (let btn of botones) {
+                btn.className = "flex-shrink-0 px-5 py-2.5 rounded-xl text-sm font-bold capitalize tracking-wider transition-all duration-200 border-2 bg-white text-gray-500 border-gray-200 hover:border-gray-400 hover:text-gray-800";
+            }
+            clickedBtn.className = "flex-shrink-0 px-5 py-2.5 rounded-xl text-sm font-bold capitalize tracking-wider transition-all duration-200 border-2 bg-gray-900 text-white border-gray-900 shadow-md";
+        }
+
+        // --- CÁLCULOS ---
         function calcularSalarioEstimado() {
             const hours = parseFloat(document.getElementById('blockHours').value) || 0;
             const meals = parseFloat(document.getElementById('mealAllowance').value) || 0;
@@ -198,102 +223,179 @@
             const deduccionesVar = parseFloat(document.getElementById('deduccionesVar').value) || 0;
 
             const pagoVuelo = hours * TARIFA_HORA_VUELO;
-            const dietasYExtras = meals + turnarounds;
-            salarioEstimadoCalculado = BASE_FIJA_NETA + pagoVuelo + dietasYExtras - deduccionesVar;
-
-            document.getElementById('pagoVueloDisplay').innerText = pagoVuelo.toFixed(2) + ' AED';
-            document.getElementById('dietasDisplay').innerText = dietasYExtras.toFixed(2) + ' AED';
-            document.getElementById('deduccionesDisplay').innerText = '-' + deduccionesVar.toFixed(2) + ' AED';
-            document.getElementById('salarioEstimadoDisplay').innerText = salarioEstimadoCalculado.toFixed(2) + ' AED';
+            salarioEstimadoCalculado = BASE_FIJA_NETA + pagoVuelo + meals + turnarounds - deduccionesVar;
+            
+            document.getElementById('salarioEstimadoDisplay').innerText = Math.floor(salarioEstimadoCalculado).toLocaleString() + ' AED';
         }
 
         function usarEstimacionParaPlan() {
-            document.getElementById('salarioInput').value = salarioEstimadoCalculado.toFixed(2);
+            document.getElementById('salarioInput').value = Math.floor(salarioEstimadoCalculado);
             calcularExcedente();
-            window.scrollTo({ top: document.getElementById('salarioInput').offsetTop - 100, behavior: 'smooth' });
         }
 
-        // Calculadora de Excedente (70/30)
         function calcularExcedente() {
             const salario = parseFloat(document.getElementById('salarioInput').value);
             const panelResultados = document.getElementById('resultados');
             const panelSinExcedente = document.getElementById('sinExcedente');
             
-            if (isNaN(salario) || salario <= 0) return;
+            let pagoDeuda = 0;
+            let fondoEmergencia = 0;
+            let excedente = 0;
+
+            if (isNaN(salario) || salario <= 0) {
+                panelResultados.classList.add('hidden');
+                panelSinExcedente.classList.add('hidden');
+                actualizarGraficoDistribucion(LINEA_BASE, 0, 0);
+                return;
+            }
 
             if (salario > LINEA_BASE) {
-                const excedente = salario - LINEA_BASE;
-                const pagoDeuda = excedente * 0.70;
-                const fondoEmergencia = excedente * 0.30;
+                excedente = salario - LINEA_BASE;
+                pagoDeuda = excedente * 0.70;
+                fondoEmergencia = excedente * 0.30;
 
-                document.getElementById('excedenteTotal').innerText = excedente.toFixed(2) + ' AED';
-                document.getElementById('pagoDeuda').innerText = pagoDeuda.toFixed(2) + ' AED';
-                document.getElementById('fondoEmergencia').innerText = fondoEmergencia.toFixed(2) + ' AED';
+                document.getElementById('pagoDeuda').innerText = pagoDeuda.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' AED';
+                document.getElementById('fondoEmergencia').innerText = fondoEmergencia.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' AED';
                 
                 datosCalculados = { salario, excedente, pagoDeuda, fondoEmergencia };
                 
                 panelResultados.classList.remove('hidden');
                 panelSinExcedente.classList.add('hidden');
+                actualizarGraficoDistribucion(LINEA_BASE, pagoDeuda, fondoEmergencia);
             } else {
                 panelResultados.classList.add('hidden');
                 panelSinExcedente.classList.remove('hidden');
                 datosCalculados = null;
+                actualizarGraficoDistribucion(salario, 0, 0);
             }
         }
 
-        // Cargar Deudas desde Supabase
-        async function cargarDeudas() {
-            const { data, error } = await supabaseClient.from('deudas').select('*').order('id', { ascending: true });
-            const tbody = document.getElementById('debtsTableBody');
+        // --- GRÁFICOS (CHART.JS) ---
+        function actualizarGraficoDistribucion(base, deuda, fondo) {
+            const ctx = document.getElementById('distributionChart').getContext('2d');
             
-            if (error) {
-                tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-4 text-red-500">Error al cargar: ${error.message}</td></tr>`;
-                return;
+            if (distChartInstance) {
+                distChartInstance.destroy();
             }
 
-            tbody.innerHTML = '';
-            data.forEach(deuda => {
-                tbody.innerHTML += `
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3 font-medium">${deuda.nombre}</td>
-                        <td class="px-4 py-3 text-red-600 font-semibold">${parseFloat(deuda.saldo).toLocaleString('en-US', {minimumFractionDigits: 2})} AED</td>
-                        <td class="px-4 py-3 text-gray-600">${parseFloat(deuda.cuota_minima).toLocaleString('en-US', {minimumFractionDigits: 2})} AED</td>
-                        <td class="px-4 py-3">
-                            <button onclick="actualizarSaldo(${deuda.id}, ${deuda.saldo})" class="text-blue-600 hover:underline text-xs font-semibold">Actualizar Saldo</button>
-                        </td>
-                    </tr>
-                `;
+            distChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Supervivencia (Fijos)', 'Ataque Deuda (70%)', 'Reserva (30%)'],
+                    datasets: [{
+                        data: [base, deuda, fondo],
+                        backgroundColor: ['#f3f4f6', '#ef4444', '#3b82f6'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '75%',
+                    plugins: {
+                        legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20, font: { size: 11, family: 'system-ui' } } }
+                    }
+                }
             });
         }
 
+        function renderizarGraficoDeudas(nombres, saldos) {
+            const ctx = document.getElementById('debtsChart').getContext('2d');
+            
+            if (debtsChartInstance) {
+                debtsChartInstance.destroy();
+            }
+
+            debtsChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: nombres,
+                    datasets: [{
+                        label: 'Saldo Pendiente (AED)',
+                        data: saldos,
+                        backgroundColor: '#1f2937',
+                        borderRadius: 6,
+                        barThickness: 'flex',
+                        maxBarThickness: 40
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y', // Barras horizontales
+                    scales: {
+                        x: { beginAtZero: true, grid: { display: false } },
+                        y: { grid: { display: false } }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        // --- SUPABASE DATA ---
+        async function cargarDeudas() {
+            const { data, error } = await supabaseClient.from('deudas').select('*').order('id', { ascending: true });
+            const container = document.getElementById('debtCardsContainer');
+            
+            if (error) {
+                container.innerHTML = `<div class="text-red-500">Error: ${error.message}</div>`;
+                return;
+            }
+
+            container.innerHTML = '';
+            const nombres = [];
+            const saldos = [];
+
+            data.forEach(deuda => {
+                nombres.push(deuda.nombre);
+                saldos.push(parseFloat(deuda.saldo));
+
+                container.innerHTML += `
+                    <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-bold text-gray-800">${deuda.nombre}</h3>
+                            <button onclick="actualizarSaldo(${deuda.id}, ${deuda.saldo})" class="bg-gray-100 text-gray-600 hover:bg-gray-200 px-3 py-1 rounded-md text-xs font-bold transition">
+                                Editar
+                            </button>
+                        </div>
+                        <div class="flex justify-between items-end mt-4">
+                            <div>
+                                <p class="text-xs text-gray-400 uppercase font-bold tracking-wider">Deuda Restante</p>
+                                <p class="text-2xl font-extrabold text-red-600">${parseFloat(deuda.saldo).toLocaleString('en-US')} AED</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xs text-gray-400 uppercase font-bold tracking-wider">Cuota Min.</p>
+                                <p class="text-sm font-bold text-gray-600">${parseFloat(deuda.cuota_minima).toLocaleString()} AED</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            renderizarGraficoDeudas(nombres, saldos);
+        }
+
         async function actualizarSaldo(id, saldoActual) {
-            const nuevoSaldo = prompt("Introduce el nuevo saldo restante exacto:", saldoActual);
+            const nuevoSaldo = prompt("Actualiza el saldo exacto pendiente:", saldoActual);
             if (nuevoSaldo !== null && !isNaN(nuevoSaldo)) {
                 const { error } = await supabaseClient.from('deudas').update({ saldo: parseFloat(nuevoSaldo) }).eq('id', id);
                 if (!error) cargarDeudas();
-                else alert("Error al actualizar saldo en Supabase");
+                else alert("Error al actualizar saldo");
             }
         }
 
         async function guardarMes() {
             if (!datosCalculados) return;
-
-            const mesRaw = document.getElementById('mesSelector').value;
-            if (!mesRaw) {
-                alert("Por favor, selecciona el mes correspondiente.");
-                return;
-            }
-            
-            // Convertimos el formato YYYY-MM a un texto legible (ej: "septiembre de 2026")
-            const dateObj = new Date(mesRaw + '-05'); // Añadimos el día 05 para evitar desajustes de zona horaria
-            const mesFormateado = dateObj.toLocaleString('es-ES', { month: 'long', year: 'numeric' });
             
             const status = document.getElementById('saveStatus');
             status.classList.remove('hidden');
-            status.innerText = "Guardando en Supabase...";
+            status.innerText = "Sincronizando con Supabase...";
 
             const { error } = await supabaseClient.from('historial_meses').insert([{
-                mes: mesFormateado,
+                mes: mesSeleccionado,
                 salario: datosCalculados.salario,
                 linea_base: LINEA_BASE,
                 excedente: datosCalculados.excedente,
@@ -302,10 +404,10 @@
             }]);
 
             if (error) {
-                status.innerText = "Error al guardar: " + error.message;
+                status.innerText = "Error: " + error.message;
                 status.classList.add('text-red-500');
             } else {
-                status.innerText = `¡Registro de ${mesFormateado} guardado con éxito!`;
+                status.innerText = `¡Distribución de ${mesSeleccionado} guardada con éxito!`;
                 status.classList.replace('text-gray-500', 'text-green-600');
                 status.classList.replace('text-red-500', 'text-green-600');
                 setTimeout(() => { status.classList.add('hidden'); }, 3000);
