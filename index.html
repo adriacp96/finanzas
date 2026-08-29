@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debt & Surplus Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans p-6">
+    <div class="max-w-4xl mx-auto space-y-6">
+        
+        <header class="flex justify-between items-end border-b pb-4">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">Control de Flujo y Deuda</h1>
+                <p class="text-gray-500 mt-1">Estrategia de Excedente Variable</p>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Panel de Ingresos Variables -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <h2 class="text-xl font-semibold mb-4">Ingreso del Mes</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Salario Recibido (AED)</label>
+                        <input type="number" id="salarioInput" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Ej. 25000">
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <p class="text-sm text-gray-600 flex justify-between"><span>Línea Base (Supervivencia):</span> <span class="font-semibold text-gray-800">8,979.00 AED</span></p>
+                        <ul class="text-xs text-gray-500 mt-2 space-y-1">
+                            <li>• Alquiler (Provisión): 3,033 AED</li>
+                            <li>• Comida y Transporte: 2,000 AED</li>
+                            <li>• Servicios (DU, DEWA, etc.): 600 AED</li>
+                            <li>• Cuota Préstamo NBD: 3,346 AED</li>
+                        </ul>
+                    </div>
+                    <button onclick="calcularExcedente()" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition">Calcular Plan de Ataque</button>
+                </div>
+            </div>
+
+            <!-- Panel de Resultados del Mes -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <h2 class="text-xl font-semibold mb-4">Distribución del Excedente</h2>
+                <div id="resultados" class="hidden space-y-4">
+                    <div class="flex justify-between items-center p-3 bg-green-50 text-green-800 rounded-lg">
+                        <span>Excedente Total:</span>
+                        <span id="excedenteTotal" class="font-bold text-lg">0.00 AED</span>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center p-3 border rounded-lg">
+                            <div>
+                                <p class="font-medium">Directo a Deuda (70%)</p>
+                                <p class="text-xs text-gray-500">Atacar tarjeta 2811 o capital del préstamo</p>
+                            </div>
+                            <span id="pagoDeuda" class="font-bold text-red-600">0.00 AED</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 border rounded-lg">
+                            <div>
+                                <p class="font-medium">Fondo / Ahorro (30%)</p>
+                                <p class="text-xs text-gray-500">Reserva para meses de vuelos bajos</p>
+                            </div>
+                            <span id="fondoEmergencia" class="font-bold text-blue-600">0.00 AED</span>
+                        </div>
+                    </div>
+                    <button onclick="guardarMes()" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition mt-2">Guardar Registro en Supabase</button>
+                    <p id="saveStatus" class="text-sm text-center text-gray-500 hidden"></p>
+                </div>
+                <div id="sinExcedente" class="hidden p-4 bg-yellow-50 text-yellow-800 rounded-lg text-sm">
+                    El salario de este mes no supera la línea base. Cubre los gastos mínimos y utiliza tu fondo de reserva si es necesario. No realices pagos extra a la deuda.
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel de Estado de Deudas -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h2 class="text-xl font-semibold mb-4">Estado Actual de Deudas</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-left text-sm whitespace-nowrap">
+                    <thead class="uppercase tracking-wider border-b-2 border-gray-100">
+                        <tr>
+                            <th class="px-4 py-3">Concepto</th>
+                            <th class="px-4 py-3">Saldo Restante</th>
+                            <th class="px-4 py-3">Cuota Fija Base</th>
+                            <th class="px-4 py-3">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="debtsTableBody" class="divide-y divide-gray-100">
+                        <tr><td colspan="4" class="px-4 py-4 text-center text-gray-500">Cargando datos desde Supabase...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Inicializar Supabase
+        const supabaseUrl = 'https://jgvgabkrriedaquqehpb.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndmdhYmtycmllZGFxdXFlaHBiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5OTYzNDQsImV4cCI6MjEwMzU3MjM0NH0.jdq2xaDtJ0YO-8zpQYqQPu5e2dkyCl8XjXtw_cGhqko';
+        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+        const LINEA_BASE = 8979.00;
+        let datosCalculados = null;
+
+        async function cargarDeudas() {
+            const { data, error } = await supabase.from('deudas').select('*').order('id', { ascending: true });
+            const tbody = document.getElementById('debtsTableBody');
+            
+            if (error) {
+                tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-4 text-red-500">Error al cargar: ${error.message}</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = '';
+            data.forEach(deuda => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 font-medium">${deuda.nombre}</td>
+                        <td class="px-4 py-3 text-red-600 font-semibold">${deuda.saldo.toLocaleString()} AED</td>
+                        <td class="px-4 py-3 text-gray-600">${deuda.cuota_minima.toLocaleString()} AED</td>
+                        <td class="px-4 py-3">
+                            <button onclick="actualizarSaldo(${deuda.id}, ${deuda.saldo})" class="text-blue-600 hover:underline text-xs font-medium">Actualizar Saldo</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function actualizarSaldo(id, saldoActual) {
+            const nuevoSaldo = prompt("Introduce el nuevo saldo restante exacto:", saldoActual);
+            if (nuevoSaldo !== null && !isNaN(nuevoSaldo)) {
+                const { error } = await supabase.from('deudas').update({ saldo: parseFloat(nuevoSaldo) }).eq('id', id);
+                if (!error) cargarDeudas();
+                else alert("Error al actualizar");
+            }
+        }
+
+        function calcularExcedente() {
+            const salario = parseFloat(document.getElementById('salarioInput').value);
+            const panelResultados = document.getElementById('resultados');
+            const panelSinExcedente = document.getElementById('sinExcedente');
+            
+            if (isNaN(salario) || salario <= 0) return;
+
+            if (salario > LINEA_BASE) {
+                const excedente = salario - LINEA_BASE;
+                const pagoDeuda = excedente * 0.70;
+                const fondoEmergencia = excedente * 0.30;
+
+                document.getElementById('excedenteTotal').innerText = excedente.toFixed(2) + ' AED';
+                document.getElementById('pagoDeuda').innerText = pagoDeuda.toFixed(2) + ' AED';
+                document.getElementById('fondoEmergencia').innerText = fondoEmergencia.toFixed(2) + ' AED';
+                
+                datosCalculados = { salario, excedente, pagoDeuda, fondoEmergencia };
+                
+                panelResultados.classList.remove('hidden');
+                panelSinExcedente.classList.add('hidden');
+            } else {
+                panelResultados.classList.add('hidden');
+                panelSinExcedente.classList.remove('hidden');
+                datosCalculados = null;
+            }
+        }
+
+        async function guardarMes() {
+            if (!datosCalculados) return;
+            
+            const mesActual = new Date().toLocaleString('es-ES', { month: 'long', year: 'numeric' });
+            const status = document.getElementById('saveStatus');
+            status.classList.remove('hidden');
+            status.innerText = "Guardando...";
+
+            const { error } = await supabase.from('historial_meses').insert([{
+                mes: mesActual,
+                salario: datosCalculados.salario,
+                linea_base: LINEA_BASE,
+                excedente: datosCalculados.excedente,
+                pago_extra_deuda: datosCalculados.pagoDeuda,
+                fondo_emergencia: datosCalculados.fondoEmergencia
+            }]);
+
+            if (error) {
+                status.innerText = "Error: " + error.message;
+                status.classList.add('text-red-500');
+            } else {
+                status.innerText = "¡Registro guardado correctamente!";
+                status.classList.replace('text-gray-500', 'text-green-600');
+                setTimeout(() => { status.classList.add('hidden'); }, 3000);
+            }
+        }
+
+        // Cargar datos iniciales
+        cargarDeudas();
+    </script>
+</body>
+</html>
