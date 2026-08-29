@@ -38,6 +38,7 @@
 </head>
 <body class="text-slate-800 antialiased selection:bg-indigo-100 selection:text-indigo-900">
 
+    <!-- HEADER / HERO SECTION -->
     <div class="bg-slate-900 text-white pb-32 pt-8 px-4 rounded-b-[3rem] shadow-2xl relative overflow-hidden">
         <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
             <div class="absolute -top-24 -right-24 w-96 h-96 bg-indigo-500 rounded-full mix-blend-screen filter blur-[80px] opacity-40"></div>
@@ -62,6 +63,7 @@
                 </div>
             </header>
 
+            <!-- Global KPIs -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
                 <div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/10 shadow-inner hover:bg-white/15 transition duration-300">
                     <p class="text-indigo-200 text-xs uppercase font-extrabold tracking-widest mb-1.5 flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Deuda Total</p>
@@ -91,8 +93,10 @@
         </div>
     </div>
 
+    <!-- MAIN DASHBOARD CONTENT -->
     <main class="max-w-7xl mx-auto px-4 -mt-20 relative z-20 space-y-8 pb-24">
 
+        <!-- TOGGLE MODO -->
         <div class="flex justify-center -mt-6 mb-2">
             <div class="bg-white p-1 rounded-2xl shadow-xl border border-slate-100 inline-flex w-full sm:w-auto">
                 <button id="btnModoSim" onclick="setModo('simulacion')" class="flex-1 sm:w-48 py-3 text-sm font-black bg-indigo-50 text-indigo-700 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2">
@@ -104,8 +108,10 @@
             </div>
         </div>
 
+        <!-- FILA 1: ENTRADAS DE DATOS -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             
+            <!-- PASO 1: INGRESOS -->
             <div class="glass-card rounded-3xl p-8 border border-white">
                 <div class="flex items-center justify-between mb-8">
                     <div class="flex items-center gap-3">
@@ -114,6 +120,7 @@
                     </div>
                 </div>
 
+                <!-- MODO SIMULACIÓN -->
                 <div id="panelSimulacion">
                     <div class="mb-10 bg-slate-50 p-6 rounded-2xl border border-slate-100 shadow-inner">
                         <div class="flex justify-between items-end mb-4">
@@ -149,6 +156,7 @@
                     </div>
                 </div>
 
+                <!-- MODO REAL -->
                 <div id="panelReal" class="hidden">
                     <div class="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-8 text-center mt-4">
                         <label class="block text-xs font-black text-emerald-600 uppercase tracking-widest mb-4">Introduce tu nómina final exacta</label>
@@ -161,8 +169,10 @@
                 </div>
             </div>
 
+            <!-- PASO 2: GASTOS DINÁMICOS -->
             <div class="bg-slate-900 rounded-3xl p-8 shadow-xl relative overflow-hidden border border-slate-800">
                 <div class="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -mr-20 -mt-20 blur-3xl pointer-events-none"></div>
+                <img src="emaar-family_card.png" alt="Emaar Card" class="absolute -right-12 top-1/2 transform -translate-y-1/2 w-72 opacity-40 drop-shadow-2xl mix-blend-lighten pointer-events-none" style="filter: brightness(0.9) contrast(1.2);">
 
                 <div class="relative z-10 h-full flex flex-col justify-between">
                     <div>
@@ -171,7 +181,8 @@
                             <h2 class="text-xl font-black text-white tracking-tight">Gastos Dinámicos</h2>
                         </div>
                         
-                        <div class="mb-6 bg-slate-800/50 p-5 rounded-2xl border border-slate-700/50">
+                        <!-- EMAAR CARD -->
+                        <div class="mb-6 bg-slate-800/50 p-5 rounded-2xl border border-slate-700/50 relative overflow-hidden">
                             <label class="block text-xs font-bold text-yellow-400 uppercase tracking-widest mb-3">Tarjeta Emaar</label>
                             <div class="flex items-center border-b-2 border-slate-600 focus-within:border-yellow-400 transition-colors pb-2">
                                 <span class="text-slate-400 font-bold mr-3 text-2xl">AED</span>
@@ -180,7 +191,9 @@
                             <p class="text-[10px] text-slate-400 mt-2 font-medium">Saldo a liquidar para evitar intereses.</p>
                         </div>
 
-                        <div id="dewaSimulacionPanel" class="bg-cyan-900/20 p-5 rounded-2xl border border-cyan-800/50">
+                        <!-- DEWA CALCULATOR -->
+                        <!-- Simulación DEWA -->
+                        <div id="dewaSimulacionPanel" class="bg-cyan-900/40 p-5 rounded-2xl border border-cyan-800/50 backdrop-blur-sm">
                             <label class="block text-xs font-bold text-cyan-400 uppercase tracking-widest mb-3">DEWA (Proyección)</label>
                             <div class="flex justify-between items-center mb-2 text-xs text-slate-300">
                                 <span>Housing + Sewerage (Fijo Dubai)</span>
@@ -189,7 +202,7 @@
                             <div class="flex justify-between items-center text-xs text-slate-300 mb-4">
                                 <span>Consumo Estimado (Luz + Agua)</span>
                                 <div class="flex items-center gap-1">
-                                    <input type="number" id="dewaConsumoSim" value="164" oninput="actualizarGastos()" class="w-20 bg-slate-800 border border-slate-600 rounded-lg text-right p-1.5 font-bold text-white focus:outline-none focus:border-cyan-400">
+                                    <input type="number" id="dewaConsumoSim" value="164" oninput="actualizarGastos()" class="w-20 bg-slate-800/80 border border-slate-600 rounded-lg text-right p-1.5 font-bold text-white focus:outline-none focus:border-cyan-400">
                                     <span>AED</span>
                                 </div>
                             </div>
@@ -199,7 +212,8 @@
                             </div>
                         </div>
 
-                        <div id="dewaRealPanel" class="hidden bg-cyan-900/20 p-5 rounded-2xl border border-cyan-800/50">
+                        <!-- Real DEWA -->
+                        <div id="dewaRealPanel" class="hidden bg-cyan-900/40 p-5 rounded-2xl border border-cyan-800/50 backdrop-blur-sm">
                             <label class="block text-xs font-bold text-cyan-400 uppercase tracking-widest mb-3">Factura DEWA (Dato Real)</label>
                             <div class="flex items-center border-b-2 border-slate-600 focus-within:border-cyan-400 transition-colors pb-2">
                                 <span class="text-slate-400 font-bold mr-3 text-2xl">AED</span>
@@ -213,6 +227,7 @@
             </div>
         </div>
 
+        <!-- FILA 2: BALANCE Y ESTRATEGIA -->
         <div class="glass-card rounded-[2.5rem] p-8 sm:p-10 border border-white shadow-xl relative overflow-hidden bg-white/95">
             
             <div class="flex items-center justify-between mb-10 border-b border-slate-100 pb-6">
@@ -225,6 +240,7 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
                 
+                <!-- Columna Izquierda: Ingresos vs Gastos -->
                 <div class="lg:col-span-4 space-y-6">
                     <div>
                         <p class="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-1">Total Ingresos Netos</p>
@@ -259,9 +275,11 @@
                     </div>
                 </div>
 
+                <!-- Columna Central: Gráfico -->
                 <div class="lg:col-span-4 relative flex flex-col items-center justify-center">
                     <div class="relative w-full max-w-[240px] aspect-square">
                         <canvas id="distributionChart"></canvas>
+                        <!-- Texto central del gráfico -->
                         <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-2">
                             <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Excedente Libre</span>
                             <span class="text-2xl font-black text-emerald-500 mt-0.5 val-excedente">7,709 AED</span>
@@ -275,6 +293,7 @@
                     </div>
                 </div>
 
+                <!-- Columna Derecha: Destino del Excedente -->
                 <div class="lg:col-span-4 space-y-5" id="panelExcedente">
                     <p class="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-1 text-center lg:text-left">Distribución (70/30)</p>
                     
@@ -294,6 +313,7 @@
                 </div>
             </div>
 
+            <!-- Botón Guardar -->
             <div class="mt-12 pt-8 border-t border-slate-100 flex flex-col items-center">
                 <button onclick="guardarMes()" class="w-full sm:w-auto bg-slate-900 text-white py-4 px-12 rounded-2xl font-black text-lg shadow-2xl shadow-slate-900/30 hover:bg-slate-800 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3 group">
                     <span id="textoBotonGuardar">Guardar Proyección en Supabase</span>
@@ -303,6 +323,7 @@
             </div>
         </div>
 
+        <!-- FILA 3: HISTÓRICO DE INGRESOS -->
         <div class="glass-card rounded-[2.5rem] p-8 sm:p-10 border border-white shadow-xl relative overflow-hidden bg-white/95">
             <div class="flex justify-between items-end mb-8 border-b border-slate-100 pb-6">
                 <div>
@@ -323,6 +344,7 @@
             </div>
         </div>
 
+        <!-- FILA 4: PORTAFOLIO DE PASIVOS -->
         <div class="pt-2">
             <div class="flex items-center gap-3 mb-8 px-2">
                 <div class="w-8 h-8 rounded-lg bg-slate-200 text-slate-600 flex items-center justify-center font-black">4</div>
@@ -331,6 +353,7 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
                 
+                <!-- Vehículo Dinámico -->
                 <div class="lg:col-span-1 bg-gradient-to-b from-slate-900 to-black rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden border border-slate-800 h-full flex flex-col justify-between min-h-[380px]">
                     <div class="absolute top-0 right-0 w-64 h-64 bg-emerald-500 opacity-20 rounded-full -mr-20 -mt-20 blur-[60px] pointer-events-none"></div>
                     <div class="relative z-10">
@@ -357,6 +380,7 @@
                     <img src="dashing.png" alt="Jetour" class="absolute -bottom-6 -right-12 w-80 drop-shadow-2xl pointer-events-none z-0 transform scale-110">
                 </div>
 
+                <!-- Tarjetas Supabase -->
                 <div class="lg:col-span-2 glass-card rounded-[2.5rem] p-8 shadow-sm h-full border border-white">
                     <div class="flex justify-between items-end mb-8">
                         <p class="text-xs font-extrabold text-slate-400 uppercase tracking-widest">Base de Datos en Tiempo Real</p>
