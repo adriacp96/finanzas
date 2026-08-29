@@ -40,7 +40,6 @@
 
     <!-- HEADER / HERO SECTION -->
     <div class="bg-slate-900 text-white pb-32 pt-8 px-4 rounded-b-[3rem] shadow-2xl relative overflow-hidden">
-        <!-- Abstract Lights -->
         <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
             <div class="absolute -top-24 -right-24 w-96 h-96 bg-indigo-500 rounded-full mix-blend-screen filter blur-[80px] opacity-40"></div>
             <div class="absolute top-12 -left-24 w-72 h-72 bg-emerald-500 rounded-full mix-blend-screen filter blur-[80px] opacity-30"></div>
@@ -96,7 +95,7 @@
     <!-- MAIN DASHBOARD CONTENT -->
     <main class="max-w-7xl mx-auto px-4 -mt-20 relative z-20 space-y-8 pb-24">
 
-        <!-- FILA 1: ENTRADAS DE DATOS (Ingresos y Gastos) -->
+        <!-- FILA 1: ENTRADAS DE DATOS -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             
             <!-- PASO 1: INGRESOS -->
@@ -153,22 +152,21 @@
                         </div>
                         
                         <div class="mb-4">
-                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Saldo Emaar Family Card (Puntos)</label>
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Saldo Emaar Family Card</label>
                             <div class="flex items-center border-b-2 border-slate-700 focus-within:border-yellow-400 transition-colors pb-3 w-full sm:w-2/3">
                                 <span class="text-slate-500 font-bold mr-3 text-3xl">AED</span>
                                 <input type="number" id="gastoEmaar" value="2000" oninput="actualizarGastos()" class="w-full bg-transparent text-5xl font-black text-white focus:outline-none placeholder-slate-700" placeholder="0">
                             </div>
                         </div>
                     </div>
-                    
-                    <p class="text-xs text-slate-400 font-medium leading-relaxed max-w-xs mt-8 bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
-                        Agrupa tus gastos diarios (cafés, ropa, ocio) en la tarjeta para sumar puntos. Este saldo se restará de tus ingresos para pagarla entera y <span class="text-yellow-400 font-bold">evitar intereses</span>.
+                    <p class="text-xs text-slate-400 font-medium max-w-xs mt-8 bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
+                        Saldo a deducir del salario para liquidar la tarjeta entera a fin de mes y acumular <span class="text-yellow-400 font-bold">Upoints</span> sin pagar intereses.
                     </p>
                 </div>
             </div>
         </div>
 
-        <!-- FILA 2: BALANCE, 70/30 Y GUARDAR (El Cerebro) -->
+        <!-- FILA 2: BALANCE Y GUARDAR (El Cerebro) -->
         <div class="glass-card rounded-[2.5rem] p-8 sm:p-10 border border-white shadow-xl relative overflow-hidden bg-white/95">
             
             <div class="flex items-center gap-3 mb-10">
@@ -178,20 +176,18 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
                 
-                <!-- Columna Izquierda: Ingresos vs Gastos -->
+                <!-- Izquierda: Ingresos vs Gastos -->
                 <div class="lg:col-span-4 space-y-6">
                     <div>
                         <p class="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-1">Total Ingresos Netos</p>
                         <h3 class="text-4xl font-black text-emerald-500 tracking-tighter val-salario">18,430 AED</h3>
                     </div>
-                    
                     <div class="h-px w-full bg-slate-100"></div>
-                    
                     <div>
                         <p class="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-2">Obligaciones a Pagar</p>
                         <div class="space-y-3">
                             <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                <span class="text-sm font-semibold text-slate-600">Costes Fijos (Casa/Coche)</span>
+                                <span class="text-sm font-semibold text-slate-600">Costes Fijos</span>
                                 <span class="font-black text-slate-800">-8,721 AED</span>
                             </div>
                             <div class="flex justify-between items-center bg-yellow-50 p-3 rounded-xl border border-yellow-100">
@@ -200,18 +196,16 @@
                             </div>
                         </div>
                     </div>
-                    
                     <div class="pt-2">
                         <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Línea de Vida Total</p>
                         <p class="text-xl font-black text-slate-800 val-base">10,721 AED</p>
                     </div>
                 </div>
 
-                <!-- Columna Central: Gráfico -->
+                <!-- Centro: Gráfico 70/30 -->
                 <div class="lg:col-span-4 relative flex flex-col items-center justify-center">
                     <div class="relative w-full max-w-[240px] aspect-square">
                         <canvas id="distributionChart"></canvas>
-                        <!-- Texto central del gráfico -->
                         <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-2">
                             <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Excedente Libre</span>
                             <span class="text-2xl font-black text-emerald-500 mt-0.5 val-excedente">7,709 AED</span>
@@ -225,7 +219,7 @@
                     </div>
                 </div>
 
-                <!-- Columna Derecha: Destino del Excedente -->
+                <!-- Derecha: Destino del Dinero -->
                 <div class="lg:col-span-4 space-y-5" id="panelExcedente">
                     <p class="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-1 text-center lg:text-left">Destino del Dinero</p>
                     
@@ -233,14 +227,12 @@
                         <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-rose-500"></div>
                         <p class="text-[10px] font-extrabold text-rose-500 uppercase tracking-widest mb-1">Ataque Extra a Deuda (70%)</p>
                         <p class="text-3xl font-black text-rose-600 tracking-tight val-deuda">5,396 AED</p>
-                        <p class="text-xs font-semibold text-slate-500 mt-2">Súmalo a tu cuota NBD/Jetour para liquidarlos antes.</p>
                     </div>
                     
                     <div class="bg-white border-2 border-blue-100 p-5 rounded-2xl shadow-sm relative overflow-hidden">
                         <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-500"></div>
                         <p class="text-[10px] font-extrabold text-blue-500 uppercase tracking-widest mb-1">Fondo de Emergencia (30%)</p>
                         <p class="text-3xl font-black text-blue-600 tracking-tight val-fondo">2,313 AED</p>
-                        <p class="text-xs font-semibold text-slate-500 mt-2">Ahorro para meses de vacaciones o pocos vuelos.</p>
                     </div>
                 </div>
             </div>
@@ -253,11 +245,27 @@
                 </button>
                 <p id="saveStatus" class="text-sm font-bold text-center hidden mt-4"></p>
             </div>
-
         </div>
 
-        <!-- FILA 3: PORTAFOLIO DE PASIVOS -->
-        <div class="pt-6">
+        <!-- FILA 3: HISTÓRICO DE INGRESOS (NUEVO) -->
+        <div class="glass-card rounded-[2.5rem] p-8 sm:p-10 border border-white shadow-xl relative overflow-hidden bg-white/95">
+            <div class="flex justify-between items-end mb-8 border-b border-slate-100 pb-6">
+                <div>
+                    <h2 class="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+                        <svg class="w-6 h-6 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
+                        Evolución de Ingresos
+                    </h2>
+                    <p class="text-sm font-semibold text-slate-500 mt-2">Histórico extraído de nóminas + registros de Supabase</p>
+                </div>
+            </div>
+            
+            <div class="relative w-full h-[350px]">
+                <canvas id="incomeHistoryChart"></canvas>
+            </div>
+        </div>
+
+        <!-- FILA 4: PORTAFOLIO DE PASIVOS -->
+        <div class="pt-2">
             <div class="flex items-center gap-3 mb-8 px-2">
                 <div class="w-8 h-8 rounded-lg bg-slate-200 text-slate-600 flex items-center justify-center font-black">4</div>
                 <h2 class="text-2xl font-black text-slate-900 tracking-tight">Tus Activos y Pasivos</h2>
@@ -268,20 +276,17 @@
                 <!-- Vehículo -->
                 <div class="lg:col-span-1 bg-gradient-to-b from-slate-900 to-black rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden border border-slate-800 h-full flex flex-col justify-between min-h-[360px]">
                     <div class="absolute top-0 right-0 w-64 h-64 bg-emerald-500 opacity-20 rounded-full -mr-20 -mt-20 blur-[60px] pointer-events-none"></div>
-                    
                     <div class="relative z-10">
                         <div class="flex justify-between items-start mb-4">
                             <span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Activo Fijo</span>
                             <span class="text-slate-500 font-bold text-xs uppercase tracking-wider">Murabaha</span>
                         </div>
                         <h3 class="text-white font-black text-3xl tracking-tight leading-tight mb-1">Jetour Dashing '25</h3>
-                        
                         <div class="mt-8">
                             <p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-1">Cuota Mensual Fija</p>
                             <p class="text-4xl font-black text-white">1,741<span class="text-xl text-slate-500 font-bold">.67 AED</span></p>
                         </div>
                     </div>
-
                     <img src="dashing.png" alt="Jetour" class="absolute -bottom-6 -right-12 w-80 drop-shadow-2xl pointer-events-none z-0 transform scale-110">
                 </div>
 
@@ -289,7 +294,6 @@
                 <div class="lg:col-span-2 glass-card rounded-[2.5rem] p-8 shadow-sm h-full border border-white">
                     <div class="flex justify-between items-end mb-8">
                         <p class="text-xs font-extrabold text-slate-400 uppercase tracking-widest">Base de Datos en Tiempo Real</p>
-                        <div class="hidden sm:block"><canvas id="miniDebtChart" class="h-10 w-32"></canvas></div>
                     </div>
 
                     <div id="debtCardsContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -322,7 +326,24 @@
         let deudaTotal = 0;
         
         let distChartInstance = null;
-        let miniChartInstance = null;
+        let historyChartInstance = null;
+
+        // Histórico real de nóminas (Agosto 2023 - Agosto 2026)
+        const historicalIncome = [
+            { mes: 'Ago 23', valor: 6617.6 }, { mes: 'Sep 23', valor: 3361.67 }, { mes: 'Oct 23', valor: 4482.8 },
+            { mes: 'Nov 23', valor: 10353.51 }, { mes: 'Dic 23', valor: 12175.81 }, { mes: 'Ene 24', valor: 4167.82 },
+            { mes: 'Feb 24', valor: 9895.47 }, { mes: 'Mar 24', valor: 8218.58 }, { mes: 'Abr 24', valor: 12026.91 },
+            { mes: 'May 24', valor: 26177.74 }, { mes: 'Jun 24', valor: 10605.53 }, { mes: 'Jul 24', valor: 9939.08 },
+            { mes: 'Ago 24', valor: 11220.91 }, { mes: 'Sep 24', valor: 11869.78 }, { mes: 'Oct 24', valor: 7550.14 },
+            { mes: 'Nov 24', valor: 11258.69 }, { mes: 'Dic 24', valor: 11030.33 }, { mes: 'Ene 25', valor: 10647.28 },
+            { mes: 'Feb 25', valor: 8198.75 }, { mes: 'Mar 25', valor: 12273.74 }, { mes: 'Abr 25', valor: 11277.6 },
+            { mes: 'May 25', valor: 34760.4 }, { mes: 'Jun 25', valor: 11421.23 }, { mes: 'Jul 25', valor: 9288.2 },
+            { mes: 'Ago 25', valor: 11386.73 }, { mes: 'Sep 25', valor: 10949.61 }, { mes: 'Oct 25', valor: 10714.48 },
+            { mes: 'Nov 25', valor: 12577.88 }, { mes: 'Dic 25', valor: 12113.24 }, { mes: 'Ene 26', valor: 13519.2 },
+            { mes: 'Feb 26', valor: 12684.32 }, { mes: 'Mar 26', valor: 13169.11 }, { mes: 'Abr 26', valor: 16212.96 },
+            { mes: 'May 26', valor: 40873.32 }, { mes: 'Jun 26', valor: 16708.98 }, { mes: 'Jul 26', valor: 18696.08 },
+            { mes: 'Ago 26', valor: 29100.13 }
+        ];
 
         window.onload = () => {
             const today = new Date();
@@ -332,6 +353,7 @@
             
             cargarDeudas();
             actualizarSlider(); 
+            cargarHistorialIngresos();
         };
 
         function updateTexts(className, text) {
@@ -406,7 +428,7 @@
                 distChartInstance = new Chart(ctx, {
                     type: 'doughnut',
                     data: {
-                        labels: ['Costes + Tarjeta', 'Ataque Deuda', 'Fondo'],
+                        labels: ['Costes', 'Deuda', 'Fondo'],
                         datasets: [{
                             data: [base, deuda, fondo],
                             backgroundColor: ['#e2e8f0', '#f43f5e', '#3b82f6'],
@@ -428,7 +450,7 @@
                 const meses = Math.ceil(deudaTotal / pagoMensualEstimado);
                 document.getElementById('kpiMonthsFree').innerText = `~${meses} Meses`;
             } else {
-                document.getElementById('kpiMonthsFree').innerText = "--- Meses";
+                document.getElementById('kpiMonthsFree').innerText = "---";
             }
         }
 
@@ -436,16 +458,10 @@
             const { data, error } = await supabaseClient.from('deudas').select('*').order('id', { ascending: true });
             const container = document.getElementById('debtCardsContainer');
             
-            if (error) {
-                container.innerHTML = `<div class="text-red-500 font-bold">Error: ${error.message}</div>`;
-                return;
-            }
+            if (error) { container.innerHTML = `<div class="text-red-500 font-bold">Error: ${error.message}</div>`; return; }
 
             container.innerHTML = '';
             deudaTotal = 0;
-            const nombres = [];
-            const saldos = [];
-            
             const deudasVisibles = data.filter(d => !d.nombre.toLowerCase().includes('coche'));
             const maxDeuda = Math.max(...deudasVisibles.map(d => parseFloat(d.saldo)), 1);
 
@@ -454,9 +470,6 @@
                 deudaTotal += saldo;
                 
                 if (!deuda.nombre.toLowerCase().includes('coche')) {
-                    nombres.push(deuda.nombre.substring(0, 10) + '...');
-                    saldos.push(saldo);
-
                     const porcentaje = (saldo / maxDeuda) * 100;
                     const isCreditCard = deuda.nombre.toLowerCase().includes('tarjeta') || deuda.nombre.includes('2811');
                     const colorClass = isCreditCard ? 'bg-emerald-500' : 'bg-rose-500';
@@ -470,7 +483,6 @@
                                 </div>
                                 <p class="text-3xl font-black text-slate-900 tracking-tight mb-2">${saldo.toLocaleString('en-US', {minimumFractionDigits: 2})} <span class="text-sm font-bold text-slate-400">AED</span></p>
                             </div>
-                            
                             <div class="mt-4">
                                 <div class="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
                                     <span>Progreso / Peso</span>
@@ -487,25 +499,6 @@
 
             document.getElementById('kpiTotalDebt').innerText = Math.floor(deudaTotal).toLocaleString() + ' AED';
             actualizarKpiProyeccion();
-            renderMiniChart(nombres, saldos);
-        }
-
-        function renderMiniChart(labels, data) {
-            const ctx = document.getElementById('miniDebtChart').getContext('2d');
-            if (miniChartInstance) miniChartInstance.destroy();
-
-            miniChartInstance = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{ data: data, backgroundColor: '#cbd5e1', borderRadius: 4, barThickness: 8 }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false }, tooltip: { enabled: false } },
-                    scales: { x: { display: false }, y: { display: false } }
-                }
-            });
         }
 
         async function actualizarSaldo(id, saldoActual) {
@@ -515,6 +508,63 @@
                 if (!error) cargarDeudas();
                 else alert("Error de sincronización con Supabase.");
             }
+        }
+
+        // Carga historial estático + base de datos
+        async function cargarHistorialIngresos() {
+            const { data, error } = await supabaseClient.from('historial_meses').select('mes, salario').order('id', { ascending: true });
+            
+            let combinedData = [...historicalIncome];
+            
+            if (!error && data) {
+                data.forEach(record => {
+                    // Evitar duplicar meses si el nombre coincide. Supabase devuelve "septiembre de 2026", convertimos a "Sep 26"
+                    const mesAbrev = record.mes.substring(0,3).charAt(0).toUpperCase() + record.mes.substring(1,3).toLowerCase() + ' ' + record.mes.slice(-2);
+                    combinedData.push({ mes: mesAbrev, valor: parseFloat(record.salario) });
+                });
+            }
+
+            const labels = combinedData.map(d => d.mes);
+            const values = combinedData.map(d => d.valor);
+
+            const ctx = document.getElementById('incomeHistoryChart').getContext('2d');
+            
+            // Crear gradiente
+            const gradient = ctx.createLinearGradient(0, 0, 0, 350);
+            gradient.addColorStop(0, 'rgba(99, 102, 241, 0.4)'); // indigo-500
+            gradient.addColorStop(1, 'rgba(99, 102, 241, 0.0)');
+
+            if (historyChartInstance) historyChartInstance.destroy();
+
+            historyChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Ingreso Neto (AED)',
+                        data: values,
+                        borderColor: '#6366f1', // indigo-500
+                        borderWidth: 3,
+                        backgroundColor: gradient,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#ffffff',
+                        pointBorderColor: '#6366f1',
+                        pointBorderWidth: 2,
+                        pointRadius: 3,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1e293b', padding: 12, titleFont: { size: 13 }, bodyFont: { size: 14, weight: 'bold' } } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#f1f5f9', drawBorder: false }, ticks: { color: '#94a3b8', font: { size: 11, weight: 'bold' }, callback: function(value) { return value / 1000 + 'k'; } } },
+                        x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10, weight: 'bold' }, maxTicksLimit: 12 } }
+                    },
+                    interaction: { mode: 'index', intersect: false }
+                }
+            });
         }
 
         async function guardarMes() {
@@ -547,6 +597,7 @@
             } else {
                 status.innerText = `✅ ¡Distribución de ${mesFormateado} guardada!`;
                 status.className = "text-sm font-bold text-center text-emerald-600 mt-4";
+                cargarHistorialIngresos(); // Refrescar el gráfico para mostrar el nuevo mes insertado
                 setTimeout(() => { status.classList.add('hidden'); }, 4000);
             }
             btn.innerHTML = originalContent;
