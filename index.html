@@ -80,11 +80,12 @@
                 </div>
                 <div class="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/10 cursor-help group relative">
                     <p class="text-slate-400 text-xs uppercase font-bold tracking-wider mb-1">Costes Fijos (Sin Tarjeta)</p>
-                    <p class="text-2xl font-black text-white group-hover:text-indigo-300 transition">6,979 AED</p>
-                    <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-white text-slate-800 text-xs rounded-xl p-3 shadow-xl opacity-0 group-hover:opacity-100 transition pointer-events-none border border-slate-200 z-50">
+                    <p class="text-2xl font-black text-white group-hover:text-indigo-300 transition">8,721 AED</p>
+                    <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-56 bg-white text-slate-800 text-xs rounded-xl p-3 shadow-xl opacity-0 group-hover:opacity-100 transition pointer-events-none border border-slate-200 z-50">
                         <div class="flex justify-between mb-1"><span>Alquiler (Provisión):</span><span class="font-bold">3,033</span></div>
                         <div class="flex justify-between mb-1"><span>Servicios (DU/DEWA):</span><span class="font-bold">600</span></div>
-                        <div class="flex justify-between"><span>Préstamo NBD:</span><span class="font-bold">3,346</span></div>
+                        <div class="flex justify-between mb-1"><span>Préstamo NBD:</span><span class="font-bold">3,346</span></div>
+                        <div class="flex justify-between"><span>Préstamo Coche:</span><span class="font-bold">1,742</span></div>
                     </div>
                 </div>
             </div>
@@ -145,7 +146,6 @@
 
                 <!-- EMAAR FAMILY CARD EXPENSE -->
                 <div class="bg-gradient-to-br from-slate-900 to-black rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden border border-slate-800">
-                    <!-- Efectos de luz y la imagen de la tarjeta -->
                     <div class="absolute top-0 right-0 w-48 h-48 bg-white opacity-5 rounded-full -mr-10 -mt-10 blur-3xl pointer-events-none"></div>
                     <img src="emaar-family_card.png" alt="Emaar Card" class="absolute -right-16 top-1/2 transform -translate-y-1/2 w-64 opacity-50 drop-shadow-2xl mix-blend-lighten pointer-events-none" style="filter: brightness(0.8) contrast(1.2);">
 
@@ -163,7 +163,7 @@
                             <span class="text-slate-400 font-bold mr-2 text-2xl">AED</span>
                             <input type="number" id="gastoEmaar" value="2000" oninput="actualizarGastos()" class="w-full bg-transparent text-3xl font-black text-white focus:outline-none placeholder-slate-600" placeholder="0">
                         </div>
-                        <p class="text-[10px] text-slate-500 mt-2 font-medium">Introduce el saldo de tu tarjeta para este mes. Se deducirá del salario para liquidarla entera y evitar intereses.</p>
+                        <p class="text-[10px] text-slate-500 mt-2 font-medium">Cubre todos tus gastos diarios. Se deducirá del salario para liquidarla entera a final de mes.</p>
                     </div>
                 </div>
 
@@ -175,9 +175,10 @@
 
             </div>
 
-            <!-- RIGHT PANEL: FINANCIAL RECEIPT & CHARTS -->
+            <!-- RIGHT PANEL: FINANCIAL RECEIPT & DEBT PORTFOLIO -->
             <div class="lg:col-span-5 space-y-6">
                 
+                <!-- El Recibo Financiero -->
                 <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-md border border-slate-200 relative overflow-hidden">
                     <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-500 via-indigo-500 to-yellow-400"></div>
                     
@@ -191,8 +192,8 @@
 
                     <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 mb-6">
                         <div class="flex justify-between items-center text-sm mb-2">
-                            <span class="font-medium text-slate-500">Obligaciones Fijas (Alquiler, NBD)</span>
-                            <span class="font-bold text-slate-800">-6,979 AED</span>
+                            <span class="font-medium text-slate-500">Obligaciones Fijas (Coche, Casa, NBD)</span>
+                            <span class="font-bold text-slate-800">-8,721 AED</span>
                         </div>
                         <div class="flex justify-between items-center text-sm mb-3">
                             <span class="font-medium text-yellow-600">Pago Tarjeta Emaar (100%)</span>
@@ -200,7 +201,7 @@
                         </div>
                         <div class="flex justify-between items-center pt-3 border-t border-slate-200">
                             <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Línea Base Dinámica</span>
-                            <span id="displayLineaBase" class="text-lg font-black text-slate-700">8,979 AED</span>
+                            <span id="displayLineaBase" class="text-lg font-black text-slate-700">10,721 AED</span>
                         </div>
                     </div>
 
@@ -208,10 +209,9 @@
                     <div id="panelExcedente">
                         <div class="flex justify-between items-center mb-4 px-2">
                             <span class="text-xs font-bold uppercase tracking-wider text-emerald-600">Excedente Generado</span>
-                            <span id="excedenteTotal" class="text-xl font-black text-emerald-600">9,451 AED</span>
+                            <span id="excedenteTotal" class="text-xl font-black text-emerald-600">7,709 AED</span>
                         </div>
                         
-                        <!-- Doughnut Chart (70/30) -->
                         <div class="relative w-full max-w-[180px] mx-auto aspect-square mb-6">
                             <canvas id="distributionChart"></canvas>
                         </div>
@@ -219,12 +219,12 @@
                         <div class="grid grid-cols-2 gap-3">
                             <div class="relative overflow-hidden rounded-xl bg-white border border-rose-100 p-4 shadow-sm text-center">
                                 <p class="text-[10px] font-bold text-rose-500 uppercase tracking-wider mb-1">Ataque Deuda (70%)</p>
-                                <span id="pagoDeuda" class="text-lg font-black text-rose-600">6,616 AED</span>
+                                <span id="pagoDeuda" class="text-lg font-black text-rose-600">5,396 AED</span>
                             </div>
                             
                             <div class="relative overflow-hidden rounded-xl bg-white border border-blue-100 p-4 shadow-sm text-center">
                                 <p class="text-[10px] font-bold text-blue-500 uppercase tracking-wider mb-1">Fondo Reserva (30%)</p>
-                                <span id="fondoEmergencia" class="text-lg font-black text-blue-600">2,835 AED</span>
+                                <span id="fondoEmergencia" class="text-lg font-black text-blue-600">2,313 AED</span>
                             </div>
                         </div>
                     </div>
@@ -237,9 +237,42 @@
 
                 <!-- Debt Portfolio -->
                 <div class="glass-card rounded-3xl p-6 sm:p-8 shadow-sm">
-                    <h2 class="text-lg font-extrabold text-slate-800 mb-6">Portafolio de Pasivos</h2>
-                    <div id="debtCardsContainer" class="space-y-4">
-                        <div class="text-center text-sm font-bold text-slate-400 py-8">Cargando base de datos...</div>
+                    <div class="flex justify-between items-end mb-6">
+                        <div>
+                            <h2 class="text-lg font-extrabold text-slate-800">Portafolio de Pasivos</h2>
+                            <p class="text-xs font-medium text-slate-500 mt-1">Sincronizado en tiempo real con Supabase</p>
+                        </div>
+                        <div class="hidden sm:block">
+                            <canvas id="miniDebtChart" class="h-10 w-24"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- NEW CAR WIDGET (Murabaha) -->
+                    <div class="bg-gradient-to-br from-slate-900 to-black rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden border border-slate-800 mb-6">
+                        <div class="absolute top-0 right-0 w-64 h-64 bg-emerald-500 opacity-10 rounded-full -mr-10 -mt-10 blur-3xl pointer-events-none"></div>
+                        
+                        <!-- Imagen del Coche -->
+                        <img src="dashing.png" alt="Jetour Dashing" class="absolute -right-4 sm:-right-8 top-1/2 transform -translate-y-1/2 w-56 sm:w-72 drop-shadow-2xl pointer-events-none z-0">
+
+                        <div class="relative z-10 w-2/3 md:w-1/2">
+                            <div class="flex items-center gap-2 mb-4">
+                                <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                                <h2 class="text-sm font-extrabold text-white uppercase tracking-wider">Activo Financiado</h2>
+                            </div>
+                            
+                            <h3 class="text-white font-bold text-xl sm:text-2xl tracking-tight leading-tight mb-1">Jetour Dashing '25</h3>
+                            <p class="text-slate-400 text-xs font-medium mb-6">Emirates Islamic Murabaha</p>
+                            
+                            <div>
+                                <p class="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-1">Cuota Fija Mensual</p>
+                                <p class="text-2xl sm:text-3xl font-black text-white">1,741<span class="text-base text-slate-500 font-bold">.67 AED</span></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Supabase Dynamic Cards -->
+                    <div id="debtCardsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="text-center text-sm font-bold text-slate-400 py-8 col-span-2">Cargando base de datos...</div>
                     </div>
                 </div>
 
@@ -255,7 +288,8 @@
 
         const BASE_FIJA_NETA = 11165.00; 
         const TARIFA_HORA_VUELO = 68.32;  
-        const GASTOS_FIJOS_OBLIGATORIOS = 6979.00; // Alquiler + DEWA/DU + NBD Loan
+        // 3033 (Alquiler) + 600 (Servicios) + 3346 (NBD Loan) + 1741.67 (Coche)
+        const GASTOS_FIJOS_OBLIGATORIOS = 8720.67; 
 
         let gastoVariableEmaar = 2000.00;
         let lineaBaseDinamica = GASTOS_FIJOS_OBLIGATORIOS + gastoVariableEmaar;
@@ -267,6 +301,7 @@
         let deudaTotal = 0;
         
         let distChartInstance = null;
+        let miniChartInstance = null;
 
         window.onload = () => {
             const today = new Date();
@@ -307,6 +342,9 @@
             const pagoVuelo = hours * TARIFA_HORA_VUELO;
             salarioEstimadoCalculado = BASE_FIJA_NETA + pagoVuelo + meals + turnarounds;
 
+            document.getElementById('pagoVueloDisplay').innerText = Math.floor(pagoVuelo).toLocaleString() + ' AED';
+            document.getElementById('dietasDisplay').innerText = Math.floor(meals + turnarounds).toLocaleString() + ' AED';
+            
             animateValue('salarioEstimadoDisplay', salarioEstimadoCalculado);
             calcularExcedente();
         }
@@ -363,7 +401,8 @@
 
         function actualizarKpiProyeccion() {
             if (deudaTotal > 0 && pagoDeuda > 0) {
-                const pagoMensualEstimado = pagoDeuda + 3346; 
+                // Pagos mínimos fijos a sumar al excedente (NBD: 3346 + Coche: 1742)
+                const pagoMensualEstimado = pagoDeuda + 3346 + 1741.67; 
                 const meses = Math.ceil(deudaTotal / pagoMensualEstimado);
                 document.getElementById('kpiMonthsFree').innerText = `~${meses} Meses`;
             } else {
@@ -382,20 +421,25 @@
 
             container.innerHTML = '';
             deudaTotal = 0;
+            const nombres = [];
+            const saldos = [];
             const maxDeuda = Math.max(...data.map(d => parseFloat(d.saldo)));
 
             data.forEach(deuda => {
                 const saldo = parseFloat(deuda.saldo);
                 deudaTotal += saldo;
+                nombres.push(deuda.nombre.substring(0, 10) + '...');
+                saldos.push(saldo);
+
                 const porcentaje = (saldo / maxDeuda) * 100;
-                const colorClass = saldo < 5000 ? 'bg-emerald-500' : 'bg-rose-500';
+                const colorClass = saldo < 10000 ? 'bg-emerald-500' : 'bg-rose-500';
 
                 container.innerHTML += `
                     <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm hover:shadow-md transition group">
                         <div class="flex justify-between items-start mb-4">
                             <div>
                                 <h3 class="font-bold text-slate-800">${deuda.nombre}</h3>
-                                <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mt-0.5">Cuota Fija: ${parseFloat(deuda.cuota_minima).toLocaleString()} AED</p>
+                                <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mt-0.5">Cuota: ${parseFloat(deuda.cuota_minima).toLocaleString()} AED</p>
                             </div>
                             <button onclick="actualizarSaldo(${deuda.id}, ${deuda.saldo})" class="text-[10px] uppercase font-bold tracking-wider text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg hover:bg-slate-200 hover:text-slate-800 transition">Editar</button>
                         </div>
@@ -409,6 +453,25 @@
 
             document.getElementById('kpiTotalDebt').innerText = Math.floor(deudaTotal).toLocaleString() + ' AED';
             actualizarKpiProyeccion();
+            renderMiniChart(nombres, saldos);
+        }
+
+        function renderMiniChart(labels, data) {
+            const ctx = document.getElementById('miniDebtChart').getContext('2d');
+            if (miniChartInstance) miniChartInstance.destroy();
+
+            miniChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{ data: data, backgroundColor: '#cbd5e1', borderRadius: 2 }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                    scales: { x: { display: false }, y: { display: false } }
+                }
+            });
         }
 
         async function actualizarSaldo(id, saldoActual) {
