@@ -420,7 +420,7 @@
                         
                         <div class="relative z-10 flex justify-between items-start mb-6">
                             <span class="bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Fondo de Provisión</span>
-                            <span class="text-xs font-bold text-slate-400 bg-slate-900/50 px-2.5 py-1 rounded-md border border-slate-700"><i class="fa-regular fa-clock mr-1"></i> Vence en 42 días</span>
+                            <span id="rentDaysBadge" class="text-xs font-bold text-slate-400 bg-slate-900/50 px-2.5 py-1 rounded-md border border-slate-700">---</span>
                         </div>
 
                         <div class="relative z-10 flex items-center gap-5 sm:gap-6">
@@ -437,7 +437,7 @@
 
                             <!-- Datos Financieros -->
                             <div class="w-full">
-                                <h3 class="text-white font-black text-lg tracking-tight leading-tight mb-1">Cheque Alquiler (Q3)</h3>
+                                <h3 id="rentQuarterTitle" class="text-white font-black text-lg tracking-tight leading-tight mb-1">Cheque Alquiler</h3>
                                 <p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-3">Acumulado vs Objetivo</p>
 
                                 <div class="flex justify-between items-end border-b border-slate-700 pb-2 mb-2">
@@ -490,7 +490,7 @@
         
         let distChartInstance = null;
         let historyChartInstance = null;
-        let deudasGlobales = []; // Guarda el estado actual real de Supabase
+        let deudasGlobales = []; 
 
         const historicalIncome = [
             { mes: 'Ago 23', valor: 6617.6 }, { mes: 'Sep 23', valor: 3361.67 }, { mes: 'Oct 23', valor: 4482.8 },
@@ -515,22 +515,7 @@
             cargarDeudas();
             cargarHistorialIngresos();
             cargarDatosMes(); 
-
-            // Inicializamos el widget de provisión de alquiler
-            actualizarPropositoAlquiler(6066, 9099);
         };
-
-        function actualizarPropositoAlquiler(ahorroActual, metaTotal) {
-            const porcentaje = Math.min(100, Math.max(0, (ahorroActual / metaTotal) * 100));
-            const recorteSuperior = 100 - porcentaje; 
-            
-            setTimeout(() => {
-                document.getElementById('homeFillLiquid').style.clipPath = `inset(${recorteSuperior}% 0 0 0)`;
-            }, 100);
-
-            document.getElementById('rentSavedValue').innerText = ahorroActual.toLocaleString();
-            document.getElementById('rentPercentageBadge').innerText = `${Math.floor(porcentaje)}% Lleno`;
-        }
 
         function cambiarMes(offset) {
             const selector = document.getElementById('mesSelector');
@@ -610,7 +595,6 @@
                 setTimeout(() => { status.classList.add('hidden'); }, 2000);
             }
             
-            // Actualizar visualmente los pasivos según el mes seleccionado
             renderizarDeudasDinamicas();
         }
 
@@ -867,6 +851,55 @@
             
             document.getElementById('kpiTotalDebt').innerText = Math.floor(deudaTotal).toLocaleString() + ' AED';
             actualizarKpiProyeccion();
+            calcularEstadoAlquiler(selectedDate);
+        }
+
+        function calcularEstadoAlquiler(fechaSeleccionada) {
+            const mes = fechaSeleccionada.getMonth() + 1;
+            const anio = fechaSeleccionada.getFullYear();
+            
+            let mesCheque, qText, mesesAhorrados;
+            if (mes <= 3) { mesCheque = 3; qText = "Q1 (Marzo)"; mesesAhorrados = mes === 3 ? 3 : mes; } 
+            else if (mes <= 6) { mesCheque = 6; qText = "Q2 (Junio)"; mesesAhorrados = mes === 6 ? 3 : mes - 3; } 
+            else if (mes <= 9) { mesCheque = 9; qText = "Q3 (Septiembre)"; mesesAhorrados = mes === 9 ? 3 : mes - 6; } 
+            else { mesCheque = 12; qText = "Q4 (Diciembre)"; mesesAhorrados = mes === 12 ? 3 : mes - 9; }
+
+            const cuotaMensual = 3033;
+            const meta = 9099;
+            const ahorroActual = mesesAhorrados * cuotaMensual;
+            const fechaCobro = new Date(anio, mesCheque - 1, 5);
+            const diasRestantes = Math.ceil((fechaCobro - fechaSeleccionada) / (1000 * 60 * 60 * 24));
+
+            const porcentaje = Math.min(100, Math.max(0, (ahorroActual / meta) * 100));
+            const recorteSuperior = 100 - porcentaje; 
+            
+            setTimeout(() => {
+                const liquid = document.getElementById('homeFillLiquid');
+                if(liquid) liquid.style.clipPath = `inset(${recorteSuperior}% 0 0 0)`;
+            }, 100);
+
+            const titulo = document.getElementById('rentQuarterTitle');
+            if(titulo) titulo.innerText = `Cheque Alquiler ${qText}`;
+
+            document.getElementById('rentSavedValue').innerText = ahorroActual.toLocaleString();
+            
+            const badgePorcentaje = document.getElementById('rentPercentageBadge');
+            if (ahorroActual >= meta) {
+                badgePorcentaje.innerHTML = `<i class="fa-solid fa-check"></i> Listo para Pagar`;
+                badgePorcentaje.className = "text-white bg-gradient-to-r from-emerald-500 to-teal-400 px-2 py-0.5 rounded shadow-sm font-black";
+            } else {
+                badgePorcentaje.innerText = `${Math.floor(porcentaje)}% Lleno`;
+                badgePorcentaje.className = "text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded";
+            }
+
+            const badgeDias = document.getElementById('rentDaysBadge');
+            if (diasRestantes <= 0 && diasRestantes > -30) {
+                badgeDias.innerHTML = `<i class="fa-solid fa-money-check"></i> Mes de Cobro`;
+                badgeDias.className = "text-xs font-bold text-amber-400 bg-amber-900/50 px-2.5 py-1 rounded-md border border-amber-700/50";
+            } else {
+                badgeDias.innerHTML = `<i class="fa-regular fa-clock mr-1"></i> Vence en ~${Math.abs(diasRestantes)} días`;
+                badgeDias.className = "text-xs font-bold text-slate-400 bg-slate-900/50 px-2.5 py-1 rounded-md border border-slate-700";
+            }
         }
 
         async function actualizarSaldo(id, saldoActual) {
@@ -1015,7 +1048,6 @@
                 status.innerText = "Error al guardar mes: " + error.message;
                 status.className = "text-sm font-bold text-center text-rose-400 mt-4";
             } else {
-                // ACTUALIZACIÓN AUTOMÁTICA DE DEUDAS (SOLO SI ES DATO REAL Y MES ACTUAL)
                 const today = new Date();
                 const selectedMonthStr = document.getElementById('mesSelector').value;
                 const [y, m] = selectedMonthStr.split('-');
