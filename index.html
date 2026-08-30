@@ -393,7 +393,7 @@
                         <div class="relative z-10">
                             <div class="flex justify-between items-start mb-4">
                                 <span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Activo Fijo</span>
-                                <button id="carWidgetEditBtn" class="text-[10px] uppercase font-bold tracking-wider text-slate-400 bg-white/10 px-3 py-1.5 rounded-lg hover:bg-white/20 hover:text-white transition">Editar</button>
+                                <button id="carWidgetEditBtn" class="text-[10px] uppercase font-bold tracking-wider text-slate-400 bg-white/10 px-3 py-1.5 rounded-lg hover:bg-white/20 hover:text-white transition">Editar Hoy</button>
                             </div>
                             <h3 class="text-white font-black text-3xl tracking-tight leading-tight mb-8">Jetour Dashing '25</h3>
                             
@@ -416,7 +416,6 @@
 
                     <!-- WIDGET PROVISIÓN ALQUILER (SINKING FUND) -->
                     <div class="glass-card rounded-[2.5rem] p-6 sm:p-8 relative overflow-hidden flex flex-col justify-between min-h-[220px]">
-                        <!-- Fondo decorativo sutil -->
                         <div class="absolute top-0 right-0 w-48 h-48 bg-indigo-500 opacity-10 rounded-full -mr-10 -mt-10 blur-[50px] pointer-events-none"></div>
                         
                         <div class="relative z-10 flex justify-between items-start mb-6">
@@ -425,14 +424,11 @@
                         </div>
 
                         <div class="relative z-10 flex items-center gap-5 sm:gap-6">
-                            
                             <!-- Símbolo de la Casa Dinámica -->
                             <div class="relative w-16 h-16 sm:w-20 sm:h-20 shrink-0">
-                                <!-- Casa Fondo (Base vacía) -->
                                 <svg class="absolute top-0 left-0 w-full h-full text-slate-800/80 drop-shadow-md" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M12 3L2 12h3v8h14v-8h3L12 3z"/>
                                 </svg>
-                                
                                 <!-- Casa Frente (Líquido llenándose) usando clip-path -->
                                 <svg id="homeFillLiquid" class="absolute top-0 left-0 w-full h-full text-indigo-500 drop-shadow-[0_0_15px_rgba(99,102,241,0.5)] transition-all duration-1000 ease-out" fill="currentColor" viewBox="0 0 24 24" style="clip-path: inset(100% 0 0 0);">
                                     <path d="M12 3L2 12h3v8h14v-8h3L12 3z"/>
@@ -494,6 +490,7 @@
         
         let distChartInstance = null;
         let historyChartInstance = null;
+        let deudasGlobales = []; // Guarda el estado actual real de Supabase
 
         const historicalIncome = [
             { mes: 'Ago 23', valor: 6617.6 }, { mes: 'Sep 23', valor: 3361.67 }, { mes: 'Oct 23', valor: 4482.8 },
@@ -517,19 +514,16 @@
             
             cargarDeudas();
             cargarHistorialIngresos();
-            
             cargarDatosMes(); 
 
-            // Inicializamos el widget de provisión de alquiler (ejemplo: 2 meses de provisión de 3,033 AED)
+            // Inicializamos el widget de provisión de alquiler
             actualizarPropositoAlquiler(6066, 9099);
         };
 
         function actualizarPropositoAlquiler(ahorroActual, metaTotal) {
-            // Animación para que el símbolo de la casa se "llene"
             const porcentaje = Math.min(100, Math.max(0, (ahorroActual / metaTotal) * 100));
             const recorteSuperior = 100 - porcentaje; 
             
-            // Un breve timeout permite que la transición CSS surta efecto después de cargar
             setTimeout(() => {
                 document.getElementById('homeFillLiquid').style.clipPath = `inset(${recorteSuperior}% 0 0 0)`;
             }, 100);
@@ -569,7 +563,6 @@
             if (data) {
                 const isReal = data.tipo === 'Real';
                 
-                // Inyectamos valores guardados
                 document.getElementById('blockHoursSlider').value = data.horas_vuelo ?? 80;
                 document.getElementById('mealAllowance').value = data.dietas ?? 1500;
                 document.getElementById('turnarounds').value = data.turnarounds ?? 300;
@@ -583,7 +576,6 @@
                 if (data.salario_real) document.getElementById('salarioRealInput').value = data.salario_real;
                 else document.getElementById('salarioRealInput').value = '';
                 
-                // Actualizar barra de progreso del slider visualmente
                 const val = data.horas_vuelo ?? 80;
                 const percentage = (val / 130) * 100;
                 document.getElementById('blockHoursSlider').style.background = `linear-gradient(to right, #6366f1 0%, #6366f1 ${percentage}%, #334155 ${percentage}%, #334155 100%)`;
@@ -597,7 +589,6 @@
                 setTimeout(() => { status.classList.add('hidden'); }, 3000);
                 
             } else {
-                // Si no hay datos, volver a default settings
                 document.getElementById('blockHoursSlider').value = 80;
                 document.getElementById('mealAllowance').value = 1500;
                 document.getElementById('turnarounds').value = 300;
@@ -618,6 +609,9 @@
                 status.classList.remove('hidden');
                 setTimeout(() => { status.classList.add('hidden'); }, 2000);
             }
+            
+            // Actualizar visualmente los pasivos según el mes seleccionado
+            renderizarDeudasDinamicas();
         }
 
         function setModo(modo, triggerCalc = true) {
@@ -782,48 +776,85 @@
         }
 
         async function cargarDeudas() {
-            const { data, error } = await supabaseClient.from('deudas').select('*').order('id', { ascending: true });
-            const container = document.getElementById('debtCardsContainer');
-            if (error) { container.innerHTML = `<div class="text-rose-500 font-bold">Error: ${error.message}</div>`; return; }
+            if (deudasGlobales.length === 0) {
+                const { data, error } = await supabaseClient.from('deudas').select('*').order('id', { ascending: true });
+                if (error) { document.getElementById('debtCardsContainer').innerHTML = `<div class="text-rose-500 font-bold">Error: ${error.message}</div>`; return; }
+                deudasGlobales = data;
+            }
+            renderizarDeudasDinamicas();
+        }
 
+        function renderizarDeudasDinamicas() {
+            const container = document.getElementById('debtCardsContainer');
+            if(!container) return;
+            
             container.innerHTML = '';
             deudaTotal = 0;
-            const deudasVisibles = data.filter(d => !d.nombre.toLowerCase().includes('coche'));
+
+            const selectorVal = document.getElementById('mesSelector').value;
+            const [selYear, selMonth] = selectorVal.split('-');
+            const selectedDate = new Date(selYear, parseInt(selMonth) - 1, 1);
+            
+            const today = new Date();
+            const currentDate = new Date(today.getFullYear(), today.getMonth(), 1);
+            const monthDiff = (selectedDate.getFullYear() - currentDate.getFullYear()) * 12 + (selectedDate.getMonth() - currentDate.getMonth());
+
+            const deudasVisibles = deudasGlobales.filter(d => !d.nombre.toLowerCase().includes('coche'));
             const maxDeuda = Math.max(...deudasVisibles.map(d => parseFloat(d.saldo)), 1);
 
-            data.forEach(deuda => {
-                const saldo = parseFloat(deuda.saldo);
+            deudasGlobales.forEach(deuda => {
+                const saldoBaseReal = parseFloat(deuda.saldo);
                 const cuota = parseFloat(deuda.cuota_minima);
-                deudaTotal += saldo;
+                
+                let saldoProyectado = saldoBaseReal - (monthDiff * cuota);
+                saldoProyectado = Math.max(0, saldoProyectado);
+
+                deudaTotal += saldoProyectado;
                 
                 if (deuda.nombre.toLowerCase().includes('coche')) {
                     const carSaldoEl = document.getElementById('carWidgetSaldo');
                     const carEditBtn = document.getElementById('carWidgetEditBtn');
                     const carMesesEl = document.getElementById('carWidgetMeses');
                     
-                    if (carSaldoEl) carSaldoEl.innerHTML = `${saldo.toLocaleString('en-US', {minimumFractionDigits: 2})} <span class="text-lg text-slate-400">AED</span>`;
-                    if (carEditBtn) carEditBtn.onclick = () => actualizarSaldo(deuda.id, deuda.saldo);
-                    if (carMesesEl && cuota > 0 && saldo > 0) carMesesEl.innerText = `Quedan ~${Math.ceil(saldo/cuota)} meses`;
+                    if (carSaldoEl) carSaldoEl.innerHTML = `${saldoProyectado.toLocaleString('en-US', {minimumFractionDigits: 2})} <span class="text-lg text-slate-400">AED</span>`;
+                    if (carEditBtn) carEditBtn.onclick = () => actualizarSaldo(deuda.id, deuda.saldo); 
+                    
+                    if (carMesesEl) {
+                        if (saldoProyectado <= 0) {
+                            carMesesEl.innerText = "¡Liquidado!";
+                            carMesesEl.className = "text-xs font-bold text-white bg-gradient-to-r from-emerald-500 to-teal-400 px-2 py-1 rounded-md shadow-lg shadow-emerald-500/30";
+                        } else {
+                            carMesesEl.innerText = `Quedan ~${Math.ceil(saldoProyectado/cuota)} meses`;
+                            carMesesEl.className = "text-xs font-bold text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded-md";
+                        }
+                    }
                 } else {
-                    const porcentaje = (saldo / maxDeuda) * 100;
+                    const porcentaje = (saldoProyectado / maxDeuda) * 100;
                     const isCreditCard = deuda.nombre.toLowerCase().includes('tarjeta') || deuda.nombre.includes('2811');
                     const colorClass = isCreditCard ? 'bg-emerald-500' : 'bg-rose-500';
-                    const mesesTxt = cuota > 0 && saldo > 0 ? `<span class="text-indigo-400 font-black ml-1">(~${Math.ceil(saldo/cuota)} meses)</span>` : '';
+                    
+                    let badgeTexto = 'Lo que queda (Hoy)';
+                    if (monthDiff > 0) badgeTexto = `Proyección (+${monthDiff} meses)`;
+                    else if (monthDiff < 0) badgeTexto = `Histórico (${monthDiff} meses)`;
+
+                    const textMesesRestantes = saldoProyectado > 0 
+                        ? `<span class="text-indigo-400 font-black ml-1">(~${Math.ceil(saldoProyectado/cuota)} meses)</span>` 
+                        : `<span class="text-emerald-400 font-black ml-1">¡PAGADO! 🎉</span>`;
 
                     container.innerHTML += `
-                        <div class="bg-slate-800/50 border border-slate-700 p-6 rounded-3xl shadow-sm hover:shadow-lg hover:shadow-slate-900/50 transition-all duration-300 group flex flex-col justify-between">
+                        <div class="bg-slate-800/50 border border-slate-700 p-6 rounded-3xl shadow-sm transition-all duration-300 group flex flex-col justify-between ${saldoProyectado <= 0 ? 'opacity-40 grayscale' : 'hover:shadow-lg hover:shadow-slate-900/50'}">
                             <div>
                                 <div class="flex justify-between items-start mb-4">
                                     <h3 class="font-bold text-white leading-tight pr-2">${deuda.nombre}</h3>
-                                    <button onclick="actualizarSaldo(${deuda.id}, ${deuda.saldo})" class="text-[10px] uppercase font-bold tracking-wider text-indigo-400 bg-indigo-500/20 px-3 py-1.5 rounded-lg hover:bg-indigo-500/40 transition">Editar</button>
+                                    <button onclick="actualizarSaldo(${deuda.id}, ${deuda.saldo})" class="text-[10px] uppercase font-bold tracking-wider text-indigo-400 bg-indigo-500/20 px-3 py-1.5 rounded-lg hover:bg-indigo-500/40 transition">Editar Hoy</button>
                                 </div>
-                                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Lo que queda</p>
-                                <p class="text-3xl font-black text-white tracking-tight mb-2">${saldo.toLocaleString('en-US', {minimumFractionDigits: 2})} <span class="text-sm font-bold text-slate-500">AED</span></p>
+                                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1 text-${monthDiff > 0 ? 'indigo-300' : 'slate-400'}">${badgeTexto}</p>
+                                <p class="text-3xl font-black text-white tracking-tight mb-2">${saldoProyectado.toLocaleString('en-US', {minimumFractionDigits: 2})} <span class="text-sm font-bold text-slate-500">AED</span></p>
                             </div>
                             <div class="mt-4">
                                 <div class="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
                                     <span>Progreso / Peso</span>
-                                    <span>Cuota: ${cuota.toLocaleString()} AED ${mesesTxt}</span>
+                                    <span>Cuota: ${cuota.toLocaleString()} AED ${textMesesRestantes}</span>
                                 </div>
                                 <div class="w-full bg-slate-700 rounded-full h-1.5 overflow-hidden">
                                     <div class="${colorClass} h-full rounded-full transition-all duration-1000" style="width: ${porcentaje}%"></div>
@@ -833,6 +864,7 @@
                     `;
                 }
             });
+            
             document.getElementById('kpiTotalDebt').innerText = Math.floor(deudaTotal).toLocaleString() + ' AED';
             actualizarKpiProyeccion();
         }
@@ -841,8 +873,12 @@
             const nuevoSaldo = prompt("Actualiza el saldo pendiente a día de hoy:", saldoActual);
             if (nuevoSaldo !== null && !isNaN(nuevoSaldo)) {
                 const { error } = await supabaseClient.from('deudas').update({ saldo: parseFloat(nuevoSaldo) }).eq('id', id);
-                if (!error) cargarDeudas();
-                else alert("Error de sincronización con Supabase.");
+                if (!error) {
+                    deudasGlobales = []; // Forzar recarga tras edición
+                    cargarDeudas();
+                } else {
+                    alert("Error de sincronización con Supabase.");
+                }
             }
         }
 
@@ -979,31 +1015,28 @@
                 status.innerText = "Error al guardar mes: " + error.message;
                 status.className = "text-sm font-bold text-center text-rose-400 mt-4";
             } else {
-                // ACTUALIZACIÓN AUTOMÁTICA DE TODAS LAS DEUDAS
-                const { data: deudasActuales, error: errorDeudas } = await supabaseClient.from('deudas').select('*');
-                
-                if (!errorDeudas && deudasActuales) {
-                    const deudasActualizadas = deudasActuales.map(deuda => {
-                        const saldoAntiguo = parseFloat(deuda.saldo);
-                        const cuota = parseFloat(deuda.cuota_minima);
-                        
-                        // Restar cuota mínima evitando saldo negativo
-                        let nuevoSaldo = Math.max(0, saldoAntiguo - cuota);
+                // ACTUALIZACIÓN AUTOMÁTICA DE DEUDAS (SOLO SI ES DATO REAL Y MES ACTUAL)
+                const today = new Date();
+                const selectedMonthStr = document.getElementById('mesSelector').value;
+                const [y, m] = selectedMonthStr.split('-');
+                const isCurrentMonth = parseInt(m) === (today.getMonth() + 1) && parseInt(y) === today.getFullYear();
 
+                if (isCurrentMonth && modoActual === 'real') {
+                    const deudasActualizadas = deudasGlobales.map(deuda => {
                         return {
                             ...deuda,
-                            saldo: nuevoSaldo
+                            saldo: Math.max(0, parseFloat(deuda.saldo) - parseFloat(deuda.cuota_minima))
                         };
                     });
 
                     const { error: errorUpsertDeudas } = await supabaseClient.from('deudas').upsert(deudasActualizadas);
-                    
                     if (!errorUpsertDeudas) {
+                        deudasGlobales = []; // Forzar recarga
                         cargarDeudas();
                     }
                 }
 
-                status.innerHTML = `<span>✅ ¡Registro de ${mesFormateado} y saldos de deuda actualizados!</span>`;
+                status.innerHTML = `<span>✅ ¡Registro guardado con éxito!</span>`;
                 status.className = "text-sm font-bold text-center text-emerald-400 mt-4";
                 cargarHistorialIngresos(); 
                 setTimeout(() => { status.classList.add('hidden'); }, 4000);
