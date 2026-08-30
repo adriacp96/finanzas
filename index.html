@@ -385,31 +385,78 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
                 
-                <!-- Vehículo Dinámico -->
-                <div class="lg:col-span-1 glass-card rounded-[2.5rem] p-8 relative overflow-hidden h-full flex flex-col justify-between min-h-[380px]">
-                    <div class="absolute top-0 right-0 w-64 h-64 bg-emerald-500 opacity-20 rounded-full -mr-20 -mt-20 blur-[60px] pointer-events-none"></div>
-                    <div class="relative z-10">
-                        <div class="flex justify-between items-start mb-4">
-                            <span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Activo Fijo</span>
-                            <button id="carWidgetEditBtn" class="text-[10px] uppercase font-bold tracking-wider text-slate-400 bg-white/10 px-3 py-1.5 rounded-lg hover:bg-white/20 hover:text-white transition">Editar</button>
-                        </div>
-                        <h3 class="text-white font-black text-3xl tracking-tight leading-tight mb-8">Jetour Dashing '25</h3>
-                        
-                        <div class="space-y-5">
-                            <div>
-                                <p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-1">Lo que queda</p>
-                                <p id="carWidgetSaldo" class="text-3xl font-black text-white">--- AED</p>
+                <!-- CONTENEDOR COLUMNA IZQUIERDA: Vehículo y Alquiler -->
+                <div class="lg:col-span-1 flex flex-col gap-6 h-full">
+                    <!-- Vehículo Dinámico -->
+                    <div class="glass-card rounded-[2.5rem] p-8 relative overflow-hidden flex flex-col justify-between min-h-[380px]">
+                        <div class="absolute top-0 right-0 w-64 h-64 bg-emerald-500 opacity-20 rounded-full -mr-20 -mt-20 blur-[60px] pointer-events-none"></div>
+                        <div class="relative z-10">
+                            <div class="flex justify-between items-start mb-4">
+                                <span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Activo Fijo</span>
+                                <button id="carWidgetEditBtn" class="text-[10px] uppercase font-bold tracking-wider text-slate-400 bg-white/10 px-3 py-1.5 rounded-lg hover:bg-white/20 hover:text-white transition">Editar</button>
                             </div>
-                            <div class="flex justify-between items-end border-t border-slate-700 pt-4">
+                            <h3 class="text-white font-black text-3xl tracking-tight leading-tight mb-8">Jetour Dashing '25</h3>
+                            
+                            <div class="space-y-5">
                                 <div>
-                                    <p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-1">Cuota Fija</p>
-                                    <p class="text-lg font-black text-slate-200">1,739.00 AED</p>
+                                    <p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-1">Lo que queda</p>
+                                    <p id="carWidgetSaldo" class="text-3xl font-black text-white">--- AED</p>
                                 </div>
-                                <span id="carWidgetMeses" class="text-xs font-bold text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded-md">---</span>
+                                <div class="flex justify-between items-end border-t border-slate-700 pt-4">
+                                    <div>
+                                        <p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-1">Cuota Fija</p>
+                                        <p class="text-lg font-black text-slate-200">1,739.00 AED</p>
+                                    </div>
+                                    <span id="carWidgetMeses" class="text-xs font-bold text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded-md">---</span>
+                                </div>
+                            </div>
+                        </div>
+                        <img src="dashing.png" alt="Jetour" class="absolute -bottom-6 -right-12 w-80 drop-shadow-2xl pointer-events-none z-0 transform scale-110">
+                    </div>
+
+                    <!-- WIDGET PROVISIÓN ALQUILER (SINKING FUND) -->
+                    <div class="glass-card rounded-[2.5rem] p-6 sm:p-8 relative overflow-hidden flex flex-col justify-between min-h-[220px]">
+                        <!-- Fondo decorativo sutil -->
+                        <div class="absolute top-0 right-0 w-48 h-48 bg-indigo-500 opacity-10 rounded-full -mr-10 -mt-10 blur-[50px] pointer-events-none"></div>
+                        
+                        <div class="relative z-10 flex justify-between items-start mb-6">
+                            <span class="bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Fondo de Provisión</span>
+                            <span class="text-xs font-bold text-slate-400 bg-slate-900/50 px-2.5 py-1 rounded-md border border-slate-700"><i class="fa-regular fa-clock mr-1"></i> Vence en 42 días</span>
+                        </div>
+
+                        <div class="relative z-10 flex items-center gap-5 sm:gap-6">
+                            
+                            <!-- Símbolo de la Casa Dinámica -->
+                            <div class="relative w-16 h-16 sm:w-20 sm:h-20 shrink-0">
+                                <!-- Casa Fondo (Base vacía) -->
+                                <svg class="absolute top-0 left-0 w-full h-full text-slate-800/80 drop-shadow-md" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 3L2 12h3v8h14v-8h3L12 3z"/>
+                                </svg>
+                                
+                                <!-- Casa Frente (Líquido llenándose) usando clip-path -->
+                                <svg id="homeFillLiquid" class="absolute top-0 left-0 w-full h-full text-indigo-500 drop-shadow-[0_0_15px_rgba(99,102,241,0.5)] transition-all duration-1000 ease-out" fill="currentColor" viewBox="0 0 24 24" style="clip-path: inset(100% 0 0 0);">
+                                    <path d="M12 3L2 12h3v8h14v-8h3L12 3z"/>
+                                </svg>
+                            </div>
+
+                            <!-- Datos Financieros -->
+                            <div class="w-full">
+                                <h3 class="text-white font-black text-lg tracking-tight leading-tight mb-1">Cheque Alquiler (Q3)</h3>
+                                <p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-3">Acumulado vs Objetivo</p>
+
+                                <div class="flex justify-between items-end border-b border-slate-700 pb-2 mb-2">
+                                    <div>
+                                        <span class="text-2xl font-black text-white tracking-tight" id="rentSavedValue">---</span>
+                                        <span class="text-xs font-bold text-indigo-400 ml-1">AED</span>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between items-center text-[10px] font-bold">
+                                    <span class="text-slate-500 uppercase text-[9px]">Meta: 9,099 AED</span>
+                                    <span id="rentPercentageBadge" class="text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded">---</span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <img src="dashing.png" alt="Jetour" class="absolute -bottom-6 -right-12 w-80 drop-shadow-2xl pointer-events-none z-0 transform scale-110">
                 </div>
 
                 <!-- Tarjetas Supabase -->
@@ -472,7 +519,24 @@
             cargarHistorialIngresos();
             
             cargarDatosMes(); 
+
+            // Inicializamos el widget de provisión de alquiler (ejemplo: 2 meses de provisión de 3,033 AED)
+            actualizarPropositoAlquiler(6066, 9099);
         };
+
+        function actualizarPropositoAlquiler(ahorroActual, metaTotal) {
+            // Animación para que el símbolo de la casa se "llene"
+            const porcentaje = Math.min(100, Math.max(0, (ahorroActual / metaTotal) * 100));
+            const recorteSuperior = 100 - porcentaje; 
+            
+            // Un breve timeout permite que la transición CSS surta efecto después de cargar
+            setTimeout(() => {
+                document.getElementById('homeFillLiquid').style.clipPath = `inset(${recorteSuperior}% 0 0 0)`;
+            }, 100);
+
+            document.getElementById('rentSavedValue').innerText = ahorroActual.toLocaleString();
+            document.getElementById('rentPercentageBadge').innerText = `${Math.floor(porcentaje)}% Lleno`;
+        }
 
         function cambiarMes(offset) {
             const selector = document.getElementById('mesSelector');
@@ -925,9 +989,6 @@
                         
                         // Restar cuota mínima evitando saldo negativo
                         let nuevoSaldo = Math.max(0, saldoAntiguo - cuota);
-
-                        // Opcional: Destinar el excedente (pagoDeuda) a un préstamo en concreto
-                        // if (deuda.nombre.includes('Emirates NBD')) { nuevoSaldo = Math.max(0, nuevoSaldo - pagoDeuda); }
 
                         return {
                             ...deuda,
