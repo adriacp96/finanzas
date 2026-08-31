@@ -43,12 +43,14 @@
 </head>
 <body class="text-slate-300 antialiased selection:bg-indigo-500/30 selection:text-indigo-200">
 
+    <!-- FONDO FIJO GLOBAL -->
     <div class="fixed top-0 left-0 w-full h-full z-0 pointer-events-none overflow-hidden">
         <div class="absolute -top-24 -right-24 w-96 h-96 bg-indigo-500 rounded-full mix-blend-screen filter blur-[80px] opacity-40"></div>
         <div class="absolute top-1/3 -left-24 w-72 h-72 bg-emerald-500 rounded-full mix-blend-screen filter blur-[80px] opacity-30"></div>
         <div class="absolute bottom-10 right-1/4 w-80 h-80 bg-indigo-500 rounded-full mix-blend-screen filter blur-[100px] opacity-20"></div>
     </div>
 
+    <!-- HEADER / HERO SECTION -->
     <div class="text-white pb-32 pt-8 px-4 relative z-10">
         <div class="max-w-7xl mx-auto relative z-10">
             
@@ -80,6 +82,7 @@
                 </div>
             </header>
 
+            <!-- Global KPIs -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
                 <div class="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/10 shadow-inner hover:bg-white/10 transition duration-300">
                     <p class="text-indigo-300 text-xs uppercase font-extrabold tracking-widest mb-1.5 flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Deuda Total</p>
@@ -109,9 +112,12 @@
         </div>
     </div>
 
+    <!-- MAIN DASHBOARD CONTENT -->
     <main class="max-w-7xl mx-auto px-4 -mt-20 relative z-20 space-y-8 pb-24">
 
+        <!-- BARRA SUPERIOR MAIN: MODO Y CONTADOR DE COBRO -->
         <div class="flex flex-col sm:flex-row justify-between items-center -mt-6 mb-2 gap-4 relative z-30">
+            <!-- TOGGLE MODO -->
             <div class="bg-slate-800/80 p-1 rounded-2xl shadow-xl border border-slate-700 inline-flex w-full sm:w-auto backdrop-blur-md">
                 <button id="btnModoSim" onclick="setModo('simulacion')" class="flex-1 sm:w-48 py-3 text-sm font-black bg-indigo-500/20 text-indigo-400 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2">
                     <i class="fa-solid fa-hat-wizard"></i> Proyección
@@ -121,6 +127,7 @@
                 </button>
             </div>
             
+            <!-- PAYDAY WIDGET -->
             <div class="bg-slate-800/80 px-6 py-3 rounded-2xl shadow-xl border border-slate-700 inline-flex items-center gap-4 backdrop-blur-md w-full sm:w-auto justify-center group hover:bg-slate-700/80 transition-colors">
                 <div class="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg shadow-[0_0_15px_rgba(52,211,153,0.15)] group-hover:scale-110 transition-transform"><i class="fa-solid fa-sack-dollar"></i></div>
                 <div class="text-left">
@@ -130,8 +137,10 @@
             </div>
         </div>
 
+        <!-- FILA 1: ENTRADAS DE DATOS -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             
+            <!-- PASO 1: INGRESOS -->
             <div class="glass-card rounded-3xl p-8 z-10 relative">
                 <div class="flex items-center justify-between mb-8">
                     <div class="flex items-center gap-3">
@@ -140,6 +149,7 @@
                     </div>
                 </div>
 
+                <!-- MODO SIMULACIÓN -->
                 <div id="panelSimulacion">
                     <div class="mb-10 bg-slate-800/50 p-6 rounded-2xl border border-slate-700 shadow-inner">
                         <div class="flex justify-between items-end mb-4">
@@ -175,6 +185,7 @@
                     </div>
                 </div>
 
+                <!-- MODO REAL -->
                 <div id="panelReal" class="hidden">
                     <div class="bg-emerald-900/20 border-2 border-emerald-800/50 rounded-2xl p-8 text-center mt-4">
                         <label class="block text-xs font-black text-emerald-500 uppercase tracking-widest mb-4">Introduce tu nómina final exacta</label>
@@ -187,6 +198,7 @@
                 </div>
             </div>
 
+            <!-- PASO 2: GASTOS DINÁMICOS -->
             <div class="glass-card rounded-3xl p-8 relative overflow-hidden z-10">
                 <div class="relative z-10 h-full flex flex-col justify-between">
                     <div>
@@ -195,7 +207,6 @@
                                 <div class="w-8 h-8 rounded-lg bg-yellow-500/20 border border-yellow-500/30 text-yellow-400 flex items-center justify-center font-black">2</div>
                                 <h2 class="text-xl font-black text-white tracking-tight">Gastos Dinámicos</h2>
                             </div>
-                            <!-- NUEVO: Badge de Estado e Integración del botón -->
                             <div class="flex items-center gap-2">
                                 <span id="badgeExtractoStatus" class="text-[10px] font-bold px-2 py-1.5 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-400"><i class="fa-solid fa-spinner fa-spin"></i></span>
                                 <button onclick="abrirModalExtracto()" class="bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 border border-yellow-500/40 text-xs font-black px-3 py-1.5 rounded-xl transition flex items-center gap-2 shadow-sm">
@@ -204,6 +215,7 @@
                             </div>
                         </div>
                         
+                        <!-- EMAAR CARD -->
                         <div class="mb-6 bg-slate-800/50 p-6 rounded-2xl border border-slate-700 relative overflow-hidden">
                             <img src="emaar-family_card.png" alt="Emaar Card" class="absolute -right-16 sm:-right-8 top-1/2 transform -translate-y-1/2 w-64 sm:w-72 object-contain drop-shadow-2xl pointer-events-none opacity-80 sm:opacity-100 -rotate-12 mix-blend-lighten" style="aspect-ratio: 880/552;">
                             
@@ -217,6 +229,7 @@
                             </div>
                         </div>
 
+                        <!-- DEWA CALCULATOR -->
                         <div id="dewaSimulacionPanel" class="bg-teal-900/20 p-5 rounded-2xl border border-teal-800/50 relative overflow-hidden">
                             <img src="dewa.png" alt="DEWA Logo" class="absolute -right-10 top-1/2 transform -translate-y-1/2 w-40 opacity-10 pointer-events-none mix-blend-screen" style="aspect-ratio: 440/440;">
                             <div class="relative z-10">
@@ -244,6 +257,7 @@
                             </div>
                         </div>
 
+                        <!-- Real DEWA -->
                         <div id="dewaRealPanel" class="hidden bg-teal-900/20 p-5 rounded-2xl border border-teal-800/50 relative overflow-hidden">
                             <img src="dewa.png" alt="DEWA Logo" class="absolute -right-10 top-1/2 transform -translate-y-1/2 w-40 opacity-10 pointer-events-none mix-blend-screen" style="aspect-ratio: 440/440;">
                             <div class="relative z-10">
@@ -261,6 +275,7 @@
             </div>
         </div>
 
+        <!-- FILA 2: BALANCE Y ESTRATEGIA -->
         <div class="glass-card rounded-[2.5rem] p-8 sm:p-10 relative overflow-hidden z-10">
             
             <div class="flex items-center justify-between mb-10 border-b border-slate-700 pb-6">
@@ -272,6 +287,7 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
+                
                 <div class="lg:col-span-4 space-y-6">
                     <div>
                         <p class="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-1">Total Ingresos Netos</p>
@@ -283,7 +299,9 @@
                         <div class="flex justify-between text-xs text-slate-400 font-medium"><span>Vuelos:</span><span id="pagoVueloDisplay" class="text-slate-200">5,465 AED</span></div>
                         <div class="flex justify-between text-xs text-slate-400 font-medium"><span>Variables:</span><span id="dietasDisplay" class="text-slate-200">1,800 AED</span></div>
                     </div>
+                    
                     <div class="h-px w-full bg-slate-700 my-4"></div>
+                    
                     <div>
                         <p class="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-2">Obligaciones a Pagar</p>
                         <div class="space-y-3">
@@ -297,6 +315,7 @@
                             </div>
                         </div>
                     </div>
+                    
                     <div class="pt-2">
                         <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Línea de Vida Total</p>
                         <p class="text-xl font-black text-white val-base">10,729 AED</p>
@@ -321,12 +340,14 @@
 
                 <div class="lg:col-span-4 space-y-5" id="panelExcedente">
                     <p class="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-1 text-center lg:text-left">Distribución (70/30)</p>
+                    
                     <div class="bg-slate-800/50 border border-rose-900/50 p-5 rounded-2xl shadow-sm relative overflow-hidden">
                         <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-rose-500"></div>
                         <p class="text-[10px] font-extrabold text-rose-400 uppercase tracking-widest mb-1">Ataque Extra a Deuda (70%)</p>
                         <p class="text-3xl font-black text-rose-500 tracking-tight val-deuda">5,390 AED</p>
                         <p class="text-[10px] font-semibold text-slate-400 mt-2">Súmalo a la cuota mensual de Supabase.</p>
                     </div>
+                    
                     <div class="bg-slate-800/50 border border-blue-900/50 p-5 rounded-2xl shadow-sm relative overflow-hidden">
                         <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-500"></div>
                         <p class="text-[10px] font-extrabold text-blue-400 uppercase tracking-widest mb-1">Fondo de Emergencia (30%)</p>
@@ -336,6 +357,7 @@
                 </div>
             </div>
 
+            <!-- Botón Guardar / Estado -->
             <div class="mt-12 pt-8 border-t border-slate-700 flex flex-col items-center">
                 <button onclick="guardarMes()" class="w-full sm:w-auto bg-indigo-600 text-white py-4 px-12 rounded-2xl font-black text-lg shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3 group">
                     <span id="textoBotonGuardar">Guardar Proyección en Supabase</span>
@@ -345,6 +367,7 @@
             </div>
         </div>
 
+        <!-- FILA 3: HISTÓRICO DE INGRESOS -->
         <div class="glass-card rounded-[2.5rem] p-8 sm:p-10 relative overflow-hidden z-10">
             <div class="flex justify-between items-end mb-8 border-b border-slate-700 pb-6">
                 <div>
@@ -360,11 +383,13 @@
                     <span class="flex items-center gap-1"><div class="w-4 border-t-2 border-dashed border-slate-400"></div> Media</span>
                 </div>
             </div>
+            
             <div class="relative w-full h-[350px]">
                 <canvas id="incomeHistoryChart"></canvas>
             </div>
         </div>
 
+        <!-- FILA 4: PORTAFOLIO DE PASIVOS -->
         <div class="pt-2 relative z-10">
             <div class="flex items-center gap-3 mb-8 px-2">
                 <div class="w-8 h-8 rounded-lg bg-white/10 border border-white/20 text-white flex items-center justify-center font-black">4</div>
@@ -372,7 +397,9 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+                
                 <div class="lg:col-span-1 flex flex-col gap-6 h-full">
+                    <!-- Vehículo Dinámico -->
                     <div class="glass-card rounded-[2.5rem] p-8 relative overflow-hidden flex flex-col justify-between min-h-[380px]">
                         <div class="absolute top-0 right-0 w-64 h-64 bg-emerald-500 opacity-20 rounded-full -mr-20 -mt-20 blur-[60px] pointer-events-none"></div>
                         <div class="relative z-10">
@@ -381,13 +408,17 @@
                                 <button id="carWidgetEditBtn" class="text-[10px] uppercase font-bold tracking-wider text-slate-400 bg-white/10 px-3 py-1.5 rounded-lg hover:bg-white/20 hover:text-white transition">Editar Hoy</button>
                             </div>
                             <h3 class="text-white font-black text-3xl tracking-tight leading-tight mb-8">Jetour Dashing '25</h3>
+                            
                             <div class="space-y-5">
                                 <div>
                                     <p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-1">Lo que queda</p>
                                     <p id="carWidgetSaldo" class="text-3xl font-black text-white">--- AED</p>
                                 </div>
                                 <div class="flex justify-between items-end border-t border-slate-700 pt-4">
-                                    <div><p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-1">Cuota Fija</p><p class="text-lg font-black text-slate-200">1,739.00 AED</p></div>
+                                    <div>
+                                        <p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-1">Cuota Fija</p>
+                                        <p class="text-lg font-black text-slate-200">1,739.00 AED</p>
+                                    </div>
                                     <span id="carWidgetMeses" class="text-xs font-bold text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded-md">---</span>
                                 </div>
                             </div>
@@ -395,22 +426,33 @@
                         <img src="dashing.png" alt="Jetour" class="absolute -bottom-6 -right-12 w-80 drop-shadow-2xl pointer-events-none z-0 transform scale-110">
                     </div>
 
+                    <!-- WIDGET PROVISIÓN ALQUILER -->
                     <div class="glass-card rounded-[2.5rem] p-6 sm:p-8 relative overflow-hidden flex flex-col justify-between min-h-[220px]">
                         <div class="absolute top-0 right-0 w-48 h-48 bg-indigo-500 opacity-10 rounded-full -mr-10 -mt-10 blur-[50px] pointer-events-none"></div>
+                        
                         <div class="relative z-10 flex justify-between items-start mb-6">
                             <span class="bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Fondo de Provisión</span>
                             <span id="rentDaysBadge" class="text-xs font-bold text-slate-400 bg-slate-900/50 px-2.5 py-1 rounded-md border border-slate-700">---</span>
                         </div>
+
                         <div class="relative z-10 flex items-center gap-5 sm:gap-6">
                             <div class="relative w-16 h-16 sm:w-20 sm:h-20 shrink-0">
-                                <svg class="absolute top-0 left-0 w-full h-full text-slate-800/80 drop-shadow-md" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L2 12h3v8h14v-8h3L12 3z"/></svg>
-                                <svg id="homeFillLiquid" class="absolute top-0 left-0 w-full h-full text-indigo-500 drop-shadow-[0_0_15px_rgba(99,102,241,0.5)] transition-all duration-1000 ease-out" fill="currentColor" viewBox="0 0 24 24" style="clip-path: inset(100% 0 0 0);"><path d="M12 3L2 12h3v8h14v-8h3L12 3z"/></svg>
+                                <svg class="absolute top-0 left-0 w-full h-full text-slate-800/80 drop-shadow-md" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 3L2 12h3v8h14v-8h3L12 3z"/>
+                                </svg>
+                                <svg id="homeFillLiquid" class="absolute top-0 left-0 w-full h-full text-indigo-500 drop-shadow-[0_0_15px_rgba(99,102,241,0.5)] transition-all duration-1000 ease-out" fill="currentColor" viewBox="0 0 24 24" style="clip-path: inset(100% 0 0 0);">
+                                    <path d="M12 3L2 12h3v8h14v-8h3L12 3z"/>
+                                </svg>
                             </div>
                             <div class="w-full">
                                 <h3 id="rentQuarterTitle" class="text-white font-black text-lg tracking-tight leading-tight mb-1">Cheque Alquiler</h3>
                                 <p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-3">Acumulado vs Objetivo</p>
+
                                 <div class="flex justify-between items-end border-b border-slate-700 pb-2 mb-2">
-                                    <div><span class="text-2xl font-black text-white tracking-tight" id="rentSavedValue">---</span><span class="text-xs font-bold text-indigo-400 ml-1">AED</span></div>
+                                    <div>
+                                        <span class="text-2xl font-black text-white tracking-tight" id="rentSavedValue">---</span>
+                                        <span class="text-xs font-bold text-indigo-400 ml-1">AED</span>
+                                    </div>
                                 </div>
                                 <div class="flex justify-between items-center text-[10px] font-bold">
                                     <span class="text-slate-500 uppercase text-[9px]">Meta: 9,099 AED</span>
@@ -421,10 +463,12 @@
                     </div>
                 </div>
 
+                <!-- Tarjetas Supabase -->
                 <div class="lg:col-span-2 glass-card rounded-[2.5rem] p-8 h-full">
                     <div class="flex justify-between items-end mb-8">
                         <p class="text-xs font-extrabold text-slate-400 uppercase tracking-widest">Base de Datos en Tiempo Real</p>
                     </div>
+
                     <div id="debtCardsContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                         <div class="text-center text-sm font-bold text-slate-400 py-12 col-span-2">Sincronizando deudas...</div>
                     </div>
@@ -433,6 +477,7 @@
             </div>
         </div>
 
+        <!-- FILA 5: ANÁLISIS DE GASTOS DINÁMICOS -->
         <div class="glass-card rounded-[2.5rem] p-8 sm:p-10 relative overflow-hidden z-10">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 border-b border-slate-700 pb-6 gap-4">
                 <div>
@@ -445,6 +490,7 @@
                 <div class="flex items-center gap-2 w-full sm:w-auto">
                     <select id="filtroGastosMes" onchange="renderizarAnalisisVisual()" class="w-full sm:w-auto bg-slate-800/80 text-white text-sm font-bold p-3 rounded-xl border border-slate-600 outline-none focus:border-yellow-400 transition-colors shadow-inner">
                         <option value="tendencia">📈 Tendencia Global (Últimos Meses)</option>
+                        <!-- Opciones generadas dinámicamente -->
                     </select>
                     <button id="btnBorrarExtracto" onclick="borrarExtractoBD()" class="hidden bg-rose-500/20 text-rose-400 p-3 rounded-xl hover:bg-rose-500/40 hover:text-white transition-colors border border-rose-500/30" title="Borrar este extracto del histórico">
                         <i class="fa-solid fa-trash"></i>
@@ -482,7 +528,10 @@
                 </div>
             </div>
 
-            <div id="contenedorCategoriasVisual" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 pt-6 border-t border-slate-700 hidden"></div>
+            <!-- GRID VISUAL DE CATEGORÍAS -->
+            <div id="contenedorCategoriasVisual" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 pt-6 border-t border-slate-700 hidden">
+                <!-- Se inyectan las tarjetas de categorías dinámicamente -->
+            </div>
         </div>
 
     </main>
@@ -504,11 +553,12 @@
                 </div>
             </div>
 
+            <!-- ZONA DE CARGA -->
             <div id="dropZoneExtracto" onclick="document.getElementById('inputPdfExtracto').click()" class="border-2 border-dashed border-slate-700 hover:border-yellow-400/60 rounded-2xl p-8 text-center cursor-pointer transition-colors bg-slate-800/40 group">
                 <input type="file" id="inputPdfExtracto" accept="application/pdf" class="hidden" onchange="procesarArchivoPdf(event)">
                 <i class="fa-solid fa-cloud-arrow-up text-4xl text-slate-500 group-hover:text-yellow-400 transition-colors mb-3"></i>
                 <p class="text-sm font-bold text-white mb-1">Arrastra tu extracto PDF aquí o haz clic para seleccionarlo</p>
-                <p class="text-xs text-slate-500">Soporta auto-detección de duplicados.</p>
+                <p class="text-xs text-slate-500">Soporta auto-detección de duplicados y redirección de mes.</p>
             </div>
 
             <div id="loadingPdf" class="hidden py-10 text-center text-indigo-400">
@@ -516,6 +566,7 @@
                 <p class="text-sm font-bold">Procesando y categorizando extracto...</p>
             </div>
 
+            <!-- RESULTADOS DEL PARSEO -->
             <div id="resultadoExtracto" class="hidden mt-6 space-y-6">
                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700">
@@ -566,8 +617,10 @@
     </div>
 
     <script>
+        // Inicializar PDF.js Worker
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
+        // Credenciales Supabase (Asegúrate de no compartirlas públicamente en entornos de prod reales)
         const supabaseUrl = 'https://jgvgabkrriedaquqehpb.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndmdhYmtycmllZGFxdXFlaHBiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5OTYzNDQsImV4cCI6MjEwMzU3MjM0NH0.jdq2xaDtJ0YO-8zpQYqQPu5e2dkyCl8XjXtw_cGhqko';
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
@@ -591,6 +644,7 @@
         let datosExtractoActual = null;
         let extractosGlobales = [];
 
+        // Diccionarios Visuales para la Fila 5
         const catColors = {
             'Comida & Delivery': '#f43f5e', 
             'Supermercado & Alimentación': '#10b981', 
@@ -615,6 +669,7 @@
             'Otros Gastos': 'fa-receipt'
         };
 
+        // Mapeo para detección automática de meses
         const monthMap = { 'JAN': '01', 'FEB': '02', 'MAR': '03', 'APR': '04', 'MAY': '05', 'JUN': '06', 'JUL': '07', 'AUG': '08', 'SEP': '09', 'OCT': '10', 'NOV': '11', 'DEC': '12' };
 
         const historicalIncome = [
@@ -642,6 +697,7 @@
             cargarHistorialIngresos();
             configurarDragAndDrop();
 
+            // Cargar los extractos antes de cargar los datos del mes para auto-sincronizar el panel visual
             await cargarExtractosEmaar();
             cargarDatosMes(); 
         };
@@ -1191,6 +1247,7 @@
             dz.addEventListener('drop', ev => { if (ev.dataTransfer.files.length > 0) leerPdf(ev.dataTransfer.files[0]); }, false);
         }
         function procesarArchivoPdf(event) { if (event.target.files[0]) leerPdf(event.target.files[0]); }
+        
         async function leerPdf(file) {
             document.getElementById('dropZoneExtracto').classList.add('hidden'); document.getElementById('resultadoExtracto').classList.add('hidden'); document.getElementById('loadingPdf').classList.remove('hidden');
             try {
@@ -1200,6 +1257,7 @@
                 analizarTextoExtracto(text);
             } catch (err) { alert("Error al leer PDF: " + err.message); document.getElementById('dropZoneExtracto').classList.remove('hidden'); document.getElementById('loadingPdf').classList.add('hidden'); }
         }
+        
         function cleanNumber(str) { return parseFloat(str ? str.replace(/,/g, '').trim() : 0) || 0; }
 
         function analizarTextoExtracto(texto) {
@@ -1297,7 +1355,7 @@
             else { 
                 if(existeEnDB) alert("🔄 Extracto actualizado en el histórico.");
                 else alert("✅ Nuevo extracto guardado en el histórico."); 
-                cargarExtractosEmaar(); cerrarModalExtracto(); 
+                await cargarExtractosEmaar(); cerrarModalExtracto(); 
             }
             btn.innerHTML = orig; btn.disabled = false;
         }
