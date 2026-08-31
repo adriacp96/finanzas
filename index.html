@@ -198,7 +198,7 @@
                             <div class="flex items-center gap-2">
                                 <span id="badgeExtractoStatus" class="text-[10px] font-bold px-2 py-1.5 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-400"><i class="fa-solid fa-spinner fa-spin"></i></span>
                                 <button onclick="abrirModalExtracto()" class="bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 border border-yellow-500/40 text-xs font-black px-3 py-1.5 rounded-xl transition flex items-center gap-2 shadow-sm">
-                                    <i class="fa-solid fa-file-pdf"></i> Leer Extracto
+                                    <i class="fa-solid fa-file-pdf"></i> Analizar Extractos
                                 </button>
                             </div>
                         </div>
@@ -260,6 +260,7 @@
             </div>
         </div>
 
+        <!-- FILA 2: BALANCE Y ESTRATEGIA -->
         <div class="glass-card rounded-[2.5rem] p-8 sm:p-10 relative overflow-hidden z-10">
             
             <div class="flex items-center justify-between mb-10 border-b border-slate-700 pb-6">
@@ -372,7 +373,6 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
                 <div class="lg:col-span-1 flex flex-col gap-6 h-full">
-                    <!-- Vehículo Dinámico -->
                     <div class="glass-card rounded-[2.5rem] p-8 relative overflow-hidden flex flex-col justify-between min-h-[380px]">
                         <div class="absolute top-0 right-0 w-64 h-64 bg-emerald-500 opacity-20 rounded-full -mr-20 -mt-20 blur-[60px] pointer-events-none"></div>
                         <div class="relative z-10">
@@ -395,7 +395,6 @@
                         <img src="dashing.png" alt="Jetour" class="absolute -bottom-6 -right-12 w-80 drop-shadow-2xl pointer-events-none z-0 transform scale-110">
                     </div>
 
-                    <!-- WIDGET PROVISIÓN ALQUILER -->
                     <div class="glass-card rounded-[2.5rem] p-6 sm:p-8 relative overflow-hidden flex flex-col justify-between min-h-[220px]">
                         <div class="absolute top-0 right-0 w-48 h-48 bg-indigo-500 opacity-10 rounded-full -mr-10 -mt-10 blur-[50px] pointer-events-none"></div>
                         <div class="relative z-10 flex justify-between items-start mb-6">
@@ -440,17 +439,30 @@
                 <div>
                     <h2 class="text-2xl font-black text-white tracking-tight flex items-center gap-3">
                         <div class="w-8 h-8 rounded-lg bg-yellow-500/20 border border-yellow-500/30 text-yellow-400 flex items-center justify-center font-black text-sm">5</div>
-                        Radiografía de Gastos (Emaar)
+                        Radiografía de Gastos
                     </h2>
-                    <p class="text-sm font-semibold text-slate-400 mt-2">Inteligencia de consumo basada en tus extractos bancarios históricos.</p>
+                    <p class="text-sm font-semibold text-slate-400 mt-2" id="radiografiaSubtitulo">Inteligencia de consumo basada en tus extractos bancarios históricos.</p>
                 </div>
-                <div class="flex items-center gap-2 w-full sm:w-auto">
-                    <select id="filtroGastosMes" onchange="renderizarAnalisisVisual()" class="w-full sm:w-auto bg-slate-800/80 text-white text-sm font-bold p-3 rounded-xl border border-slate-600 outline-none focus:border-yellow-400 transition-colors shadow-inner">
-                        <option value="tendencia">📈 Tendencia Global (Últimos Meses)</option>
-                    </select>
-                    <button id="btnBorrarExtracto" onclick="borrarExtractoBD()" class="hidden bg-rose-500/20 text-rose-400 p-3 rounded-xl hover:bg-rose-500/40 hover:text-white transition-colors border border-rose-500/30" title="Borrar este extracto del histórico">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
+                
+                <div class="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+                    <!-- SLIDER DE TARJETAS -->
+                    <div class="flex items-center gap-4 bg-slate-800/80 p-2 rounded-2xl border border-slate-700 shadow-inner">
+                        <button onclick="cambiarTarjetaVisual(-1)" class="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-300 transition-colors"><i class="fa-solid fa-chevron-left"></i></button>
+                        <div class="flex flex-col items-center justify-center w-36">
+                            <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-1">Cuenta Activa</span>
+                            <span id="lblTarjetaActiva" class="text-sm font-black text-white flex items-center gap-2"><i class="fa-brands fa-cc-visa text-indigo-400"></i> U By Emaar</span>
+                        </div>
+                        <button onclick="cambiarTarjetaVisual(1)" class="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-300 transition-colors"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <select id="filtroGastosMes" onchange="renderizarAnalisisVisual()" class="w-full sm:w-auto bg-slate-800/80 text-white text-sm font-bold p-3 rounded-xl border border-slate-600 outline-none focus:border-yellow-400 transition-colors shadow-inner">
+                            <option value="tendencia">📈 Tendencia Global</option>
+                        </select>
+                        <button id="btnBorrarExtracto" onclick="borrarExtractoBD()" class="hidden bg-rose-500/20 text-rose-400 p-3 rounded-xl hover:bg-rose-500/40 hover:text-white transition-colors border border-rose-500/30" title="Borrar este extracto del histórico">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
             
@@ -476,42 +488,43 @@
                             <span id="kpiTotalMoM" class="text-xs font-bold mb-1 hidden px-2 py-0.5 rounded-md"></span>
                         </div>
                     </div>
-                    <div class="bg-slate-800/50 p-5 rounded-2xl border border-slate-700 shadow-sm relative overflow-hidden">
-                        <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-amber-500"></div>
+                    <div id="panelIngresosExtra" class="bg-slate-800/50 p-5 rounded-2xl border border-slate-700 shadow-sm relative overflow-hidden">
+                        <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-amber-500" id="colorIngresoOComision"></div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1" id="labelComisiones">Intereses y Comisiones</p>
                         <p id="kpiComisiones" class="text-xl font-black text-amber-400">--- AED</p>
                     </div>
                 </div>
             </div>
 
-            <!-- GRID VISUAL DE CATEGORÍAS -->
             <div id="contenedorCategoriasVisual" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 pt-6 border-t border-slate-700 hidden"></div>
         </div>
 
     </main>
 
-    <!-- MODAL LECTOR DE EXTRACTOS DE EMIRATES NBD (TARJETA EMAAR) -->
+    <!-- MODAL LECTOR DE EXTRACTOS -->
     <div id="modalExtracto" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md hidden p-4">
         <div class="glass-card bg-slate-900 border border-slate-700 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8 shadow-2xl relative">
             <button onclick="cerrarModalExtracto()" class="absolute top-5 right-5 text-slate-400 hover:text-white text-xl">
                 <i class="fa-solid fa-xmark"></i>
             </button>
             
-            <div class="flex items-center gap-3 mb-6">
-                <div class="w-10 h-10 rounded-xl bg-yellow-500/20 border border-yellow-500/30 text-yellow-400 flex items-center justify-center text-xl">
-                    <i class="fa-solid fa-file-invoice-dollar"></i>
-                </div>
-                <div>
-                    <h3 class="text-xl font-black text-white">Lector de Extracto Emirates NBD</h3>
-                    <p class="text-xs text-slate-400">Tarjeta U By Emaar Visa Family (4034...2811)</p>
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-yellow-500/20 border border-yellow-500/30 text-yellow-400 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-file-invoice-dollar"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-black text-white">Lector Inteligente de PDF</h3>
+                        <p class="text-xs text-slate-400">Detecta automáticamente Emaar (Crédito) o NBD (Débito)</p>
+                    </div>
                 </div>
             </div>
 
             <div id="dropZoneExtracto" onclick="document.getElementById('inputPdfExtracto').click()" class="border-2 border-dashed border-slate-700 hover:border-yellow-400/60 rounded-2xl p-8 text-center cursor-pointer transition-colors bg-slate-800/40 group">
                 <input type="file" id="inputPdfExtracto" accept="application/pdf" class="hidden" onchange="procesarArchivoPdf(event)">
                 <i class="fa-solid fa-cloud-arrow-up text-4xl text-slate-500 group-hover:text-yellow-400 transition-colors mb-3"></i>
-                <p class="text-sm font-bold text-white mb-1">Arrastra tu extracto PDF aquí o haz clic para seleccionarlo</p>
-                <p class="text-xs text-slate-500">Soporta auto-detección de duplicados y redirección de mes.</p>
+                <p class="text-sm font-bold text-white mb-1">Arrastra tu extracto PDF aquí o haz clic</p>
+                <p class="text-xs text-slate-500">Subirá a la cuenta detectada en el documento.</p>
             </div>
 
             <div id="loadingPdf" class="hidden py-10 text-center text-indigo-400">
@@ -520,6 +533,11 @@
             </div>
 
             <div id="resultadoExtracto" class="hidden mt-6 space-y-6">
+                <div class="flex justify-between items-center bg-slate-800/80 px-4 py-2 rounded-xl border border-slate-700">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Cuenta Detectada</span>
+                    <span id="resCuentaDetectada" class="text-sm font-black text-white px-3 py-1 rounded bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">---</span>
+                </div>
+
                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700">
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Periodo</p>
@@ -527,37 +545,37 @@
                         <span id="badgeDuplicado" class="text-[9px] uppercase font-bold mt-1 inline-block px-1.5 py-0.5 rounded hidden"></span>
                     </div>
                     <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700">
-                        <p class="text-[10px] font-bold text-yellow-400 uppercase tracking-wider mb-1">Compras / Gastos</p>
+                        <p class="text-[10px] font-bold text-yellow-400 uppercase tracking-wider mb-1">Total Gastos</p>
                         <p id="resCompras" class="text-lg font-black text-white">--- AED</p>
                     </div>
-                    <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700">
-                        <p class="text-[10px] font-bold text-rose-400 uppercase tracking-wider mb-1">Saldo Total Pendiente</p>
+                    <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700" id="cajaSaldoPendiente">
+                        <p class="text-[10px] font-bold text-rose-400 uppercase tracking-wider mb-1">Saldo Final</p>
                         <p id="resSaldoTotal" class="text-lg font-black text-rose-400">--- AED</p>
                     </div>
-                    <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700">
-                        <p class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-1">Pagos Recibidos</p>
+                    <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700" id="cajaIngresos">
+                        <p class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-1">Total Ingresos</p>
                         <p id="resPagos" class="text-sm font-black text-emerald-400">--- AED</p>
                     </div>
-                    <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700">
+                    <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700" id="cajaMinPay">
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Pago Mínimo</p>
                         <p id="resPagoMin" class="text-sm font-black text-slate-200">--- AED</p>
                     </div>
-                    <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700">
+                    <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700" id="cajaVence">
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Vence el</p>
                         <p id="resFechaVenc" class="text-xs font-bold text-slate-200">---</p>
                     </div>
                 </div>
 
                 <div id="alertaComisiones" class="hidden bg-rose-950/30 border border-rose-800/50 rounded-xl p-4 text-xs">
-                    <p class="font-bold text-rose-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><i class="fa-solid fa-triangle-exclamation"></i> Comisiones e Intereses Detectados</p>
+                    <p class="font-bold text-rose-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><i class="fa-solid fa-triangle-exclamation"></i> Comisiones / Notas</p>
                     <p id="resDetalleComisiones" class="text-slate-300">---</p>
                 </div>
 
                 <div class="flex flex-col sm:flex-row gap-3 pt-2">
-                    <button onclick="aplicarGastoEmaar()" class="flex-1 bg-yellow-500 hover:bg-yellow-400 text-slate-900 font-black py-3 rounded-xl transition text-sm flex items-center justify-center gap-2 shadow-lg shadow-yellow-500/20">
+                    <button onclick="aplicarGastoEmaar()" id="btnAplicarGasto" class="flex-1 bg-yellow-500 hover:bg-yellow-400 text-slate-900 font-black py-3 rounded-xl transition text-sm flex items-center justify-center gap-2 shadow-lg shadow-yellow-500/20">
                         <i class="fa-solid fa-bolt"></i> Aplicar Gasto
                     </button>
-                    <button onclick="sincronizarDeudaEmaarSupabase()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-black py-3 rounded-xl transition text-sm flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20">
+                    <button onclick="sincronizarDeudaEmaarSupabase()" id="btnSyncDeuda" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-black py-3 rounded-xl transition text-sm flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20">
                         <i class="fa-solid fa-cloud-arrow-up"></i> Sync Deuda
                     </button>
                     <button onclick="guardarExtractoBD()" id="btnGuardarHistorial" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 rounded-xl transition text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20">
@@ -594,6 +612,13 @@
         let datosExtractoActual = null;
         let extractosGlobales = [];
 
+        // Tarjetas
+        const cuentasDisponibles = [
+            { id: 'Credit-Emaar', nombre: 'U By Emaar', icon: 'fa-cc-visa' },
+            { id: 'Debit-NBD', nombre: 'Current Account NBD', icon: 'fa-building-columns' }
+        ];
+        let cuentaActivaIndex = 0; // 0 = Emaar, 1 = NBD
+
         const catColors = {
             'Comida & Delivery': '#f43f5e', 
             'Supermercado & Alimentación': '#10b981', 
@@ -603,6 +628,11 @@
             'Servicios & Gobierno': '#6366f1', 
             'BNPL & Financiación': '#ec4899', 
             'Comisiones & Tasas': '#ef4444', 
+            'Alquiler': '#8b5cf6',
+            'Préstamo NBD': '#f43f5e',
+            'Préstamo Coche (Jetour)': '#ec4899',
+            'Pago Tarjeta Emaar': '#10b981',
+            'Transferencias & Envíos': '#06b6d4',
             'Otros Gastos': '#94a3b8'
         };
 
@@ -614,7 +644,12 @@
             'Transporte, Vuelos & Viajes': 'fa-plane-departure', 
             'Servicios & Gobierno': 'fa-building-columns', 
             'BNPL & Financiación': 'fa-credit-card', 
-            'Comisiones & Tasas': 'fa-triangle-exclamation', 
+            'Comisiones & Tasas': 'fa-triangle-exclamation',
+            'Alquiler': 'fa-house',
+            'Préstamo NBD': 'fa-money-check-dollar',
+            'Préstamo Coche (Jetour)': 'fa-car',
+            'Pago Tarjeta Emaar': 'fa-money-bill-transfer',
+            'Transferencias & Envíos': 'fa-paper-plane',
             'Otros Gastos': 'fa-receipt'
         };
 
@@ -645,9 +680,20 @@
             cargarHistorialIngresos();
             configurarDragAndDrop();
 
-            await cargarExtractosEmaar();
+            await cargarExtractosBaseDatos();
             cargarDatosMes(); 
         };
+
+        function cambiarTarjetaVisual(offset) {
+            cuentaActivaIndex += offset;
+            if (cuentaActivaIndex < 0) cuentaActivaIndex = cuentasDisponibles.length - 1;
+            if (cuentaActivaIndex >= cuentasDisponibles.length) cuentaActivaIndex = 0;
+            
+            const cActiva = cuentasDisponibles[cuentaActivaIndex];
+            document.getElementById('lblTarjetaActiva').innerHTML = `<i class="fa-brands ${cActiva.icon} text-indigo-400"></i> ${cActiva.nombre}`;
+            
+            actualizarDropdownExtractos();
+        }
 
         function calcularDiasCobro() {
             const today = new Date();
@@ -715,8 +761,12 @@
         function sincronizarExtractoVisor() {
             const mesRaw = document.getElementById('mesSelector').value; 
             const badgeStatus = document.getElementById('badgeExtractoStatus');
+            const cActiva = cuentasDisponibles[cuentaActivaIndex];
 
-            if (!mesRaw || extractosGlobales.length === 0) {
+            // Filtrar extractos globales para la cuenta actualmente activa
+            const extractosCuenta = extractosGlobales.filter(ext => (ext.cuenta || 'Credit-Emaar') === cActiva.id);
+
+            if (!mesRaw || extractosCuenta.length === 0) {
                 if(badgeStatus) {
                     badgeStatus.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> Pendiente`;
                     badgeStatus.className = "text-[10px] font-bold px-2 py-1.5 rounded-xl bg-rose-500/20 border border-rose-500/30 text-rose-400";
@@ -726,12 +776,14 @@
             
             const [year, month] = mesRaw.split('-');
             
-            const extractoMatch = extractosGlobales.find(ext => {
-                const fechas = ext.periodo.match(/(\d{2})-([A-Za-z]{3})-(\d{2})/g);
-                if (fechas && fechas.length === 2) {
-                    const endDate = fechas[1];
-                    const endM = monthMap[endDate.split('-')[1].toUpperCase()];
-                    const endY = '20' + endDate.split('-')[2];
+            const extractoMatch = extractosCuenta.find(ext => {
+                const fechas = ext.periodo.match(/(\d{2})-([A-Za-z]{3})-(\d{2})/g) || ext.periodo.match(/(\d{2})\s([A-Za-z]{3})\s(\d{4})/g);
+                if (fechas && fechas.length >= 1) {
+                    // Coge la última fecha que suele ser el fin del periodo
+                    const endDate = fechas[fechas.length - 1];
+                    const partes = endDate.split(/[\s\-]/);
+                    const endM = monthMap[partes[1].toUpperCase()];
+                    const endY = partes[2].length === 2 ? '20' + partes[2] : partes[2];
                     return endM === month && endY === year;
                 }
                 return false;
@@ -1000,17 +1052,24 @@
         // MÓDULO ANÁLISIS VISUAL DE EXTRACTOS (FILA 5)
         // ==========================================
 
-        async function cargarExtractosEmaar() {
+        async function cargarExtractosBaseDatos() {
             const { data, error } = await supabaseClient.from('extractos_emaar').select('*').order('created_at', { ascending: true });
             if (error) return console.error("Error cargando extractos:", error);
             
             extractosGlobales = data || [];
             extractosGlobales.sort((a, b) => new Date(a.fecha_vencimiento || a.created_at) - new Date(b.fecha_vencimiento || b.created_at));
+            
+            actualizarDropdownExtractos();
+        }
+
+        function actualizarDropdownExtractos() {
+            const cActiva = cuentasDisponibles[cuentaActivaIndex];
+            const extractosFiltrados = extractosGlobales.filter(ext => (ext.cuenta || 'Credit-Emaar') === cActiva.id);
 
             const select = document.getElementById('filtroGastosMes');
-            select.innerHTML = '<option value="tendencia">📈 Tendencia Global (Últimos Meses)</option>';
+            select.innerHTML = '<option value="tendencia">📈 Tendencia Global</option>';
             
-            [...extractosGlobales].reverse().forEach(ext => {
+            [...extractosFiltrados].reverse().forEach(ext => {
                 const opt = document.createElement('option');
                 opt.value = ext.id;
                 opt.text = `📄 ${ext.periodo}`;
@@ -1023,6 +1082,8 @@
         function renderizarAnalisisVisual() {
             const val = document.getElementById('filtroGastosMes').value;
             const ctx = document.getElementById('expensesChart').getContext('2d');
+            const cActiva = cuentasDisponibles[cuentaActivaIndex];
+            const isDebit = cActiva.id === 'Debit-NBD';
             
             const btnBorrar = document.getElementById('btnBorrarExtracto');
             if(val === 'tendencia') btnBorrar.classList.add('hidden');
@@ -1034,31 +1095,45 @@
             document.getElementById('kpiTopCategoriaMoM').className = "hidden";
             document.getElementById('contenedorCategoriasVisual').classList.add('hidden');
 
+            const extractosFiltrados = extractosGlobales.filter(ext => (ext.cuenta || 'Credit-Emaar') === cActiva.id);
+
             if (val === 'tendencia') {
-                document.getElementById('labelPromedioGasto').innerText = "Promedio Mensual (Total)";
-                document.getElementById('labelComisiones').innerText = "Fugas Históricas (Comisiones/Tasas)";
+                document.getElementById('labelPromedioGasto').innerText = "Promedio Mensual (Gastos)";
+                document.getElementById('labelComisiones').innerText = isDebit ? "Ingresos Históricos" : "Fugas Históricas (Comisiones/Tasas)";
+                document.getElementById('colorIngresoOComision').className = "absolute left-0 top-0 bottom-0 w-1.5 " + (isDebit ? "bg-emerald-500" : "bg-amber-500");
 
-                if (extractosGlobales.length === 0) return;
+                if (extractosFiltrados.length === 0) {
+                    document.getElementById('kpiPromedioGasto').innerHTML = `0 <span class="text-sm text-slate-400">AED</span>`;
+                    document.getElementById('kpiTopCategoria').innerText = "---";
+                    document.getElementById('kpiTopCategoriaAmount').innerText = "--- AED";
+                    document.getElementById('kpiComisiones').innerText = "0 AED";
+                    return;
+                }
 
-                const labels = extractosGlobales.map(e => e.periodo.split(' to ')[0].trim().substring(0, 6)); 
+                const labels = extractosFiltrados.map(e => e.periodo.substring(0, 8)); 
                 const datasets = [];
-                let totalGastoHistorico = 0, totalComisionesHistorico = 0, maxCatValue = 0, maxCatName = "---";
+                let totalGastoHistorico = 0, maxCatValue = 0, maxCatName = "---", totalMetricSecundaria = 0;
 
                 Object.keys(catColors).forEach(cat => {
-                    const dataPoints = extractosGlobales.map(ext => ext.desglose_categorias[cat] || 0);
+                    const dataPoints = extractosFiltrados.map(ext => ext.desglose_categorias[cat] || 0);
                     const catSum = dataPoints.reduce((a, b) => a + b, 0);
                     if (catSum > 0) {
                         datasets.push({ label: cat, data: dataPoints, backgroundColor: catColors[cat], borderWidth: 0, borderRadius: 4, barPercentage: 0.6 });
-                        if (cat !== 'Otros Gastos' && catSum > maxCatValue) { maxCatValue = catSum; maxCatName = cat; }
+                        if (cat !== 'Otros Gastos' && cat !== 'Pago Tarjeta Emaar' && catSum > maxCatValue) { maxCatValue = catSum; maxCatName = cat; }
                         totalGastoHistorico += catSum;
-                        if(cat === 'Comisiones & Tasas') totalComisionesHistorico = catSum;
+                        if(!isDebit && cat === 'Comisiones & Tasas') totalMetricSecundaria = catSum;
                     }
                 });
 
-                document.getElementById('kpiPromedioGasto').innerHTML = `${Math.floor(totalGastoHistorico / extractosGlobales.length).toLocaleString()} <span class="text-sm text-slate-400">AED</span>`;
+                if (isDebit) {
+                    totalMetricSecundaria = extractosFiltrados.reduce((acc, curr) => acc + (parseFloat(curr.ingresos) || 0), 0);
+                }
+
+                document.getElementById('kpiPromedioGasto').innerHTML = `${Math.floor(totalGastoHistorico / extractosFiltrados.length).toLocaleString()} <span class="text-sm text-slate-400">AED</span>`;
                 document.getElementById('kpiTopCategoria').innerText = maxCatName;
-                document.getElementById('kpiTopCategoriaAmount').innerText = `~${Math.floor(maxCatValue / extractosGlobales.length).toLocaleString()} AED/mes`;
-                document.getElementById('kpiComisiones').innerText = Math.floor(totalComisionesHistorico).toLocaleString() + ' AED';
+                document.getElementById('kpiTopCategoriaAmount').innerText = `~${Math.floor(maxCatValue / extractosFiltrados.length).toLocaleString()} AED/mes`;
+                document.getElementById('kpiComisiones').innerText = Math.floor(totalMetricSecundaria).toLocaleString() + ' AED';
+                document.getElementById('kpiComisiones').className = `text-xl font-black ${isDebit ? 'text-emerald-400' : 'text-amber-400'}`;
 
                 expensesChartInstance = new Chart(ctx, {
                     type: 'bar', data: { labels, datasets },
@@ -1069,14 +1144,16 @@
                 });
 
             } else {
+                // MES ESPECÍFICO
                 document.getElementById('labelPromedioGasto').innerText = "Gasto Total del Mes";
-                document.getElementById('labelComisiones').innerText = "Fugas Este Mes (Comisiones/Tasas)";
+                document.getElementById('labelComisiones').innerText = isDebit ? "Ingresos Este Mes" : "Fugas Este Mes (Comisiones/Tasas)";
+                document.getElementById('colorIngresoOComision').className = "absolute left-0 top-0 bottom-0 w-1.5 " + (isDebit ? "bg-emerald-500" : "bg-amber-500");
 
-                const currentIndex = extractosGlobales.findIndex(e => e.id.toString() === val);
+                const currentIndex = extractosFiltrados.findIndex(e => e.id.toString() === val);
                 if (currentIndex === -1) return;
                 
-                const extracto = extractosGlobales[currentIndex];
-                const extractoAnterior = currentIndex > 0 ? extractosGlobales[currentIndex - 1] : null;
+                const extracto = extractosFiltrados[currentIndex];
+                const extractoAnterior = currentIndex > 0 ? extractosFiltrados[currentIndex - 1] : null;
 
                 const categorias = extracto.desglose_categorias;
                 const labels = [], data = [], bgColors = [];
@@ -1086,7 +1163,7 @@
                     const monto = categorias[cat];
                     if (monto > 0) {
                         labels.push(cat); data.push(monto); bgColors.push(catColors[cat] || '#94a3b8');
-                        if (cat !== 'Otros Gastos' && monto > topVal) { topVal = monto; topCat = cat; }
+                        if (cat !== 'Otros Gastos' && cat !== 'Pago Tarjeta Emaar' && monto > topVal) { topVal = monto; topCat = cat; }
                     }
                 });
 
@@ -1095,13 +1172,8 @@
                     const diffPct = ((extracto.total_compras - extractoAnterior.total_compras) / extractoAnterior.total_compras) * 100;
                     const badge = document.getElementById('kpiTotalMoM');
                     badge.classList.remove('hidden', 'bg-rose-500/20', 'text-rose-400', 'bg-emerald-500/20', 'text-emerald-400');
-                    if(diffPct > 0) {
-                        badge.innerHTML = `<i class="fa-solid fa-arrow-trend-up"></i> +${diffPct.toFixed(1)}%`;
-                        badge.classList.add('bg-rose-500/20', 'text-rose-400'); 
-                    } else {
-                        badge.innerHTML = `<i class="fa-solid fa-arrow-trend-down"></i> ${diffPct.toFixed(1)}%`;
-                        badge.classList.add('bg-emerald-500/20', 'text-emerald-400');
-                    }
+                    if(diffPct > 0) { badge.innerHTML = `<i class="fa-solid fa-arrow-trend-up"></i> +${diffPct.toFixed(1)}%`; badge.classList.add('bg-rose-500/20', 'text-rose-400'); } 
+                    else { badge.innerHTML = `<i class="fa-solid fa-arrow-trend-down"></i> ${diffPct.toFixed(1)}%`; badge.classList.add('bg-emerald-500/20', 'text-emerald-400'); }
                 }
 
                 document.getElementById('kpiTopCategoria').innerText = topCat;
@@ -1115,7 +1187,9 @@
                     else { badgeCat.innerHTML = `${diffCat.toFixed(0)}%`; badgeCat.classList.add('bg-emerald-500/20', 'text-emerald-400'); }
                 }
                 
-                document.getElementById('kpiComisiones').innerText = Math.floor(categorias['Comisiones & Tasas'] || 0).toLocaleString() + ' AED';
+                let valSecundario = isDebit ? (extracto.ingresos || 0) : (categorias['Comisiones & Tasas'] || 0);
+                document.getElementById('kpiComisiones').innerText = Math.floor(valSecundario).toLocaleString() + ' AED';
+                document.getElementById('kpiComisiones').className = `text-xl font-black ${isDebit ? 'text-emerald-400' : 'text-amber-400'}`;
 
                 const gridContainer = document.getElementById('contenedorCategoriasVisual');
                 gridContainer.innerHTML = '';
@@ -1125,7 +1199,7 @@
                 
                 sortedCats.forEach(cat => {
                     const monto = categorias[cat];
-                    const pctTotal = Math.round((monto / extracto.total_compras) * 100);
+                    const pctTotal = extracto.total_compras > 0 ? Math.round((monto / extracto.total_compras) * 100) : 0;
                     let momHtml = '';
                     
                     if(extractoAnterior && extractoAnterior.desglose_categorias[cat] > 0) {
@@ -1139,7 +1213,7 @@
                     gridContainer.innerHTML += `
                         <div class="bg-slate-800/40 p-4 rounded-2xl border border-slate-700/80 hover:bg-slate-800/80 transition flex flex-col justify-between">
                             <div class="flex justify-between items-start mb-3">
-                                <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm shadow-inner" style="background-color: ${catColors[cat]}20; color: ${catColors[cat]}; border: 1px solid ${catColors[cat]}40;">
+                                <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm shadow-inner" style="background-color: ${catColors[cat] || '#94a3b8'}20; color: ${catColors[cat] || '#94a3b8'}; border: 1px solid ${catColors[cat] || '#94a3b8'}40;">
                                     <i class="fa-solid ${catIcons[cat] || 'fa-tag'}"></i>
                                 </div>
                                 <span class="text-slate-500 font-black text-xs">${pctTotal}%</span>
@@ -1175,22 +1249,22 @@
             const { error } = await supabaseClient.from('extractos_emaar').delete().eq('id', val);
             if (!error) {
                 alert("✅ Extracto borrado correctamente del histórico.");
-                cargarExtractosEmaar(); 
+                cargarExtractosBaseDatos(); 
             } else {
                 alert("Error al borrar el extracto: " + error.message);
             }
         }
 
         // ==========================================
-        // MÓDULO LECTOR PDF
+        // MÓDULO LECTOR PDF (CRÉDITO Y DÉBITO)
         // ==========================================
 
         function abrirModalExtracto() { document.getElementById('modalExtracto').classList.remove('hidden'); }
         function cerrarModalExtracto() { document.getElementById('modalExtracto').classList.add('hidden'); }
         function configurarDragAndDrop() {
             const dz = document.getElementById('dropZoneExtracto'); if(!dz) return;
-            ['dragenter', 'dragover'].forEach(e => dz.addEventListener(e, ev => { ev.preventDefault(); ev.stopPropagation(); dz.classList.add('border-yellow-400', 'bg-slate-800/80'); }, false));
-            ['dragleave', 'drop'].forEach(e => dz.addEventListener(e, ev => { ev.preventDefault(); ev.stopPropagation(); dz.classList.remove('border-yellow-400', 'bg-slate-800/80'); }, false));
+            ['dragenter', 'dragover'].forEach(e => dz.addEventListener(e, ev => { ev.preventDefault(); ev.stopPropagation(); dz.classList.add('border-indigo-400', 'bg-slate-800/80'); }, false));
+            ['dragleave', 'drop'].forEach(e => dz.addEventListener(e, ev => { ev.preventDefault(); ev.stopPropagation(); dz.classList.remove('border-indigo-400', 'bg-slate-800/80'); }, false));
             dz.addEventListener('drop', ev => { if (ev.dataTransfer.files.length > 0) leerPdf(ev.dataTransfer.files[0]); }, false);
         }
         function procesarArchivoPdf(event) { if (event.target.files[0]) leerPdf(event.target.files[0]); }
@@ -1201,13 +1275,20 @@
                 const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
                 let text = '';
                 for (let i = 1; i <= pdf.numPages; i++) text += (await (await pdf.getPage(i)).getTextContent()).items.map(t => t.str).join(' ') + '\n';
-                analizarTextoExtracto(text);
+                
+                if (text.includes('1015855935201') || text.includes('CURRENT ACCOUNT')) {
+                    analizarTextoExtractoDebito(text);
+                } else if (text.includes('U By Emaar Visa Family')) {
+                    analizarTextoExtractoCredito(text);
+                } else {
+                    throw new Error("Formato de extracto no reconocido.");
+                }
             } catch (err) { alert("Error al leer PDF: " + err.message); document.getElementById('dropZoneExtracto').classList.remove('hidden'); document.getElementById('loadingPdf').classList.add('hidden'); }
         }
         
         function cleanNumber(str) { return parseFloat(str ? str.replace(/,/g, '').trim() : 0) || 0; }
 
-        function analizarTextoExtracto(texto) {
+        function analizarTextoExtractoCredito(texto) {
             let periodoMatch = texto.match(/([0-9]{2}-[A-Za-z]{3}-[0-9]{2}\s*to\s*[0-9]{2}-[A-Za-z]{3}-[0-9]{2})/i);
             let periodo = periodoMatch ? periodoMatch[1].replace(/\s+/g, ' ').trim() : 'No detectado';
 
@@ -1251,29 +1332,114 @@
             const mPeriodoExtraido = periodo.match(/(\d{2})-([A-Za-z]{3})-(\d{2})/g);
             if (mPeriodoExtraido && mPeriodoExtraido.length === 2) {
                 const endDate = mPeriodoExtraido[1];
-                const endMonthAbbr = endDate.split('-')[1].toUpperCase();
-                const endYearStr = '20' + endDate.split('-')[2];
-                const monthNum = monthMap[endMonthAbbr];
-
+                const monthNum = monthMap[endDate.split('-')[1].toUpperCase()];
                 if (monthNum) {
-                    const targetMonth = `${endYearStr}-${monthNum}`;
-                    const mesSelector = document.getElementById('mesSelector');
-                    if (mesSelector.value !== targetMonth) {
-                        mesSelector.value = targetMonth;
+                    const targetMonth = `20${endDate.split('-')[2]}-${monthNum}`;
+                    if (document.getElementById('mesSelector').value !== targetMonth) {
+                        document.getElementById('mesSelector').value = targetMonth;
                         cargarDatosMes(); 
                     }
                 }
             }
 
-            datosExtractoActual = { periodo, totalPurchases, currentBalance, totalPayments, minPayment, paymentDueDate, categorias, comisionesDetectadas };
-            mostrarResultadosExtracto();
+            datosExtractoActual = { cuenta: 'Credit-Emaar', periodo, totalPurchases, currentBalance, totalPayments, minPayment, paymentDueDate, categorias, comisionesDetectadas, ingresos: 0 };
+            prepararResultadosUI();
         }
 
-        function mostrarResultadosExtracto() {
-            document.getElementById('loadingPdf').classList.add('hidden'); document.getElementById('resultadoExtracto').classList.remove('hidden');
-            document.getElementById('resPeriodo').innerText = datosExtractoActual.periodo; document.getElementById('resCompras').innerText = Math.floor(datosExtractoActual.totalPurchases).toLocaleString() + ' AED'; document.getElementById('resSaldoTotal').innerText = datosExtractoActual.currentBalance.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' AED'; document.getElementById('resPagos').innerText = Math.floor(datosExtractoActual.totalPayments).toLocaleString() + ' AED'; document.getElementById('resPagoMin').innerText = datosExtractoActual.minPayment.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' AED'; document.getElementById('resFechaVenc').innerText = datosExtractoActual.paymentDueDate;
+        function analizarTextoExtractoDebito(texto) {
+            let periodoMatch = texto.match(/PERIOD OF\s*(\d{2}\s[A-Za-z]{3}\s\d{4})\s*to\s*(\d{2}\s[A-Za-z]{3}\s\d{4})/i);
+            let periodo = periodoMatch ? `${periodoMatch[1]} to ${periodoMatch[2]}` : 'No detectado';
 
-            const existeEnDB = extractosGlobales.find(e => e.periodo === datosExtractoActual.periodo);
+            const categorias = { 'Alquiler': 0, 'Préstamo Coche (Jetour)': 0, 'Préstamo NBD': 0, 'Pago Tarjeta Emaar': 0, 'Transferencias & Envíos': 0, 'Comida & Delivery': 0, 'Supermercado & Alimentación': 0, 'Shopping, Ropa & Online': 0, 'Suscripciones & Digital': 0, 'Transporte, Vuelos & Viajes': 0, 'Servicios & Gobierno': 0, 'Otros Gastos': 0 };
+            const comisionesDetectadas = [];
+            let totalPurchases = 0;
+            let totalIngresos = 0;
+
+            const chunks = texto.split(/(?=\b\d{2}\s[A-Za-z]{3}\s\d{4}\b)/);
+            chunks.forEach(chunk => {
+                if(!chunk.trim()) return;
+                
+                const expMatch = chunk.match(/(-\d+(?:\.\d{1,2})?)/);
+                let isExpense = !!expMatch;
+                let monto = 0;
+
+                if(isExpense) {
+                    monto = Math.abs(parseFloat(expMatch[1]));
+                } else {
+                    if(chunk.includes('SALARY') || chunk.includes('PAYMENT RECEIVED THANK YOU') || chunk.includes('TT REF')) {
+                        const allNumbers = [...chunk.matchAll(/\b(\d+\.\d{2})\b/g)];
+                        if (allNumbers.length >= 2) {
+                            totalIngresos += parseFloat(allNumbers[allNumbers.length - 2][1]);
+                        }
+                    }
+                }
+
+                if(isExpense && monto > 0) {
+                    let desc = chunk.toUpperCase();
+                    if(desc.includes('4034 2811') || desc.includes('4034********2811')) categorias['Pago Tarjeta Emaar'] += monto;
+                    else if (desc.includes('INWARD CLEARING CHQ')) categorias['Alquiler'] += monto;
+                    else if (desc.includes('INSTL RECOVERY') || desc.includes('INSTL_RECOVERY')) {
+                        if (monto > 3000 && monto < 3500) categorias['Préstamo NBD'] += monto;
+                        else if (monto > 1500 && monto < 2000) categorias['Préstamo Coche (Jetour)'] += monto;
+                        else categorias['Otros Gastos'] += monto;
+                    } else if (desc.includes('DDR-512000')) categorias['Préstamo NBD'] += monto;
+                    else if (desc.includes('P2P') || desc.includes('TT REF') || desc.includes('MOBILE BANKING TRANSFER') || desc.includes('EXCHANGE') || desc.includes('PAYSEND')) categorias['Transferencias & Envíos'] += monto;
+                    else if (/CAREEM FOOD|NOON FOOD|DELIVEROO|KEETA|MCDONALD|BURGERKING|MATTO/i.test(desc)) categorias['Comida & Delivery'] += monto;
+                    else if (/AMAZON GROCERY|NOON MINUTES|CAREEM QUIK|LULU|WAITROSE|CARREFOUR/i.test(desc)) categorias['Supermercado & Alimentación'] += monto;
+                    else if (/AMAZON|NOON|IKEA|HOME BOX|BRANDS FOR LESS|DAISO|MUMUSO/i.test(desc)) categorias['Shopping, Ropa & Online'] += monto;
+                    else if (/SMART DUBAI|DUBAI ELECTRICITY|ETISALAT|DU AUTO PAY/i.test(desc)) categorias['Servicios & Gobierno'] += monto;
+                    else if (/CAREEM HALA|CAREEM QUIK|RTA|ENOC|EMARAT|TRIP\.COM|AENA|DUBAI TAXI|SHERATON/i.test(desc)) categorias['Transporte, Vuelos & Viajes'] += monto;
+                    else categorias['Otros Gastos'] += monto;
+                    
+                    totalPurchases += monto;
+                }
+            });
+
+            if (periodoMatch) {
+                const endDate = periodoMatch[2];
+                const monthNum = monthMap[endDate.split(' ')[1].toUpperCase()];
+                if (monthNum) {
+                    const targetMonth = `${endDate.split(' ')[2]}-${monthNum}`;
+                    if (document.getElementById('mesSelector').value !== targetMonth) {
+                        document.getElementById('mesSelector').value = targetMonth;
+                        cargarDatosMes(); 
+                    }
+                }
+            }
+
+            datosExtractoActual = { cuenta: 'Debit-NBD', periodo, totalPurchases, currentBalance: 0, totalPayments: totalIngresos, minPayment: 0, paymentDueDate: '---', categorias, comisionesDetectadas, ingresos: totalIngresos };
+            prepararResultadosUI();
+        }
+
+        function prepararResultadosUI() {
+            document.getElementById('loadingPdf').classList.add('hidden'); document.getElementById('resultadoExtracto').classList.remove('hidden');
+            
+            const isDebit = datosExtractoActual.cuenta === 'Debit-NBD';
+            
+            document.getElementById('resCuentaDetectada').innerHTML = isDebit ? `<i class="fa-solid fa-building-columns"></i> Cuenta Corriente` : `<i class="fa-brands fa-cc-visa"></i> U By Emaar`;
+            document.getElementById('resPeriodo').innerText = datosExtractoActual.periodo; 
+            document.getElementById('resCompras').innerText = Math.floor(datosExtractoActual.totalPurchases).toLocaleString() + ' AED'; 
+            
+            if(isDebit) {
+                document.getElementById('cajaSaldoPendiente').classList.add('hidden');
+                document.getElementById('cajaMinPay').classList.add('hidden');
+                document.getElementById('cajaVence').classList.add('hidden');
+                document.getElementById('resPagos').innerText = Math.floor(datosExtractoActual.ingresos).toLocaleString() + ' AED';
+                document.getElementById('btnAplicarGasto').classList.add('hidden');
+                document.getElementById('btnSyncDeuda').classList.add('hidden');
+            } else {
+                document.getElementById('cajaSaldoPendiente').classList.remove('hidden');
+                document.getElementById('cajaMinPay').classList.remove('hidden');
+                document.getElementById('cajaVence').classList.remove('hidden');
+                document.getElementById('resSaldoTotal').innerText = datosExtractoActual.currentBalance.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' AED'; 
+                document.getElementById('resPagos').innerText = Math.floor(datosExtractoActual.totalPayments).toLocaleString() + ' AED'; 
+                document.getElementById('resPagoMin').innerText = datosExtractoActual.minPayment.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' AED'; 
+                document.getElementById('resFechaVenc').innerText = datosExtractoActual.paymentDueDate;
+                document.getElementById('btnAplicarGasto').classList.remove('hidden');
+                document.getElementById('btnSyncDeuda').classList.remove('hidden');
+            }
+
+            const existeEnDB = extractosGlobales.find(e => e.periodo === datosExtractoActual.periodo && (e.cuenta || 'Credit-Emaar') === datosExtractoActual.cuenta);
             const badgeDup = document.getElementById('badgeDuplicado');
             if(existeEnDB) {
                 badgeDup.innerHTML = `<i class="fa-solid fa-rotate"></i> Actualizar Existente`;
@@ -1301,9 +1467,7 @@
         async function guardarExtractoBD() {
             if (!datosExtractoActual) return alert("No hay datos.");
             let f = null; if (datosExtractoActual.paymentDueDate !== '---') { const p = datosExtractoActual.paymentDueDate.split('/'); if(p.length===3) f = `${p[2]}-${p[1]}-${p[0]}`; }
-            const payload = { periodo: datosExtractoActual.periodo, fecha_vencimiento: f, total_compras: datosExtractoActual.totalPurchases, saldo_total: datosExtractoActual.currentBalance, pagos_recibidos: datosExtractoActual.totalPayments, pago_minimo: datosExtractoActual.minPayment, desglose_categorias: datosExtractoActual.categorias, comisiones_detectadas: datosExtractoActual.comisionesDetectadas };
-            
-            const existeEnDB = extractosGlobales.find(e => e.periodo === datosExtractoActual.periodo);
+            const payload = { cuenta: datosExtractoActual.cuenta, periodo: datosExtractoActual.periodo, fecha_vencimiento: f, total_compras: datosExtractoActual.totalPurchases, saldo_total: datosExtractoActual.currentBalance, pagos_recibidos: datosExtractoActual.totalPayments, pago_minimo: datosExtractoActual.minPayment, desglose_categorias: datosExtractoActual.categorias, comisiones_detectadas: datosExtractoActual.comisionesDetectadas, ingresos: datosExtractoActual.ingresos };
             
             const btn = document.getElementById('btnGuardarHistorial'); const orig = btn.innerHTML;
             btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Guardando...`; btn.disabled = true;
@@ -1311,9 +1475,8 @@
             const { error } = await supabaseClient.from('extractos_emaar').upsert([payload], { onConflict: 'periodo' });
             if (error) alert("Error Supabase: " + error.message); 
             else { 
-                if(existeEnDB) alert("🔄 Extracto actualizado en el histórico.");
-                else alert("✅ Nuevo extracto guardado en el histórico."); 
-                await cargarExtractosEmaar(); cerrarModalExtracto(); 
+                await cargarExtractosBaseDatos(); 
+                cerrarModalExtracto(); 
             }
             btn.innerHTML = orig; btn.disabled = false;
         }
