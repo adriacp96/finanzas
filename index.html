@@ -567,6 +567,9 @@
                     <button onclick="sincronizarDeudaEmaarSupabase()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-black py-3 rounded-xl transition text-sm flex items-center justify-center gap-2">
                         <i class="fa-solid fa-cloud-arrow-up"></i> Sincronizar Saldo Deuda
                     </button>
+                    <button onclick="guardarExtractoBD()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 rounded-xl transition text-sm flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-database"></i> Guardar en Histórico
+                    </button>
                 </div>
             </div>
         </div>
@@ -1431,7 +1434,6 @@
         async function sincronizarDeudaEmaarSupabase() {
             if (!datosExtractoActual || datosExtractoActual.currentBalance <= 0) return alert("No hay saldo pendiente válido para sincronizar.");
             
-            // Buscar la deuda de la tarjeta Emaar en el array cargado de Supabase
             const deudaEmaar = deudasGlobales.find(d => 
                 d.nombre.toLowerCase().includes('tarjeta') || 
                 d.nombre.toLowerCase().includes('emaar') || 
@@ -1455,6 +1457,39 @@
                 alert(`✅ Saldo de la tarjeta Emaar sincronizado con éxito en Supabase: ${nuevoSaldo.toLocaleString()} AED.`);
             } else {
                 alert("Error al sincronizar con Supabase: " + error.message);
+            }
+        }
+
+        async function guardarExtractoBD() {
+            if (!datosExtractoActual) return alert("No hay datos de extracto para guardar.");
+
+            let fechaVencFormateada = null;
+            if(datosExtractoActual.paymentDueDate && datosExtractoActual.paymentDueDate !== '---') {
+                const partesFecha = datosExtractoActual.paymentDueDate.split('/');
+                if(partesFecha.length === 3) {
+                    fechaVencFormateada = `${partesFecha[2]}-${partesFecha[1]}-${partesFecha[0]}`;
+                }
+            }
+
+            const payload = {
+                periodo: datosExtractoActual.periodo,
+                fecha_vencimiento: fechaVencFormateada,
+                total_compras: datosExtractoActual.totalPurchases,
+                saldo_total: datosExtractoActual.currentBalance,
+                pagos_recibidos: datosExtractoActual.totalPayments,
+                pago_minimo: datosExtractoActual.minPayment,
+                desglose_categorias: datosExtractoActual.categorias,
+                comisiones_detectadas: datosExtractoActual.comisionesDetectadas
+            };
+
+            const { data, error } = await supabaseClient
+                .from('extractos_emaar')
+                .upsert([payload], { onConflict: 'periodo' });
+
+            if (error) {
+                alert("Error al guardar el extracto en Supabase: " + error.message);
+            } else {
+                alert(`✅ Extracto del periodo ${datosExtractoActual.periodo} guardado permanentemente en la base de datos.`);
             }
         }
     </script>
