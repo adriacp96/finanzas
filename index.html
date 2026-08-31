@@ -589,7 +589,6 @@
     </div>
 
     <script>
-        // Inicializar PDF.js Worker
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
         const supabaseUrl = 'https://jgvgabkrriedaquqehpb.supabase.co';
@@ -615,9 +614,10 @@
         let datosExtractoActual = null;
         let extractosGlobales = [];
 
+        // Modificado fa-brands por la clase genérica para que funcione fa-solid
         const cuentasDisponibles = [
-            { id: 'Credit-Emaar', nombre: 'U By Emaar', icon: 'fa-cc-visa' },
-            { id: 'Debit-NBD', nombre: 'Current Account NBD', icon: 'fa-building-columns' }
+            { id: 'Credit-Emaar', nombre: 'U By Emaar', icon: 'fa-brands fa-cc-visa' },
+            { id: 'Debit-NBD', nombre: 'Current Account NBD', icon: 'fa-solid fa-building-columns' }
         ];
         let cuentaActivaIndex = 0;
 
@@ -692,7 +692,8 @@
             if (cuentaActivaIndex >= cuentasDisponibles.length) cuentaActivaIndex = 0;
             
             const cActiva = cuentasDisponibles[cuentaActivaIndex];
-            document.getElementById('lblTarjetaActiva').innerHTML = `<i class="fa-brands ${cActiva.icon} text-indigo-400"></i> ${cActiva.nombre}`;
+            // Aquí cargamos directamente cActiva.icon que ya trae todo (ej: fa-solid fa-building-columns)
+            document.getElementById('lblTarjetaActiva').innerHTML = `<i class="${cActiva.icon} text-indigo-400"></i> ${cActiva.nombre}`;
             
             actualizarDropdownExtractos();
         }
