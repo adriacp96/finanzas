@@ -484,6 +484,49 @@
             </div>
         </div>
 
+        <!-- FILA 5: ANÁLISIS DE GASTOS DINÁMICOS -->
+        <div class="glass-card rounded-[2.5rem] p-8 sm:p-10 relative overflow-hidden z-10">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 border-b border-slate-700 pb-6 gap-4">
+                <div>
+                    <h2 class="text-2xl font-black text-white tracking-tight flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-yellow-500/20 border border-yellow-500/30 text-yellow-400 flex items-center justify-center font-black text-sm">5</div>
+                        Radiografía de Gastos (Emaar)
+                    </h2>
+                    <p class="text-sm font-semibold text-slate-400 mt-2">Distribución por categorías y tendencias de consumo basadas en extractos</p>
+                </div>
+                <div class="w-full sm:w-auto">
+                    <select id="filtroGastosMes" onchange="renderizarGraficoGastos()" class="w-full sm:w-auto bg-slate-800/80 text-white text-sm font-bold p-3 rounded-xl border border-slate-600 outline-none focus:border-yellow-400 transition-colors shadow-inner">
+                        <option value="tendencia">📈 Tendencia Global (Últimos Meses)</option>
+                        <!-- Opciones generadas dinámicamente -->
+                    </select>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+                <div class="lg:col-span-2 relative w-full h-[350px]">
+                    <canvas id="expensesChart"></canvas>
+                </div>
+                <div class="lg:col-span-1 space-y-4" id="expensesSummaryPanel">
+                    <div class="bg-slate-800/50 p-5 rounded-2xl border border-slate-700 shadow-sm relative overflow-hidden">
+                        <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-rose-500"></div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Top Categoría (Gasto Principal)</p>
+                        <p id="kpiTopCategoria" class="text-xl font-black text-rose-400 truncate">---</p>
+                        <p id="kpiTopCategoriaAmount" class="text-sm font-bold text-slate-300 mt-1">--- AED</p>
+                    </div>
+                    <div class="bg-slate-800/50 p-5 rounded-2xl border border-slate-700 shadow-sm relative overflow-hidden">
+                        <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-emerald-500"></div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1" id="labelPromedioGasto">Promedio Mensual (Total)</p>
+                        <p id="kpiPromedioGasto" class="text-2xl font-black text-white">--- AED</p>
+                    </div>
+                    <div class="bg-slate-800/50 p-5 rounded-2xl border border-slate-700 shadow-sm relative overflow-hidden">
+                        <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-amber-500"></div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1" id="labelComisiones">Fugas por Comisiones / BNPL</p>
+                        <p id="kpiComisiones" class="text-xl font-black text-amber-400">--- AED</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </main>
 
     <!-- MODAL LECTOR DE EXTRACTOS DE EMIRATES NBD (TARJETA EMAAR) -->
@@ -554,21 +597,19 @@
                 <!-- DESGLOSE POR CATEGORÍAS -->
                 <div class="bg-slate-800/40 p-4 rounded-2xl border border-slate-700/80">
                     <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Desglose de Movimientos por Categoría</p>
-                    <div id="resCategoriasContainer" class="space-y-2 text-xs">
-                        <!-- Se insertan categorías dinámicamente -->
-                    </div>
+                    <div id="resCategoriasContainer" class="space-y-2 text-xs"></div>
                 </div>
 
                 <!-- BOTONES DE ACCIÓN -->
                 <div class="flex flex-col sm:flex-row gap-3 pt-2">
                     <button onclick="aplicarGastoEmaar()" class="flex-1 bg-yellow-500 hover:bg-yellow-400 text-slate-900 font-black py-3 rounded-xl transition text-sm flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-bolt"></i> Aplicar a Gastos Dinámicos
+                        <i class="fa-solid fa-bolt"></i> Aplicar Gasto
                     </button>
                     <button onclick="sincronizarDeudaEmaarSupabase()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-black py-3 rounded-xl transition text-sm flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-cloud-arrow-up"></i> Sincronizar Saldo Deuda
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Sincronizar Deuda
                     </button>
                     <button onclick="guardarExtractoBD()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 rounded-xl transition text-sm flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-database"></i> Guardar en Histórico
+                        <i class="fa-solid fa-database"></i> Guardar Histórico
                     </button>
                 </div>
             </div>
@@ -595,8 +636,24 @@
         
         let distChartInstance = null;
         let historyChartInstance = null;
+        let expensesChartInstance = null;
+        
         let deudasGlobales = []; 
         let datosExtractoActual = null;
+        let extractosGlobales = []; // Almacenará el histórico de extractos para gráficos
+
+        // Paleta de colores consistente para las categorías
+        const catColors = {
+            'Comida & Delivery': '#f43f5e', 
+            'Supermercado & Alimentación': '#10b981', 
+            'Shopping, Ropa & Online': '#8b5cf6', 
+            'Suscripciones & Digital': '#06b6d4', 
+            'Transporte, Vuelos & Viajes': '#f59e0b', 
+            'Servicios & Gobierno': '#6366f1', 
+            'BNPL & Financiación': '#ec4899', 
+            'Comisiones & Tasas': '#ef4444', 
+            'Otros Gastos': '#94a3b8'
+        };
 
         const historicalIncome = [
             { mes: 'Ago 23', valor: 6617.6 }, { mes: 'Sep 23', valor: 3361.67 }, { mes: 'Oct 23', valor: 4482.8 },
@@ -622,7 +679,7 @@
             cargarDeudas();
             cargarHistorialIngresos();
             cargarDatosMes(); 
-
+            cargarExtractosEmaar(); // Cargar data del nuevo gráfico
             configurarDragAndDrop();
         };
 
@@ -650,14 +707,9 @@
         function cambiarMes(offset) {
             const selector = document.getElementById('mesSelector');
             if (!selector.value) return;
-            
             const [year, month] = selector.value.split('-');
             let date = new Date(year, parseInt(month) - 1 + offset, 1);
-            
-            const newYear = date.getFullYear();
-            const newMonth = String(date.getMonth() + 1).padStart(2, '0');
-            
-            selector.value = `${newYear}-${newMonth}`;
+            selector.value = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
             cargarDatosMes(); 
         }
 
@@ -669,27 +721,18 @@
             const mesFormateado = dateObj.toLocaleString('es-ES', { month: 'long', year: 'numeric' });
             const status = document.getElementById('saveStatus');
             
-            const { data, error } = await supabaseClient
-                .from('historial_meses')
-                .select('*')
-                .eq('mes', mesFormateado)
-                .single();
+            const { data, error } = await supabaseClient.from('historial_meses').select('*').eq('mes', mesFormateado).single();
                 
             if (data) {
                 const isReal = data.tipo === 'Real';
-                
                 document.getElementById('blockHoursSlider').value = data.horas_vuelo ?? 80;
                 document.getElementById('mealAllowance').value = data.dietas ?? 1500;
                 document.getElementById('turnarounds').value = data.turnarounds ?? 300;
                 document.getElementById('gastoEmaar').value = data.gasto_emaar ?? 2000;
                 document.getElementById('dewaKwh').value = data.dewa_kwh ?? 434;
                 document.getElementById('dewaM3').value = data.dewa_m3 ?? 2.3;
-                
-                if (data.dewa_real) document.getElementById('dewaRealInput').value = data.dewa_real;
-                else document.getElementById('dewaRealInput').value = '';
-                
-                if (data.salario_real) document.getElementById('salarioRealInput').value = data.salario_real;
-                else document.getElementById('salarioRealInput').value = '';
+                document.getElementById('dewaRealInput').value = data.dewa_real ?? '';
+                document.getElementById('salarioRealInput').value = data.salario_real ?? '';
                 
                 const val = data.horas_vuelo ?? 80;
                 const percentage = (val / 130) * 100;
@@ -698,11 +741,10 @@
 
                 setModo(isReal ? 'real' : 'simulacion', true);
                 
-                status.innerHTML = `<span><i class="fa-solid fa-cloud-arrow-down"></i> Se ha cargado el estado de ${mesFormateado}</span>`;
+                status.innerHTML = `<span><i class="fa-solid fa-cloud-arrow-down"></i> Estado de ${mesFormateado} cargado</span>`;
                 status.className = "text-sm font-bold text-center text-indigo-400 mt-4";
                 status.classList.remove('hidden');
-                setTimeout(() => { status.classList.add('hidden'); }, 3000);
-                
+                setTimeout(() => status.classList.add('hidden'), 3000);
             } else {
                 document.getElementById('blockHoursSlider').value = 80;
                 document.getElementById('mealAllowance').value = 1500;
@@ -713,8 +755,7 @@
                 document.getElementById('dewaRealInput').value = '';
                 document.getElementById('salarioRealInput').value = '';
                 
-                const percentage = (80 / 130) * 100;
-                document.getElementById('blockHoursSlider').style.background = `linear-gradient(to right, #6366f1 0%, #6366f1 ${percentage}%, #334155 ${percentage}%, #334155 100%)`;
+                document.getElementById('blockHoursSlider').style.background = `linear-gradient(to right, #6366f1 0%, #6366f1 61.5%, #334155 61.5%, #334155 100%)`;
                 document.getElementById('sliderValue').innerHTML = `80<span class="text-xl text-indigo-400">h</span>`;
 
                 setModo('simulacion', true);
@@ -722,9 +763,8 @@
                 status.innerHTML = `<span>✨ Nuevo registro: ${mesFormateado}</span>`;
                 status.className = "text-sm font-bold text-center text-slate-500 mt-4";
                 status.classList.remove('hidden');
-                setTimeout(() => { status.classList.add('hidden'); }, 2000);
+                setTimeout(() => status.classList.add('hidden'), 2000);
             }
-            
             renderizarDeudasDinamicas();
         }
 
@@ -733,15 +773,11 @@
             if (modo === 'simulacion') {
                 document.getElementById('btnModoSim').className = "flex-1 sm:w-48 py-3 text-sm font-black bg-indigo-500/20 text-indigo-400 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2";
                 document.getElementById('btnModoReal').className = "flex-1 sm:w-48 py-3 text-sm font-black text-slate-400 hover:text-slate-200 rounded-xl transition-all flex items-center justify-center gap-2";
-                
                 document.getElementById('panelSimulacion').classList.remove('hidden');
                 document.getElementById('panelReal').classList.add('hidden');
-                
                 document.getElementById('dewaSimulacionPanel').classList.remove('hidden');
                 document.getElementById('dewaRealPanel').classList.add('hidden');
-                
                 document.getElementById('tituloIngresos').innerText = "Simulador de Ingresos";
-                
                 document.getElementById('tipoRegistroBadge').innerHTML = `<i class="fa-solid fa-hat-wizard"></i> PROYECCIÓN`;
                 document.getElementById('tipoRegistroBadge').className = "bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 text-xs font-extrabold px-3.5 py-1.5 rounded-lg uppercase tracking-wider inline-flex items-center gap-2";
                 document.getElementById('textoBotonGuardar').innerText = "Guardar Proyección en Supabase";
@@ -749,15 +785,11 @@
             } else {
                 document.getElementById('btnModoReal').className = "flex-1 sm:w-48 py-3 text-sm font-black bg-teal-500/20 text-teal-400 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2";
                 document.getElementById('btnModoSim').className = "flex-1 sm:w-48 py-3 text-sm font-black text-slate-400 hover:text-slate-200 rounded-xl transition-all flex items-center justify-center gap-2";
-                
                 document.getElementById('panelSimulacion').classList.add('hidden');
                 document.getElementById('panelReal').classList.remove('hidden');
-
                 document.getElementById('dewaSimulacionPanel').classList.add('hidden');
                 document.getElementById('dewaRealPanel').classList.remove('hidden');
-                
                 document.getElementById('tituloIngresos').innerText = "Ingreso Real";
-                
                 document.getElementById('tipoRegistroBadge').innerHTML = `<i class="fa-solid fa-money-check-dollar"></i> DATO REAL`;
                 document.getElementById('tipoRegistroBadge').className = "bg-teal-500/20 border border-teal-500/30 text-teal-400 text-xs font-extrabold px-3.5 py-1.5 rounded-lg uppercase tracking-wider inline-flex items-center gap-2";
                 document.getElementById('textoBotonGuardar').innerText = "Guardar Dato Real en Supabase";
@@ -766,9 +798,7 @@
             if (triggerCalc) actualizarGastos(); 
         }
 
-        function updateTexts(className, text) {
-            document.querySelectorAll('.' + className).forEach(el => el.innerText = text);
-        }
+        function updateTexts(className, text) { document.querySelectorAll('.' + className).forEach(el => el.innerText = text); }
 
         function actualizarSlider() {
             const val = document.getElementById('blockHoursSlider').value;
@@ -779,22 +809,13 @@
         }
 
         function actualizarGastos() {
-            const inputEmaar = parseFloat(document.getElementById('gastoEmaar').value) || 0;
-            gastoVariableEmaar = inputEmaar;
-
+            gastoVariableEmaar = parseFloat(document.getElementById('gastoEmaar').value) || 0;
             if (modoActual === 'simulacion') {
                 const kwh = parseFloat(document.getElementById('dewaKwh').value) || 0;
                 const m3 = parseFloat(document.getElementById('dewaM3').value) || 0;
-                
-                const elecSubtotal = (kwh * 0.230) + (kwh * 0.060) + 5.00;
-                const elecTotal = elecSubtotal * 1.05; 
-                
-                const waterSubtotal = (m3 * 7.700) + (m3 * 1.100) + 5.00;
-                const waterTotal = waterSubtotal * 1.05; 
-                
-                const fijoDubai = 236.08; 
-
-                gastoDewa = elecTotal + waterTotal + fijoDubai;
+                const elecTotal = ((kwh * 0.230) + (kwh * 0.060) + 5.00) * 1.05; 
+                const waterTotal = ((m3 * 7.700) + (m3 * 1.100) + 5.00) * 1.05; 
+                gastoDewa = elecTotal + waterTotal + 236.08;
                 document.getElementById('dewaTotalSimDisplay').innerText = Math.floor(gastoDewa) + ' AED';
             } else {
                 gastoDewa = parseFloat(document.getElementById('dewaRealInput').value) || 0;
@@ -805,11 +826,9 @@
             
             updateTexts('val-emaar', '-' + Math.floor(gastoVariableEmaar).toLocaleString() + ' AED');
             updateTexts('val-dewa-tooltip', Math.floor(gastoDewa).toLocaleString() + ' AED');
-            
             document.getElementById('kpiCostesFijos').innerText = Math.floor(totalFijosObligatorios).toLocaleString() + ' AED';
             document.getElementById('resumenFijos').innerText = '-' + Math.floor(totalFijosObligatorios).toLocaleString() + ' AED';
             updateTexts('val-base', Math.floor(lineaBaseDinamica).toLocaleString() + ' AED');
-            
             calcularTodo();
         }
 
@@ -819,7 +838,6 @@
                 const meals = parseFloat(document.getElementById('mealAllowance').value) || 0;
                 const turnarounds = parseFloat(document.getElementById('turnarounds').value) || 0;
                 const pagoVuelo = hours * TARIFA_HORA_VUELO;
-                
                 salarioEstimadoCalculado = BASE_FIJA_NETA + pagoVuelo + meals + turnarounds;
                 document.getElementById('pagoVueloDisplay').innerText = Math.floor(pagoVuelo).toLocaleString() + ' AED';
                 document.getElementById('dietasDisplay').innerText = Math.floor(meals + turnarounds).toLocaleString() + ' AED';
@@ -865,15 +883,7 @@
                 const ctx = document.getElementById('distributionChart').getContext('2d');
                 distChartInstance = new Chart(ctx, {
                     type: 'doughnut',
-                    data: {
-                        labels: ['Costes + Tarjeta', 'Ataque Deuda', 'Fondo'],
-                        datasets: [{ 
-                            data: [base, deuda, fondo], 
-                            backgroundColor: ['#334155', '#f43f5e', '#3b82f6'], 
-                            borderWidth: 0, 
-                            hoverOffset: 5 
-                        }]
-                    },
+                    data: { labels: ['Costes + Tarjeta', 'Ataque Deuda', 'Fondo'], datasets: [{ data: [base, deuda, fondo], backgroundColor: ['#334155', '#f43f5e', '#3b82f6'], borderWidth: 0, hoverOffset: 5 }] },
                     options: { responsive: true, maintainAspectRatio: false, cutout: '80%', plugins: { legend: { display: false }, tooltip: { enabled: true } }, animation: { duration: 400, easing: 'easeOutQuart' } }
                 });
             }
@@ -881,12 +891,9 @@
 
         function actualizarKpiProyeccion() {
             if (deudaTotal > 0 && pagoDeuda > 0) {
-                const pagoMensualEstimado = pagoDeuda + 3346 + 1739.00; 
-                const meses = Math.ceil(deudaTotal / pagoMensualEstimado);
+                const meses = Math.ceil(deudaTotal / (pagoDeuda + 3346 + 1739));
                 document.getElementById('kpiMonthsFree').innerText = `~${meses} Meses`;
-            } else {
-                document.getElementById('kpiMonthsFree').innerText = "---";
-            }
+            } else { document.getElementById('kpiMonthsFree').innerText = "---"; }
         }
 
         async function cargarDeudas() {
@@ -901,59 +908,40 @@
         function renderizarDeudasDinamicas() {
             const container = document.getElementById('debtCardsContainer');
             if(!container) return;
-            
             container.innerHTML = '';
             deudaTotal = 0;
 
             const selectorVal = document.getElementById('mesSelector').value;
             const [selYear, selMonth] = selectorVal.split('-');
             const selectedDate = new Date(selYear, parseInt(selMonth) - 1, 1);
-            
             const today = new Date();
             const currentDate = new Date(today.getFullYear(), today.getMonth(), 1);
             const monthDiff = (selectedDate.getFullYear() - currentDate.getFullYear()) * 12 + (selectedDate.getMonth() - currentDate.getMonth());
 
-            const deudasVisibles = deudasGlobales.filter(d => !d.nombre.toLowerCase().includes('coche'));
-            const maxDeuda = Math.max(...deudasVisibles.map(d => parseFloat(d.saldo)), 1);
+            const maxDeuda = Math.max(...deudasGlobales.filter(d => !d.nombre.toLowerCase().includes('coche')).map(d => parseFloat(d.saldo)), 1);
 
             deudasGlobales.forEach(deuda => {
                 const saldoBaseReal = parseFloat(deuda.saldo);
                 const cuota = parseFloat(deuda.cuota_minima);
-                
-                let saldoProyectado = saldoBaseReal - (monthDiff * cuota);
-                saldoProyectado = Math.max(0, saldoProyectado);
-
+                let saldoProyectado = Math.max(0, saldoBaseReal - (monthDiff * cuota));
                 deudaTotal += saldoProyectado;
                 
                 if (deuda.nombre.toLowerCase().includes('coche')) {
                     const carSaldoEl = document.getElementById('carWidgetSaldo');
                     const carEditBtn = document.getElementById('carWidgetEditBtn');
                     const carMesesEl = document.getElementById('carWidgetMeses');
-                    
                     if (carSaldoEl) carSaldoEl.innerHTML = `${saldoProyectado.toLocaleString('en-US', {minimumFractionDigits: 2})} <span class="text-lg text-slate-400">AED</span>`;
                     if (carEditBtn) carEditBtn.onclick = () => actualizarSaldo(deuda.id, deuda.saldo); 
-                    
                     if (carMesesEl) {
-                        if (saldoProyectado <= 0) {
-                            carMesesEl.innerText = "¡Liquidado!";
-                            carMesesEl.className = "text-xs font-bold text-white bg-gradient-to-r from-emerald-500 to-teal-400 px-2 py-1 rounded-md shadow-lg shadow-emerald-500/30";
-                        } else {
-                            carMesesEl.innerText = `Quedan ~${Math.ceil(saldoProyectado/cuota)} meses`;
-                            carMesesEl.className = "text-xs font-bold text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded-md";
-                        }
+                        if (saldoProyectado <= 0) { carMesesEl.innerText = "¡Liquidado!"; carMesesEl.className = "text-xs font-bold text-white bg-gradient-to-r from-emerald-500 to-teal-400 px-2 py-1 rounded-md shadow-lg shadow-emerald-500/30"; } 
+                        else { carMesesEl.innerText = `Quedan ~${Math.ceil(saldoProyectado/cuota)} meses`; carMesesEl.className = "text-xs font-bold text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded-md"; }
                     }
                 } else {
                     const porcentaje = (saldoProyectado / maxDeuda) * 100;
                     const isCreditCard = deuda.nombre.toLowerCase().includes('tarjeta') || deuda.nombre.includes('2811') || deuda.nombre.toLowerCase().includes('emaar');
                     const colorClass = isCreditCard ? 'bg-emerald-500' : 'bg-rose-500';
-                    
-                    let badgeTexto = 'Lo que queda (Hoy)';
-                    if (monthDiff > 0) badgeTexto = `Proyección (+${monthDiff} meses)`;
-                    else if (monthDiff < 0) badgeTexto = `Histórico (${monthDiff} meses)`;
-
-                    const textMesesRestantes = saldoProyectado > 0 
-                        ? `<span class="text-indigo-400 font-black ml-1">(~${Math.ceil(saldoProyectado/cuota)} meses)</span>` 
-                        : `<span class="text-emerald-400 font-black ml-1">¡PAGADO! 🎉</span>`;
+                    let badgeTexto = monthDiff > 0 ? `Proyección (+${monthDiff} meses)` : (monthDiff < 0 ? `Histórico (${monthDiff} meses)` : 'Lo que queda (Hoy)');
+                    const textMesesRestantes = saldoProyectado > 0 ? `<span class="text-indigo-400 font-black ml-1">(~${Math.ceil(saldoProyectado/cuota)} meses)</span>` : `<span class="text-emerald-400 font-black ml-1">¡PAGADO! 🎉</span>`;
 
                     container.innerHTML += `
                         <div class="bg-slate-800/50 border border-slate-700 p-6 rounded-3xl shadow-sm transition-all duration-300 group flex flex-col justify-between ${saldoProyectado <= 0 ? 'opacity-40 grayscale' : 'hover:shadow-lg hover:shadow-slate-900/50'}">
@@ -974,11 +962,9 @@
                                     <div class="${colorClass} h-full rounded-full transition-all duration-1000" style="width: ${porcentaje}%"></div>
                                 </div>
                             </div>
-                        </div>
-                    `;
+                        </div>`;
                 }
             });
-            
             document.getElementById('kpiTotalDebt').innerText = Math.floor(deudaTotal).toLocaleString() + ' AED';
             actualizarKpiProyeccion();
             calcularEstadoAlquiler(selectedDate);
@@ -987,34 +973,22 @@
         function calcularEstadoAlquiler(fechaSeleccionada) {
             const mes = fechaSeleccionada.getMonth() + 1;
             const anio = fechaSeleccionada.getFullYear();
-            
             let mesCheque, qText, mesesAhorrados;
             if (mes <= 3) { mesCheque = 3; qText = "Q1 (Marzo)"; mesesAhorrados = mes === 3 ? 3 : mes; } 
             else if (mes <= 6) { mesCheque = 6; qText = "Q2 (Junio)"; mesesAhorrados = mes === 6 ? 3 : mes - 3; } 
             else if (mes <= 9) { mesCheque = 9; qText = "Q3 (Septiembre)"; mesesAhorrados = mes === 9 ? 3 : mes - 6; } 
             else { mesCheque = 12; qText = "Q4 (Diciembre)"; mesesAhorrados = mes === 12 ? 3 : mes - 9; }
 
-            const cuotaMensual = 3033;
-            const meta = 9099;
-            const ahorroActual = mesesAhorrados * cuotaMensual;
-            const fechaCobro = new Date(anio, mesCheque - 1, 26);
-            const diasRestantes = Math.ceil((fechaCobro - fechaSeleccionada) / (1000 * 60 * 60 * 24));
-
-            const porcentaje = Math.min(100, Math.max(0, (ahorroActual / meta) * 100));
-            const recorteSuperior = 100 - porcentaje; 
+            const ahorroActual = mesesAhorrados * 3033;
+            const diasRestantes = Math.ceil((new Date(anio, mesCheque - 1, 26) - fechaSeleccionada) / (1000 * 60 * 60 * 24));
+            const porcentaje = Math.min(100, Math.max(0, (ahorroActual / 9099) * 100));
             
-            setTimeout(() => {
-                const liquid = document.getElementById('homeFillLiquid');
-                if(liquid) liquid.style.clipPath = `inset(${recorteSuperior}% 0 0 0)`;
-            }, 100);
-
-            const titulo = document.getElementById('rentQuarterTitle');
-            if(titulo) titulo.innerText = `Cheque Alquiler ${qText}`;
-
+            setTimeout(() => { document.getElementById('homeFillLiquid').style.clipPath = `inset(${100 - porcentaje}% 0 0 0)`; }, 100);
+            document.getElementById('rentQuarterTitle').innerText = `Cheque Alquiler ${qText}`;
             document.getElementById('rentSavedValue').innerText = ahorroActual.toLocaleString();
             
             const badgePorcentaje = document.getElementById('rentPercentageBadge');
-            if (ahorroActual >= meta) {
+            if (ahorroActual >= 9099) {
                 badgePorcentaje.innerHTML = `<i class="fa-solid fa-check"></i> Listo para Pagar`;
                 badgePorcentaje.className = "text-white bg-gradient-to-r from-emerald-500 to-teal-400 px-2 py-0.5 rounded shadow-sm font-black";
             } else {
@@ -1036,104 +1010,31 @@
             const nuevoSaldo = prompt("Actualiza el saldo pendiente a día de hoy:", saldoActual);
             if (nuevoSaldo !== null && !isNaN(nuevoSaldo)) {
                 const { error } = await supabaseClient.from('deudas').update({ saldo: parseFloat(nuevoSaldo) }).eq('id', id);
-                if (!error) {
-                    deudasGlobales = [];
-                    cargarDeudas();
-                } else {
-                    alert("Error de sincronización con Supabase.");
-                }
+                if (!error) { deudasGlobales = []; cargarDeudas(); } else alert("Error de sincronización.");
             }
         }
 
         async function cargarHistorialIngresos() {
             const { data, error } = await supabaseClient.from('historial_meses').select('mes, salario, tipo').order('id', { ascending: true });
             let combinedData = [...historicalIncome.map(d => ({...d, tipo: 'Real'}))]; 
-            
             if (!error && data) {
-                data.forEach(record => {
-                    const type = record.tipo || 'Real';
-                    const mesAbrev = record.mes.substring(0,3).charAt(0).toUpperCase() + record.mes.substring(1,3).toLowerCase() + ' ' + record.mes.slice(-2);
-                    combinedData.push({ mes: mesAbrev, valor: parseFloat(record.salario), tipo: type });
-                });
+                data.forEach(r => combinedData.push({ mes: r.mes.substring(0,3).charAt(0).toUpperCase() + r.mes.substring(1,3).toLowerCase() + ' ' + r.mes.slice(-2), valor: parseFloat(r.salario), tipo: r.tipo || 'Real' }));
             }
-
             const labels = combinedData.map(d => d.tipo === 'Proyección' ? d.mes + ' 🔮' : d.mes);
             const values = combinedData.map(d => d.valor);
-            const pointColors = combinedData.map(d => d.tipo === 'Proyección' ? '#fbbf24' : '#ffffff');
-
-            const total = values.reduce((acc, val) => acc + val, 0);
-            const media = values.length > 0 ? total / values.length : 0;
-            const averageData = Array(labels.length).fill(media);
+            const averageData = Array(labels.length).fill(values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : 0);
 
             const ctx = document.getElementById('incomeHistoryChart').getContext('2d');
-            const gradient = ctx.createLinearGradient(0, 0, 0, 350);
-            gradient.addColorStop(0, 'rgba(99, 102, 241, 0.4)');
-            gradient.addColorStop(1, 'rgba(99, 102, 241, 0.0)');
+            const gradient = ctx.createLinearGradient(0, 0, 0, 350); gradient.addColorStop(0, 'rgba(99, 102, 241, 0.4)'); gradient.addColorStop(1, 'rgba(99, 102, 241, 0.0)');
 
             if (historyChartInstance) historyChartInstance.destroy();
             historyChartInstance = new Chart(ctx, {
                 type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: 'Ingreso Neto (AED)', 
-                            data: values, 
-                            borderColor: '#6366f1', 
-                            borderWidth: 3, 
-                            backgroundColor: gradient,
-                            fill: true, 
-                            tension: 0.4, 
-                            pointBackgroundColor: pointColors, 
-                            pointBorderColor: '#6366f1', 
-                            pointBorderWidth: 2, 
-                            pointRadius: 4, 
-                            pointHoverRadius: 6,
-                            order: 2
-                        },
-                        {
-                            label: 'Media Histórica',
-                            data: averageData,
-                            borderColor: '#94a3b8',
-                            borderWidth: 2,
-                            borderDash: [5, 5],
-                            fill: false,
-                            pointRadius: 0,
-                            pointHoverRadius: 0,
-                            order: 1
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { display: false }, 
-                        tooltip: { 
-                            backgroundColor: '#0f172a', 
-                            padding: 12, 
-                            titleFont: { size: 13 }, 
-                            bodyFont: { size: 14, weight: 'bold' }, 
-                            callbacks: { 
-                                label: function(context) { 
-                                    if (context.datasetIndex === 1) return ` Media: ${Math.floor(context.raw).toLocaleString()} AED`;
-                                    return ` ${combinedData[context.dataIndex].tipo}: ${context.raw.toLocaleString()} AED`; 
-                                } 
-                            } 
-                        } 
-                    },
-                    scales: { 
-                        y: { 
-                            beginAtZero: true, 
-                            grid: { color: '#1e293b', drawBorder: false }, 
-                            ticks: { color: '#94a3b8', font: { size: 11, weight: 'bold' }, callback: function(value) { return value / 1000 + 'k'; } } 
-                        }, 
-                        x: { 
-                            grid: { display: false }, 
-                            ticks: { color: '#94a3b8', font: { size: 10, weight: 'bold' }, maxTicksLimit: 12 } 
-                        } 
-                    },
-                    interaction: { mode: 'index', intersect: false }
-                }
+                data: { labels, datasets: [
+                    { label: 'Ingreso Neto', data: values, borderColor: '#6366f1', borderWidth: 3, backgroundColor: gradient, fill: true, tension: 0.4, pointBackgroundColor: combinedData.map(d => d.tipo === 'Proyección' ? '#fbbf24' : '#ffffff'), pointBorderColor: '#6366f1', pointBorderWidth: 2, pointRadius: 4, pointHoverRadius: 6, order: 2 },
+                    { label: 'Media', data: averageData, borderColor: '#94a3b8', borderWidth: 2, borderDash: [5, 5], fill: false, pointRadius: 0, pointHoverRadius: 0, order: 1 }
+                ]},
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#0f172a', padding: 12, callbacks: { label: c => c.datasetIndex === 1 ? ` Media: ${Math.floor(c.raw).toLocaleString()} AED` : ` ${combinedData[c.dataIndex].tipo}: ${c.raw.toLocaleString()} AED` } } }, scales: { y: { beginAtZero: true, grid: { color: '#1e293b', drawBorder: false }, ticks: { color: '#94a3b8', callback: v => v / 1000 + 'k' } }, x: { grid: { display: false }, ticks: { color: '#94a3b8', maxTicksLimit: 12 } } }, interaction: { mode: 'index', intersect: false } }
             });
         }
 
@@ -1142,355 +1043,255 @@
             if (!mesRaw) return alert("Selecciona el mes a registrar.");
             if (salarioEstimadoCalculado <= 0) return alert("El ingreso debe ser mayor a 0.");
             
-            const dateObj = new Date(mesRaw + '-05');
-            const mesFormateado = dateObj.toLocaleString('es-ES', { month: 'long', year: 'numeric' });
-            
-            const btn = event.currentTarget;
-            const originalContent = btn.innerHTML;
+            const btn = event.currentTarget; const originalContent = btn.innerHTML;
             btn.innerHTML = `<svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> <span>Sincronizando...</span>`;
             btn.disabled = true;
 
-            const payload = {
-                mes: mesFormateado, 
-                salario: Math.floor(salarioEstimadoCalculado), 
-                linea_base: Math.floor(lineaBaseDinamica),
-                excedente: Math.floor(excedente), 
-                pago_extra_deuda: Math.floor(pagoDeuda), 
-                fondo_emergencia: Math.floor(fondoEmergencia), 
-                tipo: modoActual === 'simulacion' ? 'Proyección' : 'Real',
-                dewa: Math.floor(gastoDewa),
-                horas_vuelo: parseFloat(document.getElementById('blockHoursSlider').value) || 0,
-                dietas: parseFloat(document.getElementById('mealAllowance').value) || 0,
-                turnarounds: parseFloat(document.getElementById('turnarounds').value) || 0,
-                gasto_emaar: parseFloat(document.getElementById('gastoEmaar').value) || 0,
-                dewa_kwh: parseFloat(document.getElementById('dewaKwh').value) || 0,
-                dewa_m3: parseFloat(document.getElementById('dewaM3').value) || 0,
-                dewa_real: parseFloat(document.getElementById('dewaRealInput').value) || null,
-                salario_real: parseFloat(document.getElementById('salarioRealInput').value) || null
-            };
+            const mesFormateado = new Date(mesRaw + '-05').toLocaleString('es-ES', { month: 'long', year: 'numeric' });
+            const payload = { mes: mesFormateado, salario: Math.floor(salarioEstimadoCalculado), linea_base: Math.floor(lineaBaseDinamica), excedente: Math.floor(excedente), pago_extra_deuda: Math.floor(pagoDeuda), fondo_emergencia: Math.floor(fondoEmergencia), tipo: modoActual === 'simulacion' ? 'Proyección' : 'Real', dewa: Math.floor(gastoDewa), horas_vuelo: parseFloat(document.getElementById('blockHoursSlider').value) || 0, dietas: parseFloat(document.getElementById('mealAllowance').value) || 0, turnarounds: parseFloat(document.getElementById('turnarounds').value) || 0, gasto_emaar: parseFloat(document.getElementById('gastoEmaar').value) || 0, dewa_kwh: parseFloat(document.getElementById('dewaKwh').value) || 0, dewa_m3: parseFloat(document.getElementById('dewaM3').value) || 0, dewa_real: parseFloat(document.getElementById('dewaRealInput').value) || null, salario_real: parseFloat(document.getElementById('salarioRealInput').value) || null };
 
             const { error } = await supabaseClient.from('historial_meses').upsert([payload], { onConflict: 'mes' });
+            const status = document.getElementById('saveStatus'); status.classList.remove('hidden');
 
-            const status = document.getElementById('saveStatus');
-            status.classList.remove('hidden');
-
-            if (error) {
-                status.innerText = "Error al guardar mes: " + error.message;
-                status.className = "text-sm font-bold text-center text-rose-400 mt-4";
-            } else {
-                const today = new Date();
-                const selectedMonthStr = document.getElementById('mesSelector').value;
-                const [y, m] = selectedMonthStr.split('-');
-                const isCurrentMonth = parseInt(m) === (today.getMonth() + 1) && parseInt(y) === today.getFullYear();
-
-                if (isCurrentMonth && modoActual === 'real') {
-                    const deudasActualizadas = deudasGlobales.map(deuda => {
-                        return {
-                            ...deuda,
-                            saldo: Math.max(0, parseFloat(deuda.saldo) - parseFloat(deuda.cuota_minima))
-                        };
-                    });
-
-                    const { error: errorUpsertDeudas } = await supabaseClient.from('deudas').upsert(deudasActualizadas);
-                    if (!errorUpsertDeudas) {
-                        deudasGlobales = [];
-                        cargarDeudas();
-                    }
+            if (error) { status.innerText = "Error: " + error.message; status.className = "text-sm font-bold text-center text-rose-400 mt-4"; } 
+            else {
+                const [y, m] = mesRaw.split('-');
+                if (parseInt(m) === (new Date().getMonth() + 1) && parseInt(y) === new Date().getFullYear() && modoActual === 'real') {
+                    const deudasActualizadas = deudasGlobales.map(d => ({ ...d, saldo: Math.max(0, parseFloat(d.saldo) - parseFloat(d.cuota_minima)) }));
+                    if (!(await supabaseClient.from('deudas').upsert(deudasActualizadas)).error) { deudasGlobales = []; cargarDeudas(); }
                 }
-
-                status.innerHTML = `<span>✅ ¡Registro guardado con éxito!</span>`;
-                status.className = "text-sm font-bold text-center text-emerald-400 mt-4";
-                cargarHistorialIngresos(); 
-                setTimeout(() => { status.classList.add('hidden'); }, 4000);
+                status.innerHTML = `<span>✅ ¡Guardado con éxito!</span>`; status.className = "text-sm font-bold text-center text-emerald-400 mt-4";
+                cargarHistorialIngresos(); setTimeout(() => status.classList.add('hidden'), 4000);
             }
+            btn.innerHTML = originalContent; btn.disabled = false;
+        }
+
+        // ==========================================
+        // MÓDULO ANÁLISIS DE GASTOS DINÁMICO
+        // ==========================================
+
+        async function cargarExtractosEmaar() {
+            const { data, error } = await supabaseClient.from('extractos_emaar').select('*').order('created_at', { ascending: true });
+            if (error) { console.error("Error cargando extractos:", error); return; }
             
-            btn.innerHTML = originalContent;
-            btn.disabled = false;
+            extractosGlobales = data || [];
+            const select = document.getElementById('filtroGastosMes');
+            
+            // Limpiar opciones anteriores pero mantener la de "Tendencia"
+            select.innerHTML = '<option value="tendencia">📈 Tendencia Global (Últimos Meses)</option>';
+            
+            // Añadir opciones por cada mes disponible
+            [...extractosGlobales].reverse().forEach(ext => {
+                const opt = document.createElement('option');
+                opt.value = ext.id;
+                opt.text = `📄 ${ext.periodo}`;
+                select.appendChild(opt);
+            });
+            
+            renderizarGraficoGastos();
+        }
+
+        function renderizarGraficoGastos() {
+            const val = document.getElementById('filtroGastosMes').value;
+            const ctx = document.getElementById('expensesChart').getContext('2d');
+            
+            if (expensesChartInstance) expensesChartInstance.destroy();
+
+            if (val === 'tendencia') {
+                document.getElementById('labelPromedioGasto').innerText = "Promedio Mensual (Total)";
+                document.getElementById('labelComisiones').innerText = "Fugas Históricas (Comisiones/Tasas)";
+
+                if (extractosGlobales.length === 0) return; // No data yet
+
+                const labels = extractosGlobales.map(e => e.periodo.split(' to ')[0].trim().substring(0, 6)); // E.g. "03-Dec"
+                const datasets = [];
+                let totalGastoHistorico = 0;
+                let totalComisionesHistorico = 0;
+                let maxCatValue = 0;
+                let maxCatName = "---";
+
+                // Preparar los datasets para barras apiladas
+                Object.keys(catColors).forEach(cat => {
+                    const dataPoints = extractosGlobales.map(ext => ext.desglose_categorias[cat] || 0);
+                    const catSum = dataPoints.reduce((a, b) => a + b, 0);
+                    
+                    if (catSum > 0) {
+                        datasets.push({
+                            label: cat,
+                            data: dataPoints,
+                            backgroundColor: catColors[cat],
+                            borderWidth: 0,
+                            borderRadius: 4,
+                            barPercentage: 0.6
+                        });
+                        
+                        if (cat !== 'Otros Gastos' && catSum > maxCatValue) {
+                            maxCatValue = catSum;
+                            maxCatName = cat;
+                        }
+                        
+                        totalGastoHistorico += catSum;
+                        if(cat === 'Comisiones & Tasas') totalComisionesHistorico = catSum;
+                    }
+                });
+
+                // KPIs Globales
+                const promedio = totalGastoHistorico / extractosGlobales.length;
+                document.getElementById('kpiPromedioGasto').innerText = Math.floor(promedio).toLocaleString() + ' AED';
+                document.getElementById('kpiTopCategoria').innerText = maxCatName;
+                document.getElementById('kpiTopCategoriaAmount').innerText = `~${Math.floor(maxCatValue / extractosGlobales.length).toLocaleString()} AED/mes`;
+                document.getElementById('kpiComisiones').innerText = Math.floor(totalComisionesHistorico).toLocaleString() + ' AED';
+
+                expensesChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: { labels, datasets },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, backgroundColor: '#0f172a', padding: 10 } },
+                        scales: { 
+                            x: { stacked: true, grid: { display: false }, ticks: { color: '#94a3b8' } },
+                            y: { stacked: true, grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } }
+                        }
+                    }
+                });
+
+            } else {
+                // Vista de Mes Específico (Doughnut)
+                document.getElementById('labelPromedioGasto').innerText = "Gasto Total del Mes";
+                document.getElementById('labelComisiones').innerText = "Fugas Este Mes (Comisiones/Tasas)";
+
+                const extracto = extractosGlobales.find(e => e.id.toString() === val);
+                if (!extracto) return;
+
+                const categorias = extracto.desglose_categorias;
+                const labels = [];
+                const data = [];
+                const bgColors = [];
+                let topCat = "---";
+                let topVal = 0;
+
+                Object.keys(categorias).forEach(cat => {
+                    const monto = categorias[cat];
+                    if (monto > 0) {
+                        labels.push(cat);
+                        data.push(monto);
+                        bgColors.push(catColors[cat] || '#94a3b8');
+                        if (cat !== 'Otros Gastos' && monto > topVal) { topVal = monto; topCat = cat; }
+                    }
+                });
+
+                document.getElementById('kpiPromedioGasto').innerText = Math.floor(extracto.total_compras).toLocaleString() + ' AED';
+                document.getElementById('kpiTopCategoria').innerText = topCat;
+                document.getElementById('kpiTopCategoriaAmount').innerText = Math.floor(topVal).toLocaleString() + ' AED';
+                document.getElementById('kpiComisiones').innerText = Math.floor(categorias['Comisiones & Tasas'] || 0).toLocaleString() + ' AED';
+
+                expensesChartInstance = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: { labels, datasets: [{ data, backgroundColor: bgColors, borderWidth: 0, hoverOffset: 8 }] },
+                    options: { 
+                        responsive: true, maintainAspectRatio: false, cutout: '70%', 
+                        plugins: { legend: { position: 'right', labels: { color: '#cbd5e1', font: { size: 11 } } }, tooltip: { backgroundColor: '#0f172a', callbacks: { label: c => ` ${c.label}: ${c.raw.toLocaleString()} AED` } } },
+                        animation: { duration: 500, easing: 'easeOutQuart' }
+                    }
+                });
+            }
         }
 
         // ==========================================
-        // MÓDULO PARSER PDF: EMIRATES NBD (EMAAR CARD)
+        // MÓDULO PARSER PDF: EMIRATES NBD
         // ==========================================
 
-        function abrirModalExtracto() {
-            document.getElementById('modalExtracto').classList.remove('hidden');
-        }
-
-        function cerrarModalExtracto() {
-            document.getElementById('modalExtracto').classList.add('hidden');
-        }
+        function abrirModalExtracto() { document.getElementById('modalExtracto').classList.remove('hidden'); }
+        function cerrarModalExtracto() { document.getElementById('modalExtracto').classList.add('hidden'); }
 
         function configurarDragAndDrop() {
-            const dropZone = document.getElementById('dropZoneExtracto');
-            if(!dropZone) return;
-
-            ['dragenter', 'dragover'].forEach(eventName => {
-                dropZone.addEventListener(eventName, (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    dropZone.classList.add('border-yellow-400', 'bg-slate-800/80');
-                }, false);
-            });
-
-            ['dragleave', 'drop'].forEach(eventName => {
-                dropZone.addEventListener(eventName, (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    dropZone.classList.remove('border-yellow-400', 'bg-slate-800/80');
-                }, false);
-            });
-
-            dropZone.addEventListener('drop', (e) => {
-                const dt = e.dataTransfer;
-                const files = dt.files;
-                if (files.length > 0 && files[0].type === 'application/pdf') {
-                    leerPdf(files[0]);
-                }
-            }, false);
+            const dz = document.getElementById('dropZoneExtracto'); if(!dz) return;
+            ['dragenter', 'dragover'].forEach(e => dz.addEventListener(e, ev => { ev.preventDefault(); ev.stopPropagation(); dz.classList.add('border-yellow-400', 'bg-slate-800/80'); }, false));
+            ['dragleave', 'drop'].forEach(e => dz.addEventListener(e, ev => { ev.preventDefault(); ev.stopPropagation(); dz.classList.remove('border-yellow-400', 'bg-slate-800/80'); }, false));
+            dz.addEventListener('drop', ev => { if (ev.dataTransfer.files.length > 0) leerPdf(ev.dataTransfer.files[0]); }, false);
         }
 
-        function procesarArchivoPdf(event) {
-            const file = event.target.files[0];
-            if (file && file.type === 'application/pdf') {
-                leerPdf(file);
-            }
-        }
+        function procesarArchivoPdf(event) { if (event.target.files[0]) leerPdf(event.target.files[0]); }
 
         async function leerPdf(file) {
-            document.getElementById('dropZoneExtracto').classList.add('hidden');
-            document.getElementById('resultadoExtracto').classList.add('hidden');
-            document.getElementById('loadingPdf').classList.remove('hidden');
-
+            document.getElementById('dropZoneExtracto').classList.add('hidden'); document.getElementById('resultadoExtracto').classList.add('hidden'); document.getElementById('loadingPdf').classList.remove('hidden');
             try {
-                const arrayBuffer = await file.arrayBuffer();
-                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-                let fullText = '';
-
-                for (let i = 1; i <= pdf.numPages; i++) {
-                    const page = await pdf.getPage(i);
-                    const textContent = await page.getTextContent();
-                    const pageStrings = textContent.items.map(item => item.str);
-                    fullText += pageStrings.join(' ') + '\n';
-                }
-
-                analizarTextoExtracto(fullText);
+                const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+                let text = '';
+                for (let i = 1; i <= pdf.numPages; i++) text += (await (await pdf.getPage(i)).getTextContent()).items.map(t => t.str).join(' ') + '\n';
+                analizarTextoExtracto(text);
             } catch (err) {
-                alert("Error al leer el archivo PDF: " + err.message);
-                document.getElementById('dropZoneExtracto').classList.remove('hidden');
-                document.getElementById('loadingPdf').classList.add('hidden');
+                alert("Error al leer PDF: " + err.message); document.getElementById('dropZoneExtracto').classList.remove('hidden'); document.getElementById('loadingPdf').classList.add('hidden');
             }
         }
 
-        function cleanNumber(str) {
-            if (!str) return 0;
-            return parseFloat(str.replace(/,/g, '').trim()) || 0;
-        }
+        function cleanNumber(str) { return parseFloat(str ? str.replace(/,/g, '').trim() : 0) || 0; }
 
         function analizarTextoExtracto(texto) {
-            let periodo = 'No detectado';
-            const mPeriodo = texto.match(/Statement Period:\s*([0-9A-Za-z\s\-]+)/i) || texto.match(/([0-9]{2}-[A-Za-z]{3}-[0-9]{2}\s*to\s*[0-9]{2}-[A-Za-z]{3}-[0-9]{2})/i);
-            if (mPeriodo) periodo = mPeriodo[1].trim();
+            let periodo = (texto.match(/Statement Period:\s*([0-9A-Za-z\s\-]+)/i) || texto.match(/([0-9]{2}-[A-Za-z]{3}-[0-9]{2}\s*to\s*[0-9]{2}-[A-Za-z]{3}-[0-9]{2})/i) || [, 'No detectado'])[1].trim();
+            const minPayment = cleanNumber((texto.match(/Minimum Payment Due\s*([0-9,]+\.[0-9]{2})/i) || [, '0'])[1]);
+            const paymentDueDate = (texto.match(/Payment Due Date\s*([0-9]{2}\/[0-9]{2}\/[0-9]{4})/i) || [, '---'])[1];
+            const mSummary = texto.match(/STATEMENT SUMMARY[\s\S]*?([0-9,]+\.[0-9]{2})\s+([0-9,]+\.[0-9]{2})\s+([0-9,]+\.[0-9]{2})\s+([0-9,]+\.[0-9]{2})\s+([0-9,]+\.[0-9]{2})\s+([0-9,]+\.[0-9]{2})/i);
+            let totalPurchases = mSummary ? cleanNumber(mSummary[2]) : 0, totalPayments = mSummary ? cleanNumber(mSummary[4]) : 0, currentBalance = mSummary ? cleanNumber(mSummary[6]) : 0;
 
-            let minPayment = 0, paymentDueDate = '---', totalPurchases = 0, currentBalance = 0, totalPayments = 0;
-
-            const mMinPay = texto.match(/Minimum Payment Due\s*([0-9,]+\.[0-9]{2})/i) || texto.match(/([0-9,]+\.[0-9]{2})\s*Minimum Payment Due/i);
-            if (mMinPay) minPayment = cleanNumber(mMinPay[1]);
-
-            const mDueDate = texto.match(/Payment Due Date\s*([0-9]{2}\/[0-9]{2}\/[0-9]{4})/i) || texto.match(/([0-9]{2}\/[0-9]{2}\/[0-9]{4})\s*Payment Due Date/i);
-            if (mDueDate) paymentDueDate = mDueDate[1];
-
-            const summaryRegex = /STATEMENT SUMMARY[\s\S]*?([0-9,]+\.[0-9]{2})\s+([0-9,]+\.[0-9]{2})\s+([0-9,]+\.[0-9]{2})\s+([0-9,]+\.[0-9]{2})\s+([0-9,]+\.[0-9]{2})\s+([0-9,]+\.[0-9]{2})/i;
-            const mSummary = texto.match(summaryRegex);
-
-            if (mSummary) {
-                totalPurchases = cleanNumber(mSummary[2]);
-                totalPayments = cleanNumber(mSummary[4]);
-                currentBalance = cleanNumber(mSummary[6]);
-            }
-
-            // Categorización inteligente de líneas de gasto
-            const categorias = {
-                'Comida & Delivery': 0,
-                'Supermercado & Alimentación': 0,
-                'Shopping, Ropa & Online': 0,
-                'Suscripciones & Digital': 0,
-                'Transporte, Vuelos & Viajes': 0,
-                'Servicios & Gobierno': 0,
-                'BNPL & Financiación': 0,
-                'Comisiones & Tasas': 0,
-                'Otros Gastos': 0
-            };
-
+            const categorias = { 'Comida & Delivery': 0, 'Supermercado & Alimentación': 0, 'Shopping, Ropa & Online': 0, 'Suscripciones & Digital': 0, 'Transporte, Vuelos & Viajes': 0, 'Servicios & Gobierno': 0, 'BNPL & Financiación': 0, 'Comisiones & Tasas': 0, 'Otros Gastos': 0 };
             const comisionesDetectadas = [];
 
-            // Detectar transacciones individuales
             const txRegex = /(\d{2}\/\d{2}\/\d{4})\s+(\d{2}\/\d{2}\/\d{4})?\s+([A-Za-z0-9\.\*\-_\/\s@,#&]+?)\s+([0-9,]+\.[0-9]{2}(?:CR)?)/g;
             let match;
-
             while ((match = txRegex.exec(texto)) !== null) {
-                const desc = match[3].toUpperCase();
-                const amountStr = match[4];
-                const isCR = amountStr.includes('CR');
-                const monto = cleanNumber(amountStr);
+                const desc = match[3].toUpperCase(), monto = cleanNumber(match[4]);
+                if (match[4].includes('CR')) continue;
 
-                if (isCR) continue; // Ignorar abonos para el cómputo de gastos
-
-                if (desc.includes('OVERLIMIT FEE')) {
-                    categorias['Comisiones & Tasas'] += monto;
-                    comisionesDetectadas.push(`Overlimit Fee: ${monto} AED`);
-                } else if (desc.includes('CASH ADVANCE FEE')) {
-                    categorias['Comisiones & Tasas'] += monto;
-                    comisionesDetectadas.push(`Cash Advance Fee: ${monto} AED`);
-                } else if (desc.includes('BILLED FINANCE CHARGES')) {
-                    categorias['Comisiones & Tasas'] += monto;
-                    comisionesDetectadas.push(`Finance Charges: ${monto} AED`);
-                } else if (desc.includes('VAT ON')) {
-                    categorias['Comisiones & Tasas'] += monto;
-                } else if (/CAREEM FOOD|NOON FOOD|DELIVEROO|KEETA|MCDONALD|BURGERKING|RESTAURANT|BEEF BAR|GORDON RAMSAY|SIAM PARAGON/i.test(desc)) {
-                    categorias['Comida & Delivery'] += monto;
-                } else if (/AMAZON GROCERY|NOON MINUTES|CAREEM QUIK|LULU|MURALI|7ELEVEN|AEON|GROCERY|SUPERMARK/i.test(desc)) {
-                    categorias['Supermercado & Alimentación'] += monto;
-                } else if (/AMAZON|NOON|TEMU|SHOPEE|POPMART|POP MART|UNIQLO|ZARA|BALENCIAGA|REPLAY|ELEGOO|BESTSECRET|KINOKUN|BRANDS FOR LESS|DAISO|IKEA/i.test(desc)) {
-                    categorias['Shopping, Ropa & Online'] += monto;
-                } else if (/APPLE\.COM|ITUNES|AMAZON PRIME|STACKSOCIAL|SPACESHIP|BYTESIM|GROUPON|DHGATE/i.test(desc)) {
-                    categorias['Suscripciones & Digital'] += monto;
-                } else if (/GRAB|BOLT|CABIFY|ENOC|EMARAT|TRIP\.COM|MAKEMYTRIP|VIAGOGO|STUBHUB|AIR EUROPA|IBERIA|TODAYTIX|REEL ENTERTAINMENT|LONDON THEATRE/i.test(desc)) {
-                    categorias['Transporte, Vuelos & Viajes'] += monto;
-                } else if (/DU AUTO PAY|ETISALAT|E& TELECOM|SMART DUBAI|DUBAI ELECTRICITY|FAZAA/i.test(desc)) {
-                    categorias['Servicios & Gobierno'] += monto;
-                } else if (/TABBY|PAYSEND|REVOLUT|INSTALLMENT/i.test(desc)) {
-                    categorias['BNPL & Financiación'] += monto;
-                } else {
-                    categorias['Otros Gastos'] += monto;
-                }
+                if (desc.includes('OVERLIMIT FEE') || desc.includes('CASH ADVANCE FEE') || desc.includes('FINANCE CHARGES')) { categorias['Comisiones & Tasas'] += monto; comisionesDetectadas.push(`${desc.split(' ')[0]} Fee: ${monto}`); }
+                else if (desc.includes('VAT ON')) categorias['Comisiones & Tasas'] += monto;
+                else if (/CAREEM FOOD|NOON FOOD|DELIVEROO|KEETA|MCDONALD|BURGERKING|RESTAURANT|BEEF BAR|GORDON RAMSAY|SIAM PARAGON/i.test(desc)) categorias['Comida & Delivery'] += monto;
+                else if (/AMAZON GROCERY|NOON MINUTES|CAREEM QUIK|LULU|MURALI|7ELEVEN|AEON|GROCERY|SUPERMARK/i.test(desc)) categorias['Supermercado & Alimentación'] += monto;
+                else if (/AMAZON|NOON|TEMU|SHOPEE|POPMART|POP MART|UNIQLO|ZARA|BALENCIAGA|REPLAY|ELEGOO|BESTSECRET|KINOKUN|BRANDS FOR LESS|DAISO|IKEA/i.test(desc)) categorias['Shopping, Ropa & Online'] += monto;
+                else if (/APPLE\.COM|ITUNES|AMAZON PRIME|STACKSOCIAL|SPACESHIP|BYTESIM|GROUPON|DHGATE/i.test(desc)) categorias['Suscripciones & Digital'] += monto;
+                else if (/GRAB|BOLT|CABIFY|ENOC|EMARAT|TRIP\.COM|MAKEMYTRIP|VIAGOGO|STUBHUB|AIR EUROPA|IBERIA|TODAYTIX|REEL ENTERTAINMENT|LONDON THEATRE/i.test(desc)) categorias['Transporte, Vuelos & Viajes'] += monto;
+                else if (/DU AUTO PAY|ETISALAT|E& TELECOM|SMART DUBAI|DUBAI ELECTRICITY|FAZAA/i.test(desc)) categorias['Servicios & Gobierno'] += monto;
+                else if (/TABBY|PAYSEND|REVOLUT|INSTALLMENT/i.test(desc)) categorias['BNPL & Financiación'] += monto;
+                else categorias['Otros Gastos'] += monto;
             }
 
-            // Si por algún formato no se detectó summary global, aproximamos el gasto
-            if (totalPurchases === 0) {
-                totalPurchases = Object.values(categorias).reduce((a, b) => a + b, 0);
-            }
+            if (totalPurchases === 0) totalPurchases = Object.values(categorias).reduce((a, b) => a + b, 0);
 
-            datosExtractoActual = {
-                periodo,
-                totalPurchases,
-                currentBalance,
-                totalPayments,
-                minPayment,
-                paymentDueDate,
-                categorias,
-                comisionesDetectadas
-            };
-
+            datosExtractoActual = { periodo, totalPurchases, currentBalance, totalPayments, minPayment, paymentDueDate, categorias, comisionesDetectadas };
             mostrarResultadosExtracto();
         }
 
         function mostrarResultadosExtracto() {
-            document.getElementById('loadingPdf').classList.add('hidden');
-            document.getElementById('resultadoExtracto').classList.remove('hidden');
+            document.getElementById('loadingPdf').classList.add('hidden'); document.getElementById('resultadoExtracto').classList.remove('hidden');
+            document.getElementById('resPeriodo').innerText = datosExtractoActual.periodo; document.getElementById('resCompras').innerText = Math.floor(datosExtractoActual.totalPurchases).toLocaleString() + ' AED'; document.getElementById('resSaldoTotal').innerText = datosExtractoActual.currentBalance.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' AED'; document.getElementById('resPagos').innerText = Math.floor(datosExtractoActual.totalPayments).toLocaleString() + ' AED'; document.getElementById('resPagoMin').innerText = datosExtractoActual.minPayment.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' AED'; document.getElementById('resFechaVenc').innerText = datosExtractoActual.paymentDueDate;
 
-            document.getElementById('resPeriodo').innerText = datosExtractoActual.periodo;
-            document.getElementById('resCompras').innerText = Math.floor(datosExtractoActual.totalPurchases).toLocaleString() + ' AED';
-            document.getElementById('resSaldoTotal').innerText = datosExtractoActual.currentBalance.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' AED';
-            document.getElementById('resPagos').innerText = Math.floor(datosExtractoActual.totalPayments).toLocaleString() + ' AED';
-            document.getElementById('resPagoMin').innerText = datosExtractoActual.minPayment.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' AED';
-            document.getElementById('resFechaVenc').innerText = datosExtractoActual.paymentDueDate;
+            if (datosExtractoActual.comisionesDetectadas.length > 0) { document.getElementById('alertaComisiones').classList.remove('hidden'); document.getElementById('resDetalleComisiones').innerHTML = datosExtractoActual.comisionesDetectadas.join(' • '); } 
+            else document.getElementById('alertaComisiones').classList.add('hidden');
 
-            const alertaBox = document.getElementById('alertaComisiones');
-            if (datosExtractoActual.comisionesDetectadas.length > 0) {
-                alertaBox.classList.remove('hidden');
-                document.getElementById('resDetalleComisiones').innerHTML = datosExtractoActual.comisionesDetectadas.join(' • ');
-            } else {
-                alertaBox.classList.add('hidden');
-            }
-
-            const catContainer = document.getElementById('resCategoriasContainer');
-            catContainer.innerHTML = '';
-            
+            const catContainer = document.getElementById('resCategoriasContainer'); catContainer.innerHTML = '';
             for (const [nombre, monto] of Object.entries(datosExtractoActual.categorias)) {
                 if (monto > 0) {
-                    const pct = datosExtractoActual.totalPurchases > 0 ? Math.round((monto / datosExtractoActual.totalPurchases) * 100) : 0;
-                    catContainer.innerHTML += `
-                        <div class="flex justify-between items-center py-1 border-b border-slate-700/50">
-                            <span class="text-slate-300 font-medium">${nombre}</span>
-                            <div class="flex items-center gap-2">
-                                <span class="text-slate-500 font-mono text-[10px]">${pct}%</span>
-                                <span class="font-bold text-white">${Math.floor(monto).toLocaleString()} AED</span>
-                            </div>
-                        </div>
-                    `;
+                    catContainer.innerHTML += `<div class="flex justify-between items-center py-1 border-b border-slate-700/50"><span class="text-slate-300 font-medium">${nombre}</span><div class="flex items-center gap-2"><span class="text-slate-500 font-mono text-[10px]">${datosExtractoActual.totalPurchases > 0 ? Math.round((monto / datosExtractoActual.totalPurchases) * 100) : 0}%</span><span class="font-bold text-white">${Math.floor(monto).toLocaleString()} AED</span></div></div>`;
                 }
             }
         }
 
-        function aplicarGastoEmaar() {
-            if (!datosExtractoActual) return;
-            const gastoFinal = Math.floor(datosExtractoActual.totalPurchases);
-            document.getElementById('gastoEmaar').value = gastoFinal;
-            actualizarGastos();
-            cerrarModalExtracto();
-            alert(`✅ Gastos dinámicos actualizados con ${gastoFinal.toLocaleString()} AED de la tarjeta Emaar.`);
-        }
+        function aplicarGastoEmaar() { if (datosExtractoActual) { document.getElementById('gastoEmaar').value = Math.floor(datosExtractoActual.totalPurchases); actualizarGastos(); cerrarModalExtracto(); alert(`✅ Aplicado: ${Math.floor(datosExtractoActual.totalPurchases).toLocaleString()} AED`); } }
 
         async function sincronizarDeudaEmaarSupabase() {
-            if (!datosExtractoActual || datosExtractoActual.currentBalance <= 0) return alert("No hay saldo pendiente válido para sincronizar.");
-            
-            const deudaEmaar = deudasGlobales.find(d => 
-                d.nombre.toLowerCase().includes('tarjeta') || 
-                d.nombre.toLowerCase().includes('emaar') || 
-                d.nombre.includes('2811')
-            );
-
-            if (!deudaEmaar) {
-                return alert("No se encontró la deuda de la Tarjeta Emaar en Supabase. Revisa el nombre en la tabla 'deudas'.");
-            }
-
-            const nuevoSaldo = datosExtractoActual.currentBalance;
-            const { error } = await supabaseClient
-                .from('deudas')
-                .update({ saldo: nuevoSaldo })
-                .eq('id', deudaEmaar.id);
-
-            if (!error) {
-                deudasGlobales = [];
-                cargarDeudas();
-                cerrarModalExtracto();
-                alert(`✅ Saldo de la tarjeta Emaar sincronizado con éxito en Supabase: ${nuevoSaldo.toLocaleString()} AED.`);
-            } else {
-                alert("Error al sincronizar con Supabase: " + error.message);
-            }
+            if (!datosExtractoActual || datosExtractoActual.currentBalance <= 0) return alert("Saldo inválido.");
+            const deuda = deudasGlobales.find(d => d.nombre.toLowerCase().includes('tarjeta') || d.nombre.toLowerCase().includes('emaar') || d.nombre.includes('2811'));
+            if (!deuda) return alert("No se encontró deuda Tarjeta Emaar en BD.");
+            if (!(await supabaseClient.from('deudas').update({ saldo: datosExtractoActual.currentBalance }).eq('id', deuda.id)).error) { deudasGlobales = []; cargarDeudas(); cerrarModalExtracto(); alert(`✅ Deuda Emaar actualizada.`); }
         }
 
         async function guardarExtractoBD() {
-            if (!datosExtractoActual) return alert("No hay datos de extracto para guardar.");
-
-            let fechaVencFormateada = null;
-            if(datosExtractoActual.paymentDueDate && datosExtractoActual.paymentDueDate !== '---') {
-                const partesFecha = datosExtractoActual.paymentDueDate.split('/');
-                if(partesFecha.length === 3) {
-                    fechaVencFormateada = `${partesFecha[2]}-${partesFecha[1]}-${partesFecha[0]}`;
-                }
-            }
-
-            const payload = {
-                periodo: datosExtractoActual.periodo,
-                fecha_vencimiento: fechaVencFormateada,
-                total_compras: datosExtractoActual.totalPurchases,
-                saldo_total: datosExtractoActual.currentBalance,
-                pagos_recibidos: datosExtractoActual.totalPayments,
-                pago_minimo: datosExtractoActual.minPayment,
-                desglose_categorias: datosExtractoActual.categorias,
-                comisiones_detectadas: datosExtractoActual.comisionesDetectadas
-            };
-
-            const { data, error } = await supabaseClient
-                .from('extractos_emaar')
-                .upsert([payload], { onConflict: 'periodo' });
-
-            if (error) {
-                alert("Error al guardar el extracto en Supabase: " + error.message);
-            } else {
-                alert(`✅ Extracto del periodo ${datosExtractoActual.periodo} guardado permanentemente en la base de datos.`);
-            }
+            if (!datosExtractoActual) return alert("No hay datos.");
+            let f = null; if (datosExtractoActual.paymentDueDate !== '---') { const p = datosExtractoActual.paymentDueDate.split('/'); if(p.length===3) f = `${p[2]}-${p[1]}-${p[0]}`; }
+            const payload = { periodo: datosExtractoActual.periodo, fecha_vencimiento: f, total_compras: datosExtractoActual.totalPurchases, saldo_total: datosExtractoActual.currentBalance, pagos_recibidos: datosExtractoActual.totalPayments, pago_minimo: datosExtractoActual.minPayment, desglose_categorias: datosExtractoActual.categorias, comisiones_detectadas: datosExtractoActual.comisionesDetectadas };
+            
+            const { error } = await supabaseClient.from('extractos_emaar').upsert([payload], { onConflict: 'periodo' });
+            if (error) alert("Error Supabase: " + error.message); else { alert("✅ Extracto guardado."); cargarExtractosEmaar(); cerrarModalExtracto(); }
         }
     </script>
 </body>
