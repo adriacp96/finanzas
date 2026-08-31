@@ -43,14 +43,12 @@
 </head>
 <body class="text-slate-300 antialiased selection:bg-indigo-500/30 selection:text-indigo-200">
 
-    <!-- FONDO FIJO GLOBAL -->
     <div class="fixed top-0 left-0 w-full h-full z-0 pointer-events-none overflow-hidden">
         <div class="absolute -top-24 -right-24 w-96 h-96 bg-indigo-500 rounded-full mix-blend-screen filter blur-[80px] opacity-40"></div>
         <div class="absolute top-1/3 -left-24 w-72 h-72 bg-emerald-500 rounded-full mix-blend-screen filter blur-[80px] opacity-30"></div>
         <div class="absolute bottom-10 right-1/4 w-80 h-80 bg-indigo-500 rounded-full mix-blend-screen filter blur-[100px] opacity-20"></div>
     </div>
 
-    <!-- HEADER / HERO SECTION -->
     <div class="text-white pb-32 pt-8 px-4 relative z-10">
         <div class="max-w-7xl mx-auto relative z-10">
             
@@ -82,7 +80,6 @@
                 </div>
             </header>
 
-            <!-- Global KPIs -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
                 <div class="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/10 shadow-inner hover:bg-white/10 transition duration-300">
                     <p class="text-indigo-300 text-xs uppercase font-extrabold tracking-widest mb-1.5 flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Deuda Total</p>
@@ -112,12 +109,9 @@
         </div>
     </div>
 
-    <!-- MAIN DASHBOARD CONTENT -->
     <main class="max-w-7xl mx-auto px-4 -mt-20 relative z-20 space-y-8 pb-24">
 
-        <!-- BARRA SUPERIOR MAIN: MODO Y CONTADOR DE COBRO -->
         <div class="flex flex-col sm:flex-row justify-between items-center -mt-6 mb-2 gap-4 relative z-30">
-            <!-- TOGGLE MODO -->
             <div class="bg-slate-800/80 p-1 rounded-2xl shadow-xl border border-slate-700 inline-flex w-full sm:w-auto backdrop-blur-md">
                 <button id="btnModoSim" onclick="setModo('simulacion')" class="flex-1 sm:w-48 py-3 text-sm font-black bg-indigo-500/20 text-indigo-400 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2">
                     <i class="fa-solid fa-hat-wizard"></i> Proyección
@@ -127,7 +121,6 @@
                 </button>
             </div>
             
-            <!-- PAYDAY WIDGET -->
             <div class="bg-slate-800/80 px-6 py-3 rounded-2xl shadow-xl border border-slate-700 inline-flex items-center gap-4 backdrop-blur-md w-full sm:w-auto justify-center group hover:bg-slate-700/80 transition-colors">
                 <div class="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg shadow-[0_0_15px_rgba(52,211,153,0.15)] group-hover:scale-110 transition-transform"><i class="fa-solid fa-sack-dollar"></i></div>
                 <div class="text-left">
@@ -137,10 +130,8 @@
             </div>
         </div>
 
-        <!-- FILA 1: ENTRADAS DE DATOS -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             
-            <!-- PASO 1: INGRESOS -->
             <div class="glass-card rounded-3xl p-8 z-10 relative">
                 <div class="flex items-center justify-between mb-8">
                     <div class="flex items-center gap-3">
@@ -149,7 +140,6 @@
                     </div>
                 </div>
 
-                <!-- MODO SIMULACIÓN -->
                 <div id="panelSimulacion">
                     <div class="mb-10 bg-slate-800/50 p-6 rounded-2xl border border-slate-700 shadow-inner">
                         <div class="flex justify-between items-end mb-4">
@@ -185,7 +175,6 @@
                     </div>
                 </div>
 
-                <!-- MODO REAL -->
                 <div id="panelReal" class="hidden">
                     <div class="bg-emerald-900/20 border-2 border-emerald-800/50 rounded-2xl p-8 text-center mt-4">
                         <label class="block text-xs font-black text-emerald-500 uppercase tracking-widest mb-4">Introduce tu nómina final exacta</label>
@@ -198,7 +187,6 @@
                 </div>
             </div>
 
-            <!-- PASO 2: GASTOS DINÁMICOS -->
             <div class="glass-card rounded-3xl p-8 relative overflow-hidden z-10">
                 <div class="relative z-10 h-full flex flex-col justify-between">
                     <div>
@@ -212,7 +200,6 @@
                             </button>
                         </div>
                         
-                        <!-- EMAAR CARD -->
                         <div class="mb-6 bg-slate-800/50 p-6 rounded-2xl border border-slate-700 relative overflow-hidden">
                             <img src="emaar-family_card.png" alt="Emaar Card" class="absolute -right-16 sm:-right-8 top-1/2 transform -translate-y-1/2 w-64 sm:w-72 object-contain drop-shadow-2xl pointer-events-none opacity-80 sm:opacity-100 -rotate-12 mix-blend-lighten" style="aspect-ratio: 880/552;">
                             
@@ -226,8 +213,6 @@
                             </div>
                         </div>
 
-                        <!-- DEWA CALCULATOR -->
-                        <!-- Simulación DEWA -->
                         <div id="dewaSimulacionPanel" class="bg-teal-900/20 p-5 rounded-2xl border border-teal-800/50 relative overflow-hidden">
                             <img src="dewa.png" alt="DEWA Logo" class="absolute -right-10 top-1/2 transform -translate-y-1/2 w-40 opacity-10 pointer-events-none mix-blend-screen" style="aspect-ratio: 440/440;">
                             <div class="relative z-10">
@@ -255,7 +240,6 @@
                             </div>
                         </div>
 
-                        <!-- Real DEWA -->
                         <div id="dewaRealPanel" class="hidden bg-teal-900/20 p-5 rounded-2xl border border-teal-800/50 relative overflow-hidden">
                             <img src="dewa.png" alt="DEWA Logo" class="absolute -right-10 top-1/2 transform -translate-y-1/2 w-40 opacity-10 pointer-events-none mix-blend-screen" style="aspect-ratio: 440/440;">
                             <div class="relative z-10">
@@ -273,9 +257,7 @@
             </div>
         </div>
 
-        <!-- FILA 2: BALANCE Y ESTRATEGIA -->
         <div class="glass-card rounded-[2.5rem] p-8 sm:p-10 relative overflow-hidden z-10">
-            
             <div class="flex items-center justify-between mb-10 border-b border-slate-700 pb-6">
                 <div class="flex items-center gap-3">
                     <div class="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center font-black">3</div>
@@ -285,8 +267,6 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
-                
-                <!-- Columna Izquierda: Ingresos vs Gastos -->
                 <div class="lg:col-span-4 space-y-6">
                     <div>
                         <p class="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-1">Total Ingresos Netos</p>
@@ -298,9 +278,7 @@
                         <div class="flex justify-between text-xs text-slate-400 font-medium"><span>Vuelos:</span><span id="pagoVueloDisplay" class="text-slate-200">5,465 AED</span></div>
                         <div class="flex justify-between text-xs text-slate-400 font-medium"><span>Variables:</span><span id="dietasDisplay" class="text-slate-200">1,800 AED</span></div>
                     </div>
-                    
                     <div class="h-px w-full bg-slate-700 my-4"></div>
-                    
                     <div>
                         <p class="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-2">Obligaciones a Pagar</p>
                         <div class="space-y-3">
@@ -314,14 +292,12 @@
                             </div>
                         </div>
                     </div>
-                    
                     <div class="pt-2">
                         <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Línea de Vida Total</p>
                         <p class="text-xl font-black text-white val-base">10,729 AED</p>
                     </div>
                 </div>
 
-                <!-- Columna Central: Gráfico -->
                 <div class="lg:col-span-4 relative flex flex-col items-center justify-center">
                     <div class="relative w-full max-w-[240px] aspect-square">
                         <canvas id="distributionChart"></canvas>
@@ -338,17 +314,14 @@
                     </div>
                 </div>
 
-                <!-- Columna Derecha: Destino del Excedente -->
                 <div class="lg:col-span-4 space-y-5" id="panelExcedente">
                     <p class="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-1 text-center lg:text-left">Distribución (70/30)</p>
-                    
                     <div class="bg-slate-800/50 border border-rose-900/50 p-5 rounded-2xl shadow-sm relative overflow-hidden">
                         <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-rose-500"></div>
                         <p class="text-[10px] font-extrabold text-rose-400 uppercase tracking-widest mb-1">Ataque Extra a Deuda (70%)</p>
                         <p class="text-3xl font-black text-rose-500 tracking-tight val-deuda">5,390 AED</p>
                         <p class="text-[10px] font-semibold text-slate-400 mt-2">Súmalo a la cuota mensual de Supabase.</p>
                     </div>
-                    
                     <div class="bg-slate-800/50 border border-blue-900/50 p-5 rounded-2xl shadow-sm relative overflow-hidden">
                         <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-500"></div>
                         <p class="text-[10px] font-extrabold text-blue-400 uppercase tracking-widest mb-1">Fondo de Emergencia (30%)</p>
@@ -367,7 +340,6 @@
             </div>
         </div>
 
-        <!-- FILA 3: HISTÓRICO DE INGRESOS -->
         <div class="glass-card rounded-[2.5rem] p-8 sm:p-10 relative overflow-hidden z-10">
             <div class="flex justify-between items-end mb-8 border-b border-slate-700 pb-6">
                 <div>
@@ -383,13 +355,11 @@
                     <span class="flex items-center gap-1"><div class="w-4 border-t-2 border-dashed border-slate-400"></div> Media</span>
                 </div>
             </div>
-            
             <div class="relative w-full h-[350px]">
                 <canvas id="incomeHistoryChart"></canvas>
             </div>
         </div>
 
-        <!-- FILA 4: PORTAFOLIO DE PASIVOS -->
         <div class="pt-2 relative z-10">
             <div class="flex items-center gap-3 mb-8 px-2">
                 <div class="w-8 h-8 rounded-lg bg-white/10 border border-white/20 text-white flex items-center justify-center font-black">4</div>
@@ -397,9 +367,7 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-                
                 <div class="lg:col-span-1 flex flex-col gap-6 h-full">
-                    <!-- Vehículo Dinámico -->
                     <div class="glass-card rounded-[2.5rem] p-8 relative overflow-hidden flex flex-col justify-between min-h-[380px]">
                         <div class="absolute top-0 right-0 w-64 h-64 bg-emerald-500 opacity-20 rounded-full -mr-20 -mt-20 blur-[60px] pointer-events-none"></div>
                         <div class="relative z-10">
@@ -422,7 +390,6 @@
                         <img src="dashing.png" alt="Jetour" class="absolute -bottom-6 -right-12 w-80 drop-shadow-2xl pointer-events-none z-0 transform scale-110">
                     </div>
 
-                    <!-- WIDGET PROVISIÓN ALQUILER -->
                     <div class="glass-card rounded-[2.5rem] p-6 sm:p-8 relative overflow-hidden flex flex-col justify-between min-h-[220px]">
                         <div class="absolute top-0 right-0 w-48 h-48 bg-indigo-500 opacity-10 rounded-full -mr-10 -mt-10 blur-[50px] pointer-events-none"></div>
                         <div class="relative z-10 flex justify-between items-start mb-6">
@@ -461,7 +428,6 @@
             </div>
         </div>
 
-        <!-- FILA 5: ANÁLISIS DE GASTOS DINÁMICOS -->
         <div class="glass-card rounded-[2.5rem] p-8 sm:p-10 relative overflow-hidden z-10">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 border-b border-slate-700 pb-6 gap-4">
                 <div>
@@ -474,7 +440,6 @@
                 <div class="flex items-center gap-2 w-full sm:w-auto">
                     <select id="filtroGastosMes" onchange="renderizarAnalisisVisual()" class="w-full sm:w-auto bg-slate-800/80 text-white text-sm font-bold p-3 rounded-xl border border-slate-600 outline-none focus:border-yellow-400 transition-colors shadow-inner">
                         <option value="tendencia">📈 Tendencia Global (Últimos Meses)</option>
-                        <!-- Opciones generadas dinámicamente -->
                     </select>
                     <button id="btnBorrarExtracto" onclick="borrarExtractoBD()" class="hidden bg-rose-500/20 text-rose-400 p-3 rounded-xl hover:bg-rose-500/40 hover:text-white transition-colors border border-rose-500/30" title="Borrar este extracto del histórico">
                         <i class="fa-solid fa-trash"></i>
@@ -513,9 +478,7 @@
             </div>
 
             <!-- GRID VISUAL DE CATEGORÍAS -->
-            <div id="contenedorCategoriasVisual" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 pt-6 border-t border-slate-700 hidden">
-                <!-- Se inyectan las tarjetas de categorías dinámicamente -->
-            </div>
+            <div id="contenedorCategoriasVisual" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 pt-6 border-t border-slate-700 hidden"></div>
         </div>
 
     </main>
@@ -593,7 +556,7 @@
                         <i class="fa-solid fa-cloud-arrow-up"></i> Sync Deuda
                     </button>
                     <button onclick="guardarExtractoBD()" id="btnGuardarHistorial" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 rounded-xl transition text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20">
-                        <i class="fa-solid fa-database"></i> Guardar Histórico
+                        <i class="fa-solid fa-database"></i> Guardar Nuevo
                     </button>
                 </div>
             </div>
@@ -626,7 +589,6 @@
         let datosExtractoActual = null;
         let extractosGlobales = [];
 
-        // Diccionarios Visuales para la Fila 5
         const catColors = {
             'Comida & Delivery': '#f43f5e', 
             'Supermercado & Alimentación': '#10b981', 
@@ -650,6 +612,9 @@
             'Comisiones & Tasas': 'fa-triangle-exclamation', 
             'Otros Gastos': 'fa-receipt'
         };
+
+        // Mapeo para detección automática de meses
+        const monthMap = { 'JAN': '01', 'FEB': '02', 'MAR': '03', 'APR': '04', 'MAY': '05', 'JUN': '06', 'JUL': '07', 'AUG': '08', 'SEP': '09', 'OCT': '10', 'NOV': '11', 'DEC': '12' };
 
         const historicalIncome = [
             { mes: 'Ago 23', valor: 6617.6 }, { mes: 'Sep 23', valor: 3361.67 }, { mes: 'Oct 23', valor: 4482.8 },
@@ -988,7 +953,6 @@
             const { data, error } = await supabaseClient.from('extractos_emaar').select('*').order('created_at', { ascending: true });
             if (error) return console.error("Error cargando extractos:", error);
             
-            // Ordenar cronológicamente para facilitar la comparación mes a mes (por fecha_vencimiento o created_at)
             extractosGlobales = data || [];
             extractosGlobales.sort((a, b) => new Date(a.fecha_vencimiento || a.created_at) - new Date(b.fecha_vencimiento || b.created_at));
 
@@ -1009,14 +973,12 @@
             const val = document.getElementById('filtroGastosMes').value;
             const ctx = document.getElementById('expensesChart').getContext('2d');
             
-            // Mostrar/Ocultar boton de borrar
             const btnBorrar = document.getElementById('btnBorrarExtracto');
             if(val === 'tendencia') btnBorrar.classList.add('hidden');
             else btnBorrar.classList.remove('hidden');
 
             if (expensesChartInstance) expensesChartInstance.destroy();
 
-            // Limpiar indicadores MoM
             document.getElementById('kpiTotalMoM').className = "hidden";
             document.getElementById('kpiTopCategoriaMoM').className = "hidden";
             document.getElementById('contenedorCategoriasVisual').classList.add('hidden');
@@ -1056,7 +1018,6 @@
                 });
 
             } else {
-                // Vista de MES ESPECÍFICO
                 document.getElementById('labelPromedioGasto').innerText = "Gasto Total del Mes";
                 document.getElementById('labelComisiones').innerText = "Fugas Este Mes (Comisiones/Tasas)";
 
@@ -1078,7 +1039,6 @@
                     }
                 });
 
-                // Comparativa Total (MoM)
                 document.getElementById('kpiPromedioGasto').innerHTML = `${Math.floor(extracto.total_compras).toLocaleString()} <span class="text-sm text-slate-400">AED</span>`;
                 if(extractoAnterior && extractoAnterior.total_compras > 0) {
                     const diffPct = ((extracto.total_compras - extractoAnterior.total_compras) / extractoAnterior.total_compras) * 100;
@@ -1086,14 +1046,13 @@
                     badge.classList.remove('hidden', 'bg-rose-500/20', 'text-rose-400', 'bg-emerald-500/20', 'text-emerald-400');
                     if(diffPct > 0) {
                         badge.innerHTML = `<i class="fa-solid fa-arrow-trend-up"></i> +${diffPct.toFixed(1)}%`;
-                        badge.classList.add('bg-rose-500/20', 'text-rose-400'); // Gasto sube = Rojo
+                        badge.classList.add('bg-rose-500/20', 'text-rose-400'); 
                     } else {
                         badge.innerHTML = `<i class="fa-solid fa-arrow-trend-down"></i> ${diffPct.toFixed(1)}%`;
-                        badge.classList.add('bg-emerald-500/20', 'text-emerald-400'); // Gasto baja = Verde
+                        badge.classList.add('bg-emerald-500/20', 'text-emerald-400');
                     }
                 }
 
-                // Comparativa Top Categoría
                 document.getElementById('kpiTopCategoria').innerText = topCat;
                 document.getElementById('kpiTopCategoriaAmount').innerText = Math.floor(topVal).toLocaleString() + ' AED';
                 if(extractoAnterior && extractoAnterior.desglose_categorias[topCat] > 0) {
@@ -1107,12 +1066,10 @@
                 
                 document.getElementById('kpiComisiones').innerText = Math.floor(categorias['Comisiones & Tasas'] || 0).toLocaleString() + ' AED';
 
-                // Renderizar Grid de Categorías Visual
                 const gridContainer = document.getElementById('contenedorCategoriasVisual');
                 gridContainer.innerHTML = '';
                 gridContainer.classList.remove('hidden');
 
-                // Ordenar categorias de mayor a menor monto para el grid
                 const sortedCats = Object.keys(categorias).filter(c => categorias[c] > 0).sort((a,b) => categorias[b] - categorias[a]);
                 
                 sortedCats.forEach(cat => {
@@ -1167,7 +1124,7 @@
             const { error } = await supabaseClient.from('extractos_emaar').delete().eq('id', val);
             if (!error) {
                 alert("✅ Extracto borrado correctamente del histórico.");
-                cargarExtractosEmaar(); // Recarga la info y el dropdown
+                cargarExtractosEmaar(); 
             } else {
                 alert("Error al borrar el extracto: " + error.message);
             }
@@ -1215,17 +1172,36 @@
 
                 if (desc.includes('OVERLIMIT FEE') || desc.includes('CASH ADVANCE FEE') || desc.includes('FINANCE CHARGES')) { categorias['Comisiones & Tasas'] += monto; comisionesDetectadas.push(`${desc.split(' ')[0]} Fee: ${monto}`); }
                 else if (desc.includes('VAT ON') || desc.includes('SVC CHG ON')) categorias['Comisiones & Tasas'] += monto;
-                else if (/CAREEM FOOD|NOON FOOD|DELIVEROO|KEETA|MCDONALD|BURGERKING|RESTAURANT|BEEF BAR|GORDON RAMSAY|SIAM PARAGON/i.test(desc)) categorias['Comida & Delivery'] += monto;
-                else if (/AMAZON GROCERY|NOON MINUTES|CAREEM QUIK|LULU|MURALI|7ELEVEN|AEON|GROCERY|SUPERMARK/i.test(desc)) categorias['Supermercado & Alimentación'] += monto;
-                else if (/AMAZON|NOON|TEMU|SHOPEE|POPMART|POP MART|UNIQLO|ZARA|BALENCIAGA|REPLAY|ELEGOO|BESTSECRET|KINOKUN|BRANDS FOR LESS|DAISO|IKEA|PAPERCLIP/i.test(desc)) categorias['Shopping, Ropa & Online'] += monto;
-                else if (/APPLE\.COM|ITUNES|AMAZON PRIME|STACKSOCIAL|SPACESHIP|BYTESIM|GROUPON|DHGATE/i.test(desc)) categorias['Suscripciones & Digital'] += monto;
-                else if (/GRAB|BOLT|CABIFY|ENOC|EMARAT|TRIP\.COM|MAKEMYTRIP|VIAGOGO|STUBHUB|AIR EUROPA|IBERIA|TODAYTIX|REEL ENTERTAINMENT|LONDON THEATRE/i.test(desc)) categorias['Transporte, Vuelos & Viajes'] += monto;
-                else if (/DU AUTO PAY|ETISALAT|E& TELECOM|SMART DUBAI|DUBAI ELECTRICITY|FAZAA/i.test(desc)) categorias['Servicios & Gobierno'] += monto;
+                else if (/CAREEM FOOD|NOON FOOD|DELIVEROO|KEETA|MCDONALD|BURGERKING|RESTAURANT|BEEF BAR|GORDON RAMSAY|SIAM PARAGON|MATTO|SBUX|DOORDASH|SMILES FOOD/i.test(desc)) categorias['Comida & Delivery'] += monto;
+                else if (/AMAZON GROCERY|NOON MINUTES|CAREEM QUIK|LULU|MURALI|7ELEVEN|AEON|GROCERY|SUPERMARK|NORMAL OSLO/i.test(desc)) categorias['Supermercado & Alimentación'] += monto;
+                else if (/AMAZON\.AE|AMAZON RETAIL|NOON\.COM|TEMU|SHOPEE|POPMART|POP MART|UNIQLO|ZARA|BALENCIAGA|REPLAY|ELEGOO|BESTSECRET|KINOKUN|BRANDS FOR LESS|DAISO|IKEA|ALSHAYA|LANDMARK|DHGATE|PAPERCLIP|QASER|LUXURY FOR LESS|ARABIAN OUD|SHOPTHEDEAL/i.test(desc)) categorias['Shopping, Ropa & Online'] += monto;
+                else if (/APPLE\.COM|ITUNES|AMAZON PRIME|STACKSOCIAL|SPACESHIP|BYTESIM|GROUPON|UI\.COM/i.test(desc)) categorias['Suscripciones & Digital'] += monto;
+                else if (/GRAB|BOLT|CABIFY|ENOC|EMARAT|TRIP\.COM|MAKEMYTRIP|VIAGOGO|STUBHUB|AIR EUROPA|IBERIA|TODAYTIX|REEL|LONDON THEATRE|EMIRATES|SWISSOTEL/i.test(desc)) categorias['Transporte, Vuelos & Viajes'] += monto;
+                else if (/DU AUTO PAY|ETISALAT|E& TELECOM|SMART DUBAI|DUBAI ELECTRICITY|FAZAA|ICD BROOKFIELD|RESCUBE|FIT REP/i.test(desc)) categorias['Servicios & Gobierno'] += monto;
                 else if (/TABBY|PAYSEND|REVOLUT|INSTALLMENT/i.test(desc)) categorias['BNPL & Financiación'] += monto;
                 else categorias['Otros Gastos'] += monto;
             }
 
             if (totalPurchases === 0) totalPurchases = Object.values(categorias).reduce((a, b) => a + b, 0);
+            
+            // Auto-Ajuste de Mes en el Panel Global
+            const mPeriodoExtraido = periodo.match(/(\d{2})-([A-Za-z]{3})-(\d{2})/g);
+            if (mPeriodoExtraido && mPeriodoExtraido.length === 2) {
+                const endDate = mPeriodoExtraido[1];
+                const endMonthAbbr = endDate.split('-')[1].toUpperCase();
+                const endYearStr = '20' + endDate.split('-')[2];
+                const monthNum = monthMap[endMonthAbbr];
+
+                if (monthNum) {
+                    const targetMonth = `${endYearStr}-${monthNum}`;
+                    const mesSelector = document.getElementById('mesSelector');
+                    if (mesSelector.value !== targetMonth) {
+                        mesSelector.value = targetMonth;
+                        cargarDatosMes(); // Sincroniza el resto del panel a la fecha del extracto
+                    }
+                }
+            }
+
             datosExtractoActual = { periodo, totalPurchases, currentBalance, totalPayments, minPayment, paymentDueDate, categorias, comisionesDetectadas };
             mostrarResultadosExtracto();
         }
@@ -1234,7 +1210,6 @@
             document.getElementById('loadingPdf').classList.add('hidden'); document.getElementById('resultadoExtracto').classList.remove('hidden');
             document.getElementById('resPeriodo').innerText = datosExtractoActual.periodo; document.getElementById('resCompras').innerText = Math.floor(datosExtractoActual.totalPurchases).toLocaleString() + ' AED'; document.getElementById('resSaldoTotal').innerText = datosExtractoActual.currentBalance.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' AED'; document.getElementById('resPagos').innerText = Math.floor(datosExtractoActual.totalPayments).toLocaleString() + ' AED'; document.getElementById('resPagoMin').innerText = datosExtractoActual.minPayment.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' AED'; document.getElementById('resFechaVenc').innerText = datosExtractoActual.paymentDueDate;
 
-            // Detección de duplicado en DB
             const existeEnDB = extractosGlobales.find(e => e.periodo === datosExtractoActual.periodo);
             const badgeDup = document.getElementById('badgeDuplicado');
             if(existeEnDB) {
