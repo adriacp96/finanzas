@@ -799,9 +799,9 @@
                 const easeProgress = 1 - Math.pow(1 - progress, 4); 
                 const current = start + easeProgress * (end - start);
                 
-                obj.innerText = prefix + Math.floor(current).toLocaleString() + suffix;
+                obj.innerHTML = prefix + Math.floor(current).toLocaleString() + suffix;
                 if (progress < 1) window.requestAnimationFrame(step);
-                else obj.innerText = prefix + Math.floor(end).toLocaleString() + suffix;
+                else obj.innerHTML = prefix + Math.floor(end).toLocaleString() + suffix;
             };
             window.requestAnimationFrame(step);
         }
@@ -1256,9 +1256,9 @@
                 document.getElementById('colorIngresoOComision').className = "absolute left-0 top-0 bottom-0 w-1.5 " + (isDebit ? "bg-emerald-500" : "bg-amber-500");
 
                 if (extractosFiltrados.length === 0) {
-                    animateValue(document.getElementById('kpiPromedioGasto'), 0, 100, '', ' AED');
+                    animateValue(document.getElementById('kpiPromedioGasto'), 0, 100, '', ' <span class="text-sm text-slate-400">AED</span>');
                     document.getElementById('kpiTopCategoria').innerText = "---";
-                    document.getElementById('kpiTopCategoriaAmount').innerText = "--- AED";
+                    document.getElementById('kpiTopCategoriaAmount').innerHTML = "--- AED";
                     animateValue(document.getElementById('kpiComisiones'), 0, 100, '', ' AED');
                     
                     gridContainer.innerHTML = `
@@ -1495,13 +1495,11 @@
                     let catAsignada = 'Otros Gastos';
                     let esComision = false;
 
-                    // 1. Custom Rules Engine
                     let keywordFound = Object.keys(customRules).find(kw => desc.includes(kw));
                     
                     if (keywordFound) {
                         catAsignada = customRules[keywordFound];
                     } 
-                    // 2. Default Rules Fallback
                     else {
                         if (desc.includes('OVERLIMIT FEE') || desc.includes('CASH ADVANCE FEE') || desc.includes('FINANCE CHARGES')) { catAsignada = 'Comisiones & Tasas'; esComision = true; comisionesDetectadas.push(`${desc.split(' ')[0]} Fee: ${monto}`); }
                         else if (desc.includes('VAT ON') || desc.includes('SVC CHG ON')) { catAsignada = 'Comisiones & Tasas'; esComision = true; }
@@ -1611,16 +1609,13 @@
             prepararResultadosUI();
         }
 
-        // --- FUNCIONES NUEVAS DE INTELIGENCIA (RE-CATEGORIZAR Y DIVIDIR) ---
-
         function updateTxCategory(idx, selectElement) {
             const newCat = selectElement.value;
             const tx = datosExtractoActual.transacciones[idx];
             tx.cat = newCat;
             
-            // Guardar regla de aprendizaje
             let customRules = getCustomRules();
-            let keyword = tx.desc.split(' ').slice(0, 2).join(' '); // Tomar primeras 2 palabras como base para la regla
+            let keyword = tx.desc.split(' ').slice(0, 2).join(' '); 
             customRules[keyword] = newCat;
             localStorage.setItem('adria_custom_rules', JSON.stringify(customRules));
             
@@ -1640,7 +1635,6 @@
             const splitVal = parseFloat(splitValStr);
             if(isNaN(splitVal) || splitVal <= 0 || splitVal >= tx.monto) return showToast("Monto inválido para división", "error");
 
-            // Modificamos la original y creamos una nueva
             tx.monto -= splitVal;
             datosExtractoActual.transacciones.splice(idx + 1, 0, {
                 desc: tx.desc + ' (Split)',
@@ -1654,7 +1648,6 @@
         }
 
         function recalcularDesdeTransacciones() {
-            // Resetear y recalcular sumas de categorías basándonos en el array de transacciones modificado
             Object.keys(datosExtractoActual.categorias).forEach(k => datosExtractoActual.categorias[k] = 0);
             
             datosExtractoActual.transacciones.forEach(tx => {
@@ -1670,7 +1663,6 @@
             const tbody = document.getElementById('txListBody');
             tbody.innerHTML = '';
             
-            // Crear el combo de opciones base para los selectores
             let opcionesCat = '';
             Object.keys(catColors).forEach(cat => {
                 opcionesCat += `<option value="${cat}">${cat}</option>`;
@@ -1680,7 +1672,6 @@
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-700/30 transition-colors";
                 
-                // Selector con la opción de la transacción pre-seleccionada
                 let selectHtml = `<select class="bg-slate-800 text-[10px] text-white border border-slate-600 rounded px-1 py-1 focus:outline-none focus:border-indigo-500 w-full truncate" onchange="updateTxCategory(${i}, this)">`;
                 selectHtml += opcionesCat.replace(`value="${tx.cat}"`, `value="${tx.cat}" selected`);
                 selectHtml += `</select>`;
@@ -1744,12 +1735,10 @@
             if (datosExtractoActual.comisionesDetectadas.length > 0) { document.getElementById('alertaComisiones').classList.remove('hidden'); document.getElementById('resDetalleComisiones').innerHTML = datosExtractoActual.comisionesDetectadas.join(' • '); } 
             else document.getElementById('alertaComisiones').classList.add('hidden');
 
-            // --- INTELIGENCIA DE SUBSCRIPCIONES ---
             const extractosCuenta = extractosGlobales.filter(ext => (ext.cuenta || 'Credit-Emaar') === datosExtractoActual.cuenta);
             const subAlertEl = document.getElementById('subscriptionAlert');
             
             if(extractosCuenta.length > 0) {
-                // El último extracto del array (ya están ordenados por fecha de subida)
                 const lastExt = extractosCuenta[extractosCuenta.length - 1]; 
                 const prevSubs = lastExt.desglose_categorias['Suscripciones & Digital'] || 0;
                 const curSubs = datosExtractoActual.categorias['Suscripciones & Digital'] || 0;
@@ -1764,7 +1753,6 @@
                 subAlertEl.classList.add('hidden');
             }
 
-            // Renderizar la tabla de transacciones de Inteligencia
             renderizarTransaccionesInteligentes();
         }
 
