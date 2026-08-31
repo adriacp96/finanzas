@@ -325,7 +325,6 @@
                 <div class="lg:col-span-4 relative flex flex-col items-center justify-center">
                     <div class="relative w-full max-w-[240px] aspect-square">
                         <canvas id="distributionChart"></canvas>
-                        <!-- Texto central del gráfico -->
                         <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-2">
                             <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Excedente Libre</span>
                             <span class="text-2xl font-black text-emerald-400 mt-0.5 val-excedente">7,701 AED</span>
@@ -359,7 +358,6 @@
                 </div>
             </div>
 
-            <!-- Botón Guardar / Estado -->
             <div class="mt-12 pt-8 border-t border-slate-700 flex flex-col items-center">
                 <button onclick="guardarMes()" class="w-full sm:w-auto bg-indigo-600 text-white py-4 px-12 rounded-2xl font-black text-lg shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3 group">
                     <span id="textoBotonGuardar">Guardar Proyección en Supabase</span>
@@ -400,7 +398,6 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
                 
-                <!-- CONTENEDOR COLUMNA IZQUIERDA: Vehículo y Alquiler -->
                 <div class="lg:col-span-1 flex flex-col gap-6 h-full">
                     <!-- Vehículo Dinámico -->
                     <div class="glass-card rounded-[2.5rem] p-8 relative overflow-hidden flex flex-col justify-between min-h-[380px]">
@@ -411,17 +408,13 @@
                                 <button id="carWidgetEditBtn" class="text-[10px] uppercase font-bold tracking-wider text-slate-400 bg-white/10 px-3 py-1.5 rounded-lg hover:bg-white/20 hover:text-white transition">Editar Hoy</button>
                             </div>
                             <h3 class="text-white font-black text-3xl tracking-tight leading-tight mb-8">Jetour Dashing '25</h3>
-                            
                             <div class="space-y-5">
                                 <div>
                                     <p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-1">Lo que queda</p>
                                     <p id="carWidgetSaldo" class="text-3xl font-black text-white">--- AED</p>
                                 </div>
                                 <div class="flex justify-between items-end border-t border-slate-700 pt-4">
-                                    <div>
-                                        <p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-1">Cuota Fija</p>
-                                        <p class="text-lg font-black text-slate-200">1,739.00 AED</p>
-                                    </div>
+                                    <div><p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-1">Cuota Fija</p><p class="text-lg font-black text-slate-200">1,739.00 AED</p></div>
                                     <span id="carWidgetMeses" class="text-xs font-bold text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded-md">---</span>
                                 </div>
                             </div>
@@ -429,37 +422,23 @@
                         <img src="dashing.png" alt="Jetour" class="absolute -bottom-6 -right-12 w-80 drop-shadow-2xl pointer-events-none z-0 transform scale-110">
                     </div>
 
-                    <!-- WIDGET PROVISIÓN ALQUILER (SINKING FUND) -->
+                    <!-- WIDGET PROVISIÓN ALQUILER -->
                     <div class="glass-card rounded-[2.5rem] p-6 sm:p-8 relative overflow-hidden flex flex-col justify-between min-h-[220px]">
                         <div class="absolute top-0 right-0 w-48 h-48 bg-indigo-500 opacity-10 rounded-full -mr-10 -mt-10 blur-[50px] pointer-events-none"></div>
-                        
                         <div class="relative z-10 flex justify-between items-start mb-6">
                             <span class="bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Fondo de Provisión</span>
                             <span id="rentDaysBadge" class="text-xs font-bold text-slate-400 bg-slate-900/50 px-2.5 py-1 rounded-md border border-slate-700">---</span>
                         </div>
-
                         <div class="relative z-10 flex items-center gap-5 sm:gap-6">
-                            <!-- Símbolo de la Casa Dinámica -->
                             <div class="relative w-16 h-16 sm:w-20 sm:h-20 shrink-0">
-                                <svg class="absolute top-0 left-0 w-full h-full text-slate-800/80 drop-shadow-md" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M12 3L2 12h3v8h14v-8h3L12 3z"/>
-                                </svg>
-                                <!-- Casa Frente (Líquido llenándose) usando clip-path -->
-                                <svg id="homeFillLiquid" class="absolute top-0 left-0 w-full h-full text-indigo-500 drop-shadow-[0_0_15px_rgba(99,102,241,0.5)] transition-all duration-1000 ease-out" fill="currentColor" viewBox="0 0 24 24" style="clip-path: inset(100% 0 0 0);">
-                                    <path d="M12 3L2 12h3v8h14v-8h3L12 3z"/>
-                                </svg>
+                                <svg class="absolute top-0 left-0 w-full h-full text-slate-800/80 drop-shadow-md" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L2 12h3v8h14v-8h3L12 3z"/></svg>
+                                <svg id="homeFillLiquid" class="absolute top-0 left-0 w-full h-full text-indigo-500 drop-shadow-[0_0_15px_rgba(99,102,241,0.5)] transition-all duration-1000 ease-out" fill="currentColor" viewBox="0 0 24 24" style="clip-path: inset(100% 0 0 0);"><path d="M12 3L2 12h3v8h14v-8h3L12 3z"/></svg>
                             </div>
-
-                            <!-- Datos Financieros -->
                             <div class="w-full">
                                 <h3 id="rentQuarterTitle" class="text-white font-black text-lg tracking-tight leading-tight mb-1">Cheque Alquiler</h3>
                                 <p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-3">Acumulado vs Objetivo</p>
-
                                 <div class="flex justify-between items-end border-b border-slate-700 pb-2 mb-2">
-                                    <div>
-                                        <span class="text-2xl font-black text-white tracking-tight" id="rentSavedValue">---</span>
-                                        <span class="text-xs font-bold text-indigo-400 ml-1">AED</span>
-                                    </div>
+                                    <div><span class="text-2xl font-black text-white tracking-tight" id="rentSavedValue">---</span><span class="text-xs font-bold text-indigo-400 ml-1">AED</span></div>
                                 </div>
                                 <div class="flex justify-between items-center text-[10px] font-bold">
                                     <span class="text-slate-500 uppercase text-[9px]">Meta: 9,099 AED</span>
@@ -470,12 +449,10 @@
                     </div>
                 </div>
 
-                <!-- Tarjetas Supabase -->
                 <div class="lg:col-span-2 glass-card rounded-[2.5rem] p-8 h-full">
                     <div class="flex justify-between items-end mb-8">
                         <p class="text-xs font-extrabold text-slate-400 uppercase tracking-widest">Base de Datos en Tiempo Real</p>
                     </div>
-
                     <div id="debtCardsContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                         <div class="text-center text-sm font-bold text-slate-400 py-12 col-span-2">Sincronizando deudas...</div>
                     </div>
@@ -492,38 +469,52 @@
                         <div class="w-8 h-8 rounded-lg bg-yellow-500/20 border border-yellow-500/30 text-yellow-400 flex items-center justify-center font-black text-sm">5</div>
                         Radiografía de Gastos (Emaar)
                     </h2>
-                    <p class="text-sm font-semibold text-slate-400 mt-2">Distribución por categorías y tendencias de consumo basadas en extractos</p>
+                    <p class="text-sm font-semibold text-slate-400 mt-2">Inteligencia de consumo basada en tus extractos bancarios históricos.</p>
                 </div>
-                <div class="w-full sm:w-auto">
-                    <select id="filtroGastosMes" onchange="renderizarGraficoGastos()" class="w-full sm:w-auto bg-slate-800/80 text-white text-sm font-bold p-3 rounded-xl border border-slate-600 outline-none focus:border-yellow-400 transition-colors shadow-inner">
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <select id="filtroGastosMes" onchange="renderizarAnalisisVisual()" class="w-full sm:w-auto bg-slate-800/80 text-white text-sm font-bold p-3 rounded-xl border border-slate-600 outline-none focus:border-yellow-400 transition-colors shadow-inner">
                         <option value="tendencia">📈 Tendencia Global (Últimos Meses)</option>
                         <!-- Opciones generadas dinámicamente -->
                     </select>
+                    <button id="btnBorrarExtracto" onclick="borrarExtractoBD()" class="hidden bg-rose-500/20 text-rose-400 p-3 rounded-xl hover:bg-rose-500/40 hover:text-white transition-colors border border-rose-500/30" title="Borrar este extracto del histórico">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
                 </div>
             </div>
             
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center mb-8">
                 <div class="lg:col-span-2 relative w-full h-[350px]">
                     <canvas id="expensesChart"></canvas>
                 </div>
                 <div class="lg:col-span-1 space-y-4" id="expensesSummaryPanel">
                     <div class="bg-slate-800/50 p-5 rounded-2xl border border-slate-700 shadow-sm relative overflow-hidden">
                         <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-rose-500"></div>
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Top Categoría (Gasto Principal)</p>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Top Categoría (Mayor Fuga)</p>
                         <p id="kpiTopCategoria" class="text-xl font-black text-rose-400 truncate">---</p>
-                        <p id="kpiTopCategoriaAmount" class="text-sm font-bold text-slate-300 mt-1">--- AED</p>
+                        <div class="flex items-center gap-2 mt-1">
+                            <p id="kpiTopCategoriaAmount" class="text-sm font-bold text-white">--- AED</p>
+                            <span id="kpiTopCategoriaMoM" class="text-[10px] font-bold px-1.5 py-0.5 rounded-md hidden"></span>
+                        </div>
                     </div>
                     <div class="bg-slate-800/50 p-5 rounded-2xl border border-slate-700 shadow-sm relative overflow-hidden">
                         <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-emerald-500"></div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1" id="labelPromedioGasto">Promedio Mensual (Total)</p>
-                        <p id="kpiPromedioGasto" class="text-2xl font-black text-white">--- AED</p>
+                        <div class="flex items-end gap-3">
+                            <p id="kpiPromedioGasto" class="text-3xl font-black text-white">---</p>
+                            <span id="kpiTotalMoM" class="text-xs font-bold mb-1 hidden px-2 py-0.5 rounded-md"></span>
+                        </div>
                     </div>
                     <div class="bg-slate-800/50 p-5 rounded-2xl border border-slate-700 shadow-sm relative overflow-hidden">
                         <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-amber-500"></div>
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1" id="labelComisiones">Fugas por Comisiones / BNPL</p>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1" id="labelComisiones">Intereses y Comisiones</p>
                         <p id="kpiComisiones" class="text-xl font-black text-amber-400">--- AED</p>
                     </div>
                 </div>
+            </div>
+
+            <!-- GRID VISUAL DE CATEGORÍAS -->
+            <div id="contenedorCategoriasVisual" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 pt-6 border-t border-slate-700 hidden">
+                <!-- Se inyectan las tarjetas de categorías dinámicamente -->
             </div>
         </div>
 
@@ -551,7 +542,7 @@
                 <input type="file" id="inputPdfExtracto" accept="application/pdf" class="hidden" onchange="procesarArchivoPdf(event)">
                 <i class="fa-solid fa-cloud-arrow-up text-4xl text-slate-500 group-hover:text-yellow-400 transition-colors mb-3"></i>
                 <p class="text-sm font-bold text-white mb-1">Arrastra tu extracto PDF aquí o haz clic para seleccionarlo</p>
-                <p class="text-xs text-slate-500">Ejemplo: E-STATEMENT_4034320005872811_*.pdf</p>
+                <p class="text-xs text-slate-500">Soporta auto-detección de duplicados.</p>
             </div>
 
             <div id="loadingPdf" class="hidden py-10 text-center text-indigo-400">
@@ -565,6 +556,7 @@
                     <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700">
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Periodo</p>
                         <p id="resPeriodo" class="text-xs font-bold text-white leading-tight">---</p>
+                        <span id="badgeDuplicado" class="text-[9px] uppercase font-bold mt-1 inline-block px-1.5 py-0.5 rounded hidden"></span>
                     </div>
                     <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700">
                         <p class="text-[10px] font-bold text-yellow-400 uppercase tracking-wider mb-1">Compras / Gastos</p>
@@ -588,27 +580,19 @@
                     </div>
                 </div>
 
-                <!-- ALERTA DE COMISIONES DETECTADAS -->
                 <div id="alertaComisiones" class="hidden bg-rose-950/30 border border-rose-800/50 rounded-xl p-4 text-xs">
                     <p class="font-bold text-rose-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><i class="fa-solid fa-triangle-exclamation"></i> Comisiones e Intereses Detectados</p>
                     <p id="resDetalleComisiones" class="text-slate-300">---</p>
                 </div>
 
-                <!-- DESGLOSE POR CATEGORÍAS -->
-                <div class="bg-slate-800/40 p-4 rounded-2xl border border-slate-700/80">
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Desglose de Movimientos por Categoría</p>
-                    <div id="resCategoriasContainer" class="space-y-2 text-xs"></div>
-                </div>
-
-                <!-- BOTONES DE ACCIÓN -->
                 <div class="flex flex-col sm:flex-row gap-3 pt-2">
-                    <button onclick="aplicarGastoEmaar()" class="flex-1 bg-yellow-500 hover:bg-yellow-400 text-slate-900 font-black py-3 rounded-xl transition text-sm flex items-center justify-center gap-2">
+                    <button onclick="aplicarGastoEmaar()" class="flex-1 bg-yellow-500 hover:bg-yellow-400 text-slate-900 font-black py-3 rounded-xl transition text-sm flex items-center justify-center gap-2 shadow-lg shadow-yellow-500/20">
                         <i class="fa-solid fa-bolt"></i> Aplicar Gasto
                     </button>
-                    <button onclick="sincronizarDeudaEmaarSupabase()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-black py-3 rounded-xl transition text-sm flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-cloud-arrow-up"></i> Sincronizar Deuda
+                    <button onclick="sincronizarDeudaEmaarSupabase()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-black py-3 rounded-xl transition text-sm flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Sync Deuda
                     </button>
-                    <button onclick="guardarExtractoBD()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 rounded-xl transition text-sm flex items-center justify-center gap-2">
+                    <button onclick="guardarExtractoBD()" id="btnGuardarHistorial" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 rounded-xl transition text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20">
                         <i class="fa-solid fa-database"></i> Guardar Histórico
                     </button>
                 </div>
@@ -640,9 +624,9 @@
         
         let deudasGlobales = []; 
         let datosExtractoActual = null;
-        let extractosGlobales = []; // Almacenará el histórico de extractos para gráficos
+        let extractosGlobales = [];
 
-        // Paleta de colores consistente para las categorías
+        // Diccionarios Visuales para la Fila 5
         const catColors = {
             'Comida & Delivery': '#f43f5e', 
             'Supermercado & Alimentación': '#10b981', 
@@ -653,6 +637,18 @@
             'BNPL & Financiación': '#ec4899', 
             'Comisiones & Tasas': '#ef4444', 
             'Otros Gastos': '#94a3b8'
+        };
+
+        const catIcons = {
+            'Comida & Delivery': 'fa-burger', 
+            'Supermercado & Alimentación': 'fa-basket-shopping', 
+            'Shopping, Ropa & Online': 'fa-bag-shopping', 
+            'Suscripciones & Digital': 'fa-laptop-code', 
+            'Transporte, Vuelos & Viajes': 'fa-plane-departure', 
+            'Servicios & Gobierno': 'fa-building-columns', 
+            'BNPL & Financiación': 'fa-credit-card', 
+            'Comisiones & Tasas': 'fa-triangle-exclamation', 
+            'Otros Gastos': 'fa-receipt'
         };
 
         const historicalIncome = [
@@ -679,28 +675,21 @@
             cargarDeudas();
             cargarHistorialIngresos();
             cargarDatosMes(); 
-            cargarExtractosEmaar(); // Cargar data del nuevo gráfico
+            cargarExtractosEmaar();
             configurarDragAndDrop();
         };
 
         function calcularDiasCobro() {
             const today = new Date();
             let payday = new Date(today.getFullYear(), today.getMonth(), 26);
-            if (today.getDate() > 26) {
-                payday = new Date(today.getFullYear(), today.getMonth() + 1, 26);
-            }
+            if (today.getDate() > 26) payday = new Date(today.getFullYear(), today.getMonth() + 1, 26);
             const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
             const diffDays = Math.ceil((payday - todayDate) / (1000 * 60 * 60 * 24));
-            
             const widget = document.getElementById('paydayCountdown');
             if (widget) {
-                if (diffDays === 0) {
-                    widget.innerHTML = `<span class="text-emerald-400">¡Hoy cobras! 🎉</span>`;
-                } else if (diffDays === 1) {
-                    widget.innerHTML = `Mañana`;
-                } else {
-                    widget.innerHTML = `Faltan <span class="text-emerald-400 text-2xl">${diffDays}</span> días`;
-                }
+                if (diffDays === 0) widget.innerHTML = `<span class="text-emerald-400">¡Hoy cobras! 🎉</span>`;
+                else if (diffDays === 1) widget.innerHTML = `Mañana`;
+                else widget.innerHTML = `Faltan <span class="text-emerald-400 text-2xl">${diffDays}</span> días`;
             }
         }
 
@@ -716,11 +705,8 @@
         async function cargarDatosMes() {
             const mesRaw = document.getElementById('mesSelector').value;
             if (!mesRaw) return;
-            
-            const dateObj = new Date(mesRaw + '-05');
-            const mesFormateado = dateObj.toLocaleString('es-ES', { month: 'long', year: 'numeric' });
+            const mesFormateado = new Date(mesRaw + '-05').toLocaleString('es-ES', { month: 'long', year: 'numeric' });
             const status = document.getElementById('saveStatus');
-            
             const { data, error } = await supabaseClient.from('historial_meses').select('*').eq('mes', mesFormateado).single();
                 
             if (data) {
@@ -735,16 +721,9 @@
                 document.getElementById('salarioRealInput').value = data.salario_real ?? '';
                 
                 const val = data.horas_vuelo ?? 80;
-                const percentage = (val / 130) * 100;
-                document.getElementById('blockHoursSlider').style.background = `linear-gradient(to right, #6366f1 0%, #6366f1 ${percentage}%, #334155 ${percentage}%, #334155 100%)`;
+                document.getElementById('blockHoursSlider').style.background = `linear-gradient(to right, #6366f1 0%, #6366f1 ${(val / 130) * 100}%, #334155 ${(val / 130) * 100}%, #334155 100%)`;
                 document.getElementById('sliderValue').innerHTML = `${val}<span class="text-xl text-indigo-400">h</span>`;
-
                 setModo(isReal ? 'real' : 'simulacion', true);
-                
-                status.innerHTML = `<span><i class="fa-solid fa-cloud-arrow-down"></i> Estado de ${mesFormateado} cargado</span>`;
-                status.className = "text-sm font-bold text-center text-indigo-400 mt-4";
-                status.classList.remove('hidden');
-                setTimeout(() => status.classList.add('hidden'), 3000);
             } else {
                 document.getElementById('blockHoursSlider').value = 80;
                 document.getElementById('mealAllowance').value = 1500;
@@ -754,47 +733,31 @@
                 document.getElementById('dewaM3').value = 2.3;
                 document.getElementById('dewaRealInput').value = '';
                 document.getElementById('salarioRealInput').value = '';
-                
                 document.getElementById('blockHoursSlider').style.background = `linear-gradient(to right, #6366f1 0%, #6366f1 61.5%, #334155 61.5%, #334155 100%)`;
                 document.getElementById('sliderValue').innerHTML = `80<span class="text-xl text-indigo-400">h</span>`;
-
                 setModo('simulacion', true);
-                
-                status.innerHTML = `<span>✨ Nuevo registro: ${mesFormateado}</span>`;
-                status.className = "text-sm font-bold text-center text-slate-500 mt-4";
-                status.classList.remove('hidden');
-                setTimeout(() => status.classList.add('hidden'), 2000);
             }
             renderizarDeudasDinamicas();
         }
 
         function setModo(modo, triggerCalc = true) {
             modoActual = modo;
-            if (modo === 'simulacion') {
-                document.getElementById('btnModoSim').className = "flex-1 sm:w-48 py-3 text-sm font-black bg-indigo-500/20 text-indigo-400 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2";
-                document.getElementById('btnModoReal').className = "flex-1 sm:w-48 py-3 text-sm font-black text-slate-400 hover:text-slate-200 rounded-xl transition-all flex items-center justify-center gap-2";
-                document.getElementById('panelSimulacion').classList.remove('hidden');
-                document.getElementById('panelReal').classList.add('hidden');
-                document.getElementById('dewaSimulacionPanel').classList.remove('hidden');
-                document.getElementById('dewaRealPanel').classList.add('hidden');
-                document.getElementById('tituloIngresos').innerText = "Simulador de Ingresos";
-                document.getElementById('tipoRegistroBadge').innerHTML = `<i class="fa-solid fa-hat-wizard"></i> PROYECCIÓN`;
-                document.getElementById('tipoRegistroBadge').className = "bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 text-xs font-extrabold px-3.5 py-1.5 rounded-lg uppercase tracking-wider inline-flex items-center gap-2";
-                document.getElementById('textoBotonGuardar').innerText = "Guardar Proyección en Supabase";
-                document.getElementById('desgloseSimulacion').classList.remove('hidden');
-            } else {
-                document.getElementById('btnModoReal').className = "flex-1 sm:w-48 py-3 text-sm font-black bg-teal-500/20 text-teal-400 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2";
-                document.getElementById('btnModoSim').className = "flex-1 sm:w-48 py-3 text-sm font-black text-slate-400 hover:text-slate-200 rounded-xl transition-all flex items-center justify-center gap-2";
-                document.getElementById('panelSimulacion').classList.add('hidden');
-                document.getElementById('panelReal').classList.remove('hidden');
-                document.getElementById('dewaSimulacionPanel').classList.add('hidden');
-                document.getElementById('dewaRealPanel').classList.remove('hidden');
-                document.getElementById('tituloIngresos').innerText = "Ingreso Real";
-                document.getElementById('tipoRegistroBadge').innerHTML = `<i class="fa-solid fa-money-check-dollar"></i> DATO REAL`;
-                document.getElementById('tipoRegistroBadge').className = "bg-teal-500/20 border border-teal-500/30 text-teal-400 text-xs font-extrabold px-3.5 py-1.5 rounded-lg uppercase tracking-wider inline-flex items-center gap-2";
-                document.getElementById('textoBotonGuardar').innerText = "Guardar Dato Real en Supabase";
-                document.getElementById('desgloseSimulacion').classList.add('hidden');
-            }
+            const esSim = modo === 'simulacion';
+            
+            document.getElementById('btnModoSim').className = esSim ? "flex-1 sm:w-48 py-3 text-sm font-black bg-indigo-500/20 text-indigo-400 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2" : "flex-1 sm:w-48 py-3 text-sm font-black text-slate-400 hover:text-slate-200 rounded-xl transition-all flex items-center justify-center gap-2";
+            document.getElementById('btnModoReal').className = !esSim ? "flex-1 sm:w-48 py-3 text-sm font-black bg-teal-500/20 text-teal-400 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2" : "flex-1 sm:w-48 py-3 text-sm font-black text-slate-400 hover:text-slate-200 rounded-xl transition-all flex items-center justify-center gap-2";
+            
+            document.getElementById('panelSimulacion').classList.toggle('hidden', !esSim);
+            document.getElementById('panelReal').classList.toggle('hidden', esSim);
+            document.getElementById('dewaSimulacionPanel').classList.toggle('hidden', !esSim);
+            document.getElementById('dewaRealPanel').classList.toggle('hidden', esSim);
+            document.getElementById('desgloseSimulacion').classList.toggle('hidden', !esSim);
+            
+            document.getElementById('tituloIngresos').innerText = esSim ? "Simulador de Ingresos" : "Ingreso Real";
+            document.getElementById('textoBotonGuardar').innerText = esSim ? "Guardar Proyección en Supabase" : "Guardar Dato Real en Supabase";
+            document.getElementById('tipoRegistroBadge').innerHTML = esSim ? `<i class="fa-solid fa-hat-wizard"></i> PROYECCIÓN` : `<i class="fa-solid fa-money-check-dollar"></i> DATO REAL`;
+            document.getElementById('tipoRegistroBadge').className = esSim ? "bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 text-xs font-extrabold px-3.5 py-1.5 rounded-lg uppercase tracking-wider inline-flex items-center gap-2" : "bg-teal-500/20 border border-teal-500/30 text-teal-400 text-xs font-extrabold px-3.5 py-1.5 rounded-lg uppercase tracking-wider inline-flex items-center gap-2";
+            
             if (triggerCalc) actualizarGastos(); 
         }
 
@@ -803,8 +766,7 @@
         function actualizarSlider() {
             const val = document.getElementById('blockHoursSlider').value;
             document.getElementById('sliderValue').innerHTML = `${val}<span class="text-xl text-indigo-400">h</span>`;
-            const percentage = (val / 130) * 100;
-            document.getElementById('blockHoursSlider').style.background = `linear-gradient(to right, #6366f1 0%, #6366f1 ${percentage}%, #334155 ${percentage}%, #334155 100%)`;
+            document.getElementById('blockHoursSlider').style.background = `linear-gradient(to right, #6366f1 0%, #6366f1 ${(val / 130) * 100}%, #334155 ${(val / 130) * 100}%, #334155 100%)`;
             calcularTodo();
         }
 
@@ -813,9 +775,7 @@
             if (modoActual === 'simulacion') {
                 const kwh = parseFloat(document.getElementById('dewaKwh').value) || 0;
                 const m3 = parseFloat(document.getElementById('dewaM3').value) || 0;
-                const elecTotal = ((kwh * 0.230) + (kwh * 0.060) + 5.00) * 1.05; 
-                const waterTotal = ((m3 * 7.700) + (m3 * 1.100) + 5.00) * 1.05; 
-                gastoDewa = elecTotal + waterTotal + 236.08;
+                gastoDewa = (((kwh * 0.230) + (kwh * 0.060) + 5.00) * 1.05) + (((m3 * 7.700) + (m3 * 1.100) + 5.00) * 1.05) + 236.08;
                 document.getElementById('dewaTotalSimDisplay').innerText = Math.floor(gastoDewa) + ' AED';
             } else {
                 gastoDewa = parseFloat(document.getElementById('dewaRealInput').value) || 0;
@@ -837,9 +797,8 @@
                 const hours = parseFloat(document.getElementById('blockHoursSlider').value) || 0;
                 const meals = parseFloat(document.getElementById('mealAllowance').value) || 0;
                 const turnarounds = parseFloat(document.getElementById('turnarounds').value) || 0;
-                const pagoVuelo = hours * TARIFA_HORA_VUELO;
-                salarioEstimadoCalculado = BASE_FIJA_NETA + pagoVuelo + meals + turnarounds;
-                document.getElementById('pagoVueloDisplay').innerText = Math.floor(pagoVuelo).toLocaleString() + ' AED';
+                salarioEstimadoCalculado = BASE_FIJA_NETA + (hours * TARIFA_HORA_VUELO) + meals + turnarounds;
+                document.getElementById('pagoVueloDisplay').innerText = Math.floor(hours * TARIFA_HORA_VUELO).toLocaleString() + ' AED';
                 document.getElementById('dietasDisplay').innerText = Math.floor(meals + turnarounds).toLocaleString() + ' AED';
             } else {
                 salarioEstimadoCalculado = parseFloat(document.getElementById('salarioRealInput').value) || 0;
@@ -854,34 +813,27 @@
             
             if (salarioEstimadoCalculado > lineaBaseDinamica) {
                 excedente = salarioEstimadoCalculado - lineaBaseDinamica;
-                pagoDeuda = excedente * 0.70;
-                fondoEmergencia = excedente * 0.30;
-
+                pagoDeuda = excedente * 0.70; fondoEmergencia = excedente * 0.30;
                 updateTexts('val-excedente', Math.floor(excedente).toLocaleString() + ' AED');
                 updateTexts('val-deuda', Math.floor(pagoDeuda).toLocaleString() + ' AED');
                 updateTexts('val-fondo', Math.floor(fondoEmergencia).toLocaleString() + ' AED');
-                
-                panelExcedente.style.opacity = '1';
-                panelExcedente.style.pointerEvents = 'auto';
+                panelExcedente.style.opacity = '1'; panelExcedente.style.pointerEvents = 'auto';
                 panelSinExcedente.classList.add('hidden');
                 actualizarGraficoDistribucion(lineaBaseDinamica, pagoDeuda, fondoEmergencia);
             } else {
                 excedente = 0; pagoDeuda = 0; fondoEmergencia = 0;
-                panelExcedente.style.opacity = '0.1';
-                panelExcedente.style.pointerEvents = 'none';
+                panelExcedente.style.opacity = '0.1'; panelExcedente.style.pointerEvents = 'none';
                 panelSinExcedente.classList.remove('hidden');
                 actualizarGraficoDistribucion(salarioEstimadoCalculado, 0, 0);
             }
-            actualizarKpiProyeccion();
+            if (deudaTotal > 0 && pagoDeuda > 0) document.getElementById('kpiMonthsFree').innerText = `~${Math.ceil(deudaTotal / (pagoDeuda + 3346 + 1739))} Meses`;
+            else document.getElementById('kpiMonthsFree').innerText = "---";
         }
 
         function actualizarGraficoDistribucion(base, deuda, fondo) {
-            if (distChartInstance) {
-                distChartInstance.data.datasets[0].data = [base, deuda, fondo];
-                distChartInstance.update();
-            } else {
-                const ctx = document.getElementById('distributionChart').getContext('2d');
-                distChartInstance = new Chart(ctx, {
+            if (distChartInstance) { distChartInstance.data.datasets[0].data = [base, deuda, fondo]; distChartInstance.update(); } 
+            else {
+                distChartInstance = new Chart(document.getElementById('distributionChart').getContext('2d'), {
                     type: 'doughnut',
                     data: { labels: ['Costes + Tarjeta', 'Ataque Deuda', 'Fondo'], datasets: [{ data: [base, deuda, fondo], backgroundColor: ['#334155', '#f43f5e', '#3b82f6'], borderWidth: 0, hoverOffset: 5 }] },
                     options: { responsive: true, maintainAspectRatio: false, cutout: '80%', plugins: { legend: { display: false }, tooltip: { enabled: true } }, animation: { duration: 400, easing: 'easeOutQuart' } }
@@ -889,57 +841,40 @@
             }
         }
 
-        function actualizarKpiProyeccion() {
-            if (deudaTotal > 0 && pagoDeuda > 0) {
-                const meses = Math.ceil(deudaTotal / (pagoDeuda + 3346 + 1739));
-                document.getElementById('kpiMonthsFree').innerText = `~${meses} Meses`;
-            } else { document.getElementById('kpiMonthsFree').innerText = "---"; }
-        }
-
         async function cargarDeudas() {
             if (deudasGlobales.length === 0) {
                 const { data, error } = await supabaseClient.from('deudas').select('*').order('id', { ascending: true });
-                if (error) { document.getElementById('debtCardsContainer').innerHTML = `<div class="text-rose-500 font-bold">Error: ${error.message}</div>`; return; }
-                deudasGlobales = data;
+                if (!error) deudasGlobales = data;
             }
             renderizarDeudasDinamicas();
         }
 
         function renderizarDeudasDinamicas() {
             const container = document.getElementById('debtCardsContainer');
-            if(!container) return;
-            container.innerHTML = '';
-            deudaTotal = 0;
+            if(!container) return; container.innerHTML = ''; deudaTotal = 0;
 
-            const selectorVal = document.getElementById('mesSelector').value;
-            const [selYear, selMonth] = selectorVal.split('-');
+            const [selYear, selMonth] = document.getElementById('mesSelector').value.split('-');
             const selectedDate = new Date(selYear, parseInt(selMonth) - 1, 1);
             const today = new Date();
-            const currentDate = new Date(today.getFullYear(), today.getMonth(), 1);
-            const monthDiff = (selectedDate.getFullYear() - currentDate.getFullYear()) * 12 + (selectedDate.getMonth() - currentDate.getMonth());
+            const monthDiff = (selectedDate.getFullYear() - today.getFullYear()) * 12 + (selectedDate.getMonth() - today.getMonth());
 
             const maxDeuda = Math.max(...deudasGlobales.filter(d => !d.nombre.toLowerCase().includes('coche')).map(d => parseFloat(d.saldo)), 1);
 
             deudasGlobales.forEach(deuda => {
-                const saldoBaseReal = parseFloat(deuda.saldo);
                 const cuota = parseFloat(deuda.cuota_minima);
-                let saldoProyectado = Math.max(0, saldoBaseReal - (monthDiff * cuota));
+                let saldoProyectado = Math.max(0, parseFloat(deuda.saldo) - (monthDiff * cuota));
                 deudaTotal += saldoProyectado;
                 
                 if (deuda.nombre.toLowerCase().includes('coche')) {
                     const carSaldoEl = document.getElementById('carWidgetSaldo');
-                    const carEditBtn = document.getElementById('carWidgetEditBtn');
-                    const carMesesEl = document.getElementById('carWidgetMeses');
                     if (carSaldoEl) carSaldoEl.innerHTML = `${saldoProyectado.toLocaleString('en-US', {minimumFractionDigits: 2})} <span class="text-lg text-slate-400">AED</span>`;
-                    if (carEditBtn) carEditBtn.onclick = () => actualizarSaldo(deuda.id, deuda.saldo); 
-                    if (carMesesEl) {
-                        if (saldoProyectado <= 0) { carMesesEl.innerText = "¡Liquidado!"; carMesesEl.className = "text-xs font-bold text-white bg-gradient-to-r from-emerald-500 to-teal-400 px-2 py-1 rounded-md shadow-lg shadow-emerald-500/30"; } 
-                        else { carMesesEl.innerText = `Quedan ~${Math.ceil(saldoProyectado/cuota)} meses`; carMesesEl.className = "text-xs font-bold text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded-md"; }
-                    }
+                    document.getElementById('carWidgetEditBtn').onclick = () => actualizarSaldo(deuda.id, deuda.saldo); 
+                    const carMesesEl = document.getElementById('carWidgetMeses');
+                    if (saldoProyectado <= 0) { carMesesEl.innerText = "¡Liquidado!"; carMesesEl.className = "text-xs font-bold text-white bg-gradient-to-r from-emerald-500 to-teal-400 px-2 py-1 rounded-md shadow-lg shadow-emerald-500/30"; } 
+                    else { carMesesEl.innerText = `Quedan ~${Math.ceil(saldoProyectado/cuota)} meses`; carMesesEl.className = "text-xs font-bold text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded-md"; }
                 } else {
                     const porcentaje = (saldoProyectado / maxDeuda) * 100;
                     const isCreditCard = deuda.nombre.toLowerCase().includes('tarjeta') || deuda.nombre.includes('2811') || deuda.nombre.toLowerCase().includes('emaar');
-                    const colorClass = isCreditCard ? 'bg-emerald-500' : 'bg-rose-500';
                     let badgeTexto = monthDiff > 0 ? `Proyección (+${monthDiff} meses)` : (monthDiff < 0 ? `Histórico (${monthDiff} meses)` : 'Lo que queda (Hoy)');
                     const textMesesRestantes = saldoProyectado > 0 ? `<span class="text-indigo-400 font-black ml-1">(~${Math.ceil(saldoProyectado/cuota)} meses)</span>` : `<span class="text-emerald-400 font-black ml-1">¡PAGADO! 🎉</span>`;
 
@@ -959,20 +894,18 @@
                                     <span>Cuota: ${cuota.toLocaleString()} AED ${textMesesRestantes}</span>
                                 </div>
                                 <div class="w-full bg-slate-700 rounded-full h-1.5 overflow-hidden">
-                                    <div class="${colorClass} h-full rounded-full transition-all duration-1000" style="width: ${porcentaje}%"></div>
+                                    <div class="${isCreditCard ? 'bg-emerald-500' : 'bg-rose-500'} h-full rounded-full transition-all duration-1000" style="width: ${porcentaje}%"></div>
                                 </div>
                             </div>
                         </div>`;
                 }
             });
             document.getElementById('kpiTotalDebt').innerText = Math.floor(deudaTotal).toLocaleString() + ' AED';
-            actualizarKpiProyeccion();
             calcularEstadoAlquiler(selectedDate);
         }
 
         function calcularEstadoAlquiler(fechaSeleccionada) {
             const mes = fechaSeleccionada.getMonth() + 1;
-            const anio = fechaSeleccionada.getFullYear();
             let mesCheque, qText, mesesAhorrados;
             if (mes <= 3) { mesCheque = 3; qText = "Q1 (Marzo)"; mesesAhorrados = mes === 3 ? 3 : mes; } 
             else if (mes <= 6) { mesCheque = 6; qText = "Q2 (Junio)"; mesesAhorrados = mes === 6 ? 3 : mes - 3; } 
@@ -980,50 +913,36 @@
             else { mesCheque = 12; qText = "Q4 (Diciembre)"; mesesAhorrados = mes === 12 ? 3 : mes - 9; }
 
             const ahorroActual = mesesAhorrados * 3033;
-            const diasRestantes = Math.ceil((new Date(anio, mesCheque - 1, 26) - fechaSeleccionada) / (1000 * 60 * 60 * 24));
+            const diasRestantes = Math.ceil((new Date(fechaSeleccionada.getFullYear(), mesCheque - 1, 26) - fechaSeleccionada) / (1000 * 60 * 60 * 24));
             const porcentaje = Math.min(100, Math.max(0, (ahorroActual / 9099) * 100));
             
             setTimeout(() => { document.getElementById('homeFillLiquid').style.clipPath = `inset(${100 - porcentaje}% 0 0 0)`; }, 100);
             document.getElementById('rentQuarterTitle').innerText = `Cheque Alquiler ${qText}`;
             document.getElementById('rentSavedValue').innerText = ahorroActual.toLocaleString();
             
-            const badgePorcentaje = document.getElementById('rentPercentageBadge');
-            if (ahorroActual >= 9099) {
-                badgePorcentaje.innerHTML = `<i class="fa-solid fa-check"></i> Listo para Pagar`;
-                badgePorcentaje.className = "text-white bg-gradient-to-r from-emerald-500 to-teal-400 px-2 py-0.5 rounded shadow-sm font-black";
-            } else {
-                badgePorcentaje.innerText = `${Math.floor(porcentaje)}% Lleno`;
-                badgePorcentaje.className = "text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded";
-            }
+            const bPct = document.getElementById('rentPercentageBadge');
+            if (ahorroActual >= 9099) { bPct.innerHTML = `<i class="fa-solid fa-check"></i> Listo para Pagar`; bPct.className = "text-white bg-gradient-to-r from-emerald-500 to-teal-400 px-2 py-0.5 rounded shadow-sm font-black"; } 
+            else { bPct.innerText = `${Math.floor(porcentaje)}% Lleno`; bPct.className = "text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded"; }
 
-            const badgeDias = document.getElementById('rentDaysBadge');
-            if (diasRestantes <= 0 && diasRestantes > -30) {
-                badgeDias.innerHTML = `<i class="fa-solid fa-money-check"></i> Mes de Cobro`;
-                badgeDias.className = "text-xs font-bold text-amber-400 bg-amber-900/50 px-2.5 py-1 rounded-md border border-amber-700/50";
-            } else {
-                badgeDias.innerHTML = `<i class="fa-regular fa-clock mr-1"></i> Vence en ~${Math.abs(diasRestantes)} días`;
-                badgeDias.className = "text-xs font-bold text-slate-400 bg-slate-900/50 px-2.5 py-1 rounded-md border border-slate-700";
-            }
+            const bDias = document.getElementById('rentDaysBadge');
+            if (diasRestantes <= 0 && diasRestantes > -30) { bDias.innerHTML = `<i class="fa-solid fa-money-check"></i> Mes de Cobro`; bDias.className = "text-xs font-bold text-amber-400 bg-amber-900/50 px-2.5 py-1 rounded-md border border-amber-700/50"; } 
+            else { bDias.innerHTML = `<i class="fa-regular fa-clock mr-1"></i> Vence en ~${Math.abs(diasRestantes)} días`; bDias.className = "text-xs font-bold text-slate-400 bg-slate-900/50 px-2.5 py-1 rounded-md border border-slate-700"; }
         }
 
         async function actualizarSaldo(id, saldoActual) {
             const nuevoSaldo = prompt("Actualiza el saldo pendiente a día de hoy:", saldoActual);
             if (nuevoSaldo !== null && !isNaN(nuevoSaldo)) {
-                const { error } = await supabaseClient.from('deudas').update({ saldo: parseFloat(nuevoSaldo) }).eq('id', id);
-                if (!error) { deudasGlobales = []; cargarDeudas(); } else alert("Error de sincronización.");
+                if (!(await supabaseClient.from('deudas').update({ saldo: parseFloat(nuevoSaldo) }).eq('id', id)).error) { deudasGlobales = []; cargarDeudas(); }
             }
         }
 
         async function cargarHistorialIngresos() {
             const { data, error } = await supabaseClient.from('historial_meses').select('mes, salario, tipo').order('id', { ascending: true });
             let combinedData = [...historicalIncome.map(d => ({...d, tipo: 'Real'}))]; 
-            if (!error && data) {
-                data.forEach(r => combinedData.push({ mes: r.mes.substring(0,3).charAt(0).toUpperCase() + r.mes.substring(1,3).toLowerCase() + ' ' + r.mes.slice(-2), valor: parseFloat(r.salario), tipo: r.tipo || 'Real' }));
-            }
+            if (!error && data) data.forEach(r => combinedData.push({ mes: r.mes.substring(0,3).charAt(0).toUpperCase() + r.mes.substring(1,3).toLowerCase() + ' ' + r.mes.slice(-2), valor: parseFloat(r.salario), tipo: r.tipo || 'Real' }));
+            
             const labels = combinedData.map(d => d.tipo === 'Proyección' ? d.mes + ' 🔮' : d.mes);
             const values = combinedData.map(d => d.valor);
-            const averageData = Array(labels.length).fill(values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : 0);
-
             const ctx = document.getElementById('incomeHistoryChart').getContext('2d');
             const gradient = ctx.createLinearGradient(0, 0, 0, 350); gradient.addColorStop(0, 'rgba(99, 102, 241, 0.4)'); gradient.addColorStop(1, 'rgba(99, 102, 241, 0.0)');
 
@@ -1032,7 +951,7 @@
                 type: 'line',
                 data: { labels, datasets: [
                     { label: 'Ingreso Neto', data: values, borderColor: '#6366f1', borderWidth: 3, backgroundColor: gradient, fill: true, tension: 0.4, pointBackgroundColor: combinedData.map(d => d.tipo === 'Proyección' ? '#fbbf24' : '#ffffff'), pointBorderColor: '#6366f1', pointBorderWidth: 2, pointRadius: 4, pointHoverRadius: 6, order: 2 },
-                    { label: 'Media', data: averageData, borderColor: '#94a3b8', borderWidth: 2, borderDash: [5, 5], fill: false, pointRadius: 0, pointHoverRadius: 0, order: 1 }
+                    { label: 'Media', data: Array(labels.length).fill(values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : 0), borderColor: '#94a3b8', borderWidth: 2, borderDash: [5, 5], fill: false, pointRadius: 0, pointHoverRadius: 0, order: 1 }
                 ]},
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#0f172a', padding: 12, callbacks: { label: c => c.datasetIndex === 1 ? ` Media: ${Math.floor(c.raw).toLocaleString()} AED` : ` ${combinedData[c.dataIndex].tipo}: ${c.raw.toLocaleString()} AED` } } }, scales: { y: { beginAtZero: true, grid: { color: '#1e293b', drawBorder: false }, ticks: { color: '#94a3b8', callback: v => v / 1000 + 'k' } }, x: { grid: { display: false }, ticks: { color: '#94a3b8', maxTicksLimit: 12 } } }, interaction: { mode: 'index', intersect: false } }
             });
@@ -1047,40 +966,35 @@
             btn.innerHTML = `<svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> <span>Sincronizando...</span>`;
             btn.disabled = true;
 
-            const mesFormateado = new Date(mesRaw + '-05').toLocaleString('es-ES', { month: 'long', year: 'numeric' });
-            const payload = { mes: mesFormateado, salario: Math.floor(salarioEstimadoCalculado), linea_base: Math.floor(lineaBaseDinamica), excedente: Math.floor(excedente), pago_extra_deuda: Math.floor(pagoDeuda), fondo_emergencia: Math.floor(fondoEmergencia), tipo: modoActual === 'simulacion' ? 'Proyección' : 'Real', dewa: Math.floor(gastoDewa), horas_vuelo: parseFloat(document.getElementById('blockHoursSlider').value) || 0, dietas: parseFloat(document.getElementById('mealAllowance').value) || 0, turnarounds: parseFloat(document.getElementById('turnarounds').value) || 0, gasto_emaar: parseFloat(document.getElementById('gastoEmaar').value) || 0, dewa_kwh: parseFloat(document.getElementById('dewaKwh').value) || 0, dewa_m3: parseFloat(document.getElementById('dewaM3').value) || 0, dewa_real: parseFloat(document.getElementById('dewaRealInput').value) || null, salario_real: parseFloat(document.getElementById('salarioRealInput').value) || null };
+            const payload = { mes: new Date(mesRaw + '-05').toLocaleString('es-ES', { month: 'long', year: 'numeric' }), salario: Math.floor(salarioEstimadoCalculado), linea_base: Math.floor(lineaBaseDinamica), excedente: Math.floor(excedente), pago_extra_deuda: Math.floor(pagoDeuda), fondo_emergencia: Math.floor(fondoEmergencia), tipo: modoActual === 'simulacion' ? 'Proyección' : 'Real', dewa: Math.floor(gastoDewa), horas_vuelo: parseFloat(document.getElementById('blockHoursSlider').value) || 0, dietas: parseFloat(document.getElementById('mealAllowance').value) || 0, turnarounds: parseFloat(document.getElementById('turnarounds').value) || 0, gasto_emaar: parseFloat(document.getElementById('gastoEmaar').value) || 0, dewa_kwh: parseFloat(document.getElementById('dewaKwh').value) || 0, dewa_m3: parseFloat(document.getElementById('dewaM3').value) || 0, dewa_real: parseFloat(document.getElementById('dewaRealInput').value) || null, salario_real: parseFloat(document.getElementById('salarioRealInput').value) || null };
 
             const { error } = await supabaseClient.from('historial_meses').upsert([payload], { onConflict: 'mes' });
-            const status = document.getElementById('saveStatus'); status.classList.remove('hidden');
-
-            if (error) { status.innerText = "Error: " + error.message; status.className = "text-sm font-bold text-center text-rose-400 mt-4"; } 
+            if (error) { document.getElementById('saveStatus').innerText = "Error: " + error.message; document.getElementById('saveStatus').className = "text-sm font-bold text-center text-rose-400 mt-4"; document.getElementById('saveStatus').classList.remove('hidden'); } 
             else {
-                const [y, m] = mesRaw.split('-');
-                if (parseInt(m) === (new Date().getMonth() + 1) && parseInt(y) === new Date().getFullYear() && modoActual === 'real') {
-                    const deudasActualizadas = deudasGlobales.map(d => ({ ...d, saldo: Math.max(0, parseFloat(d.saldo) - parseFloat(d.cuota_minima)) }));
-                    if (!(await supabaseClient.from('deudas').upsert(deudasActualizadas)).error) { deudasGlobales = []; cargarDeudas(); }
+                if (parseInt(mesRaw.split('-')[1]) === (new Date().getMonth() + 1) && parseInt(mesRaw.split('-')[0]) === new Date().getFullYear() && modoActual === 'real') {
+                    if (!(await supabaseClient.from('deudas').upsert(deudasGlobales.map(d => ({ ...d, saldo: Math.max(0, parseFloat(d.saldo) - parseFloat(d.cuota_minima)) })))).error) { deudasGlobales = []; cargarDeudas(); }
                 }
-                status.innerHTML = `<span>✅ ¡Guardado con éxito!</span>`; status.className = "text-sm font-bold text-center text-emerald-400 mt-4";
-                cargarHistorialIngresos(); setTimeout(() => status.classList.add('hidden'), 4000);
+                document.getElementById('saveStatus').innerHTML = `<span>✅ ¡Guardado con éxito!</span>`; document.getElementById('saveStatus').className = "text-sm font-bold text-center text-emerald-400 mt-4"; document.getElementById('saveStatus').classList.remove('hidden');
+                cargarHistorialIngresos(); setTimeout(() => document.getElementById('saveStatus').classList.add('hidden'), 4000);
             }
             btn.innerHTML = originalContent; btn.disabled = false;
         }
 
         // ==========================================
-        // MÓDULO ANÁLISIS DE GASTOS DINÁMICO
+        // MÓDULO ANÁLISIS VISUAL DE EXTRACTOS (FILA 5)
         // ==========================================
 
         async function cargarExtractosEmaar() {
             const { data, error } = await supabaseClient.from('extractos_emaar').select('*').order('created_at', { ascending: true });
-            if (error) { console.error("Error cargando extractos:", error); return; }
+            if (error) return console.error("Error cargando extractos:", error);
             
+            // Ordenar cronológicamente para facilitar la comparación mes a mes (por fecha_vencimiento o created_at)
             extractosGlobales = data || [];
+            extractosGlobales.sort((a, b) => new Date(a.fecha_vencimiento || a.created_at) - new Date(b.fecha_vencimiento || b.created_at));
+
             const select = document.getElementById('filtroGastosMes');
-            
-            // Limpiar opciones anteriores pero mantener la de "Tendencia"
             select.innerHTML = '<option value="tendencia">📈 Tendencia Global (Últimos Meses)</option>';
             
-            // Añadir opciones por cada mes disponible
             [...extractosGlobales].reverse().forEach(ext => {
                 const opt = document.createElement('option');
                 opt.value = ext.id;
@@ -1088,131 +1002,190 @@
                 select.appendChild(opt);
             });
             
-            renderizarGraficoGastos();
+            renderizarAnalisisVisual();
         }
 
-        function renderizarGraficoGastos() {
+        function renderizarAnalisisVisual() {
             const val = document.getElementById('filtroGastosMes').value;
             const ctx = document.getElementById('expensesChart').getContext('2d');
             
+            // Mostrar/Ocultar boton de borrar
+            const btnBorrar = document.getElementById('btnBorrarExtracto');
+            if(val === 'tendencia') btnBorrar.classList.add('hidden');
+            else btnBorrar.classList.remove('hidden');
+
             if (expensesChartInstance) expensesChartInstance.destroy();
+
+            // Limpiar indicadores MoM
+            document.getElementById('kpiTotalMoM').className = "hidden";
+            document.getElementById('kpiTopCategoriaMoM').className = "hidden";
+            document.getElementById('contenedorCategoriasVisual').classList.add('hidden');
 
             if (val === 'tendencia') {
                 document.getElementById('labelPromedioGasto').innerText = "Promedio Mensual (Total)";
                 document.getElementById('labelComisiones').innerText = "Fugas Históricas (Comisiones/Tasas)";
 
-                if (extractosGlobales.length === 0) return; // No data yet
+                if (extractosGlobales.length === 0) return;
 
-                const labels = extractosGlobales.map(e => e.periodo.split(' to ')[0].trim().substring(0, 6)); // E.g. "03-Dec"
+                const labels = extractosGlobales.map(e => e.periodo.split(' to ')[0].trim().substring(0, 6)); 
                 const datasets = [];
-                let totalGastoHistorico = 0;
-                let totalComisionesHistorico = 0;
-                let maxCatValue = 0;
-                let maxCatName = "---";
+                let totalGastoHistorico = 0, totalComisionesHistorico = 0, maxCatValue = 0, maxCatName = "---";
 
-                // Preparar los datasets para barras apiladas
                 Object.keys(catColors).forEach(cat => {
                     const dataPoints = extractosGlobales.map(ext => ext.desglose_categorias[cat] || 0);
                     const catSum = dataPoints.reduce((a, b) => a + b, 0);
-                    
                     if (catSum > 0) {
-                        datasets.push({
-                            label: cat,
-                            data: dataPoints,
-                            backgroundColor: catColors[cat],
-                            borderWidth: 0,
-                            borderRadius: 4,
-                            barPercentage: 0.6
-                        });
-                        
-                        if (cat !== 'Otros Gastos' && catSum > maxCatValue) {
-                            maxCatValue = catSum;
-                            maxCatName = cat;
-                        }
-                        
+                        datasets.push({ label: cat, data: dataPoints, backgroundColor: catColors[cat], borderWidth: 0, borderRadius: 4, barPercentage: 0.6 });
+                        if (cat !== 'Otros Gastos' && catSum > maxCatValue) { maxCatValue = catSum; maxCatName = cat; }
                         totalGastoHistorico += catSum;
                         if(cat === 'Comisiones & Tasas') totalComisionesHistorico = catSum;
                     }
                 });
 
-                // KPIs Globales
-                const promedio = totalGastoHistorico / extractosGlobales.length;
-                document.getElementById('kpiPromedioGasto').innerText = Math.floor(promedio).toLocaleString() + ' AED';
+                document.getElementById('kpiPromedioGasto').innerHTML = `${Math.floor(totalGastoHistorico / extractosGlobales.length).toLocaleString()} <span class="text-sm text-slate-400">AED</span>`;
                 document.getElementById('kpiTopCategoria').innerText = maxCatName;
                 document.getElementById('kpiTopCategoriaAmount').innerText = `~${Math.floor(maxCatValue / extractosGlobales.length).toLocaleString()} AED/mes`;
                 document.getElementById('kpiComisiones').innerText = Math.floor(totalComisionesHistorico).toLocaleString() + ' AED';
 
                 expensesChartInstance = new Chart(ctx, {
-                    type: 'bar',
-                    data: { labels, datasets },
+                    type: 'bar', data: { labels, datasets },
                     options: {
-                        responsive: true, maintainAspectRatio: false,
-                        plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, backgroundColor: '#0f172a', padding: 10 } },
-                        scales: { 
-                            x: { stacked: true, grid: { display: false }, ticks: { color: '#94a3b8' } },
-                            y: { stacked: true, grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } }
-                        }
+                        responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, backgroundColor: '#0f172a', padding: 10 } },
+                        scales: { x: { stacked: true, grid: { display: false }, ticks: { color: '#94a3b8' } }, y: { stacked: true, grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } } }
                     }
                 });
 
             } else {
-                // Vista de Mes Específico (Doughnut)
+                // Vista de MES ESPECÍFICO
                 document.getElementById('labelPromedioGasto').innerText = "Gasto Total del Mes";
                 document.getElementById('labelComisiones').innerText = "Fugas Este Mes (Comisiones/Tasas)";
 
-                const extracto = extractosGlobales.find(e => e.id.toString() === val);
-                if (!extracto) return;
+                const currentIndex = extractosGlobales.findIndex(e => e.id.toString() === val);
+                if (currentIndex === -1) return;
+                
+                const extracto = extractosGlobales[currentIndex];
+                const extractoAnterior = currentIndex > 0 ? extractosGlobales[currentIndex - 1] : null;
 
                 const categorias = extracto.desglose_categorias;
-                const labels = [];
-                const data = [];
-                const bgColors = [];
-                let topCat = "---";
-                let topVal = 0;
+                const labels = [], data = [], bgColors = [];
+                let topCat = "---", topVal = 0;
 
                 Object.keys(categorias).forEach(cat => {
                     const monto = categorias[cat];
                     if (monto > 0) {
-                        labels.push(cat);
-                        data.push(monto);
-                        bgColors.push(catColors[cat] || '#94a3b8');
+                        labels.push(cat); data.push(monto); bgColors.push(catColors[cat] || '#94a3b8');
                         if (cat !== 'Otros Gastos' && monto > topVal) { topVal = monto; topCat = cat; }
                     }
                 });
 
-                document.getElementById('kpiPromedioGasto').innerText = Math.floor(extracto.total_compras).toLocaleString() + ' AED';
+                // Comparativa Total (MoM)
+                document.getElementById('kpiPromedioGasto').innerHTML = `${Math.floor(extracto.total_compras).toLocaleString()} <span class="text-sm text-slate-400">AED</span>`;
+                if(extractoAnterior && extractoAnterior.total_compras > 0) {
+                    const diffPct = ((extracto.total_compras - extractoAnterior.total_compras) / extractoAnterior.total_compras) * 100;
+                    const badge = document.getElementById('kpiTotalMoM');
+                    badge.classList.remove('hidden', 'bg-rose-500/20', 'text-rose-400', 'bg-emerald-500/20', 'text-emerald-400');
+                    if(diffPct > 0) {
+                        badge.innerHTML = `<i class="fa-solid fa-arrow-trend-up"></i> +${diffPct.toFixed(1)}%`;
+                        badge.classList.add('bg-rose-500/20', 'text-rose-400'); // Gasto sube = Rojo
+                    } else {
+                        badge.innerHTML = `<i class="fa-solid fa-arrow-trend-down"></i> ${diffPct.toFixed(1)}%`;
+                        badge.classList.add('bg-emerald-500/20', 'text-emerald-400'); // Gasto baja = Verde
+                    }
+                }
+
+                // Comparativa Top Categoría
                 document.getElementById('kpiTopCategoria').innerText = topCat;
                 document.getElementById('kpiTopCategoriaAmount').innerText = Math.floor(topVal).toLocaleString() + ' AED';
+                if(extractoAnterior && extractoAnterior.desglose_categorias[topCat] > 0) {
+                    const antVal = extractoAnterior.desglose_categorias[topCat];
+                    const diffCat = ((topVal - antVal) / antVal) * 100;
+                    const badgeCat = document.getElementById('kpiTopCategoriaMoM');
+                    badgeCat.classList.remove('hidden', 'bg-rose-500/20', 'text-rose-400', 'bg-emerald-500/20', 'text-emerald-400');
+                    if(diffCat > 0) { badgeCat.innerHTML = `+${diffCat.toFixed(0)}%`; badgeCat.classList.add('bg-rose-500/20', 'text-rose-400'); }
+                    else { badgeCat.innerHTML = `${diffCat.toFixed(0)}%`; badgeCat.classList.add('bg-emerald-500/20', 'text-emerald-400'); }
+                }
+                
                 document.getElementById('kpiComisiones').innerText = Math.floor(categorias['Comisiones & Tasas'] || 0).toLocaleString() + ' AED';
+
+                // Renderizar Grid de Categorías Visual
+                const gridContainer = document.getElementById('contenedorCategoriasVisual');
+                gridContainer.innerHTML = '';
+                gridContainer.classList.remove('hidden');
+
+                // Ordenar categorias de mayor a menor monto para el grid
+                const sortedCats = Object.keys(categorias).filter(c => categorias[c] > 0).sort((a,b) => categorias[b] - categorias[a]);
+                
+                sortedCats.forEach(cat => {
+                    const monto = categorias[cat];
+                    const pctTotal = Math.round((monto / extracto.total_compras) * 100);
+                    let momHtml = '';
+                    
+                    if(extractoAnterior && extractoAnterior.desglose_categorias[cat] > 0) {
+                        const antVal = extractoAnterior.desglose_categorias[cat];
+                        const diffPct = ((monto - antVal) / antVal) * 100;
+                        const icon = diffPct > 0 ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down';
+                        const colorClass = diffPct > 0 ? 'text-rose-400' : 'text-emerald-400';
+                        momHtml = `<span class="${colorClass} text-[10px] font-bold ml-2"><i class="fa-solid ${icon}"></i> ${Math.abs(diffPct).toFixed(0)}%</span>`;
+                    }
+
+                    gridContainer.innerHTML += `
+                        <div class="bg-slate-800/40 p-4 rounded-2xl border border-slate-700/80 hover:bg-slate-800/80 transition flex flex-col justify-between">
+                            <div class="flex justify-between items-start mb-3">
+                                <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm shadow-inner" style="background-color: ${catColors[cat]}20; color: ${catColors[cat]}; border: 1px solid ${catColors[cat]}40;">
+                                    <i class="fa-solid ${catIcons[cat] || 'fa-tag'}"></i>
+                                </div>
+                                <span class="text-slate-500 font-black text-xs">${pctTotal}%</span>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-tight mb-1 truncate" title="${cat}">${cat}</p>
+                                <div class="flex items-baseline">
+                                    <p class="text-lg font-black text-white">${Math.floor(monto).toLocaleString()}</p>
+                                    ${momHtml}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
 
                 expensesChartInstance = new Chart(ctx, {
                     type: 'doughnut',
                     data: { labels, datasets: [{ data, backgroundColor: bgColors, borderWidth: 0, hoverOffset: 8 }] },
                     options: { 
                         responsive: true, maintainAspectRatio: false, cutout: '70%', 
-                        plugins: { legend: { position: 'right', labels: { color: '#cbd5e1', font: { size: 11 } } }, tooltip: { backgroundColor: '#0f172a', callbacks: { label: c => ` ${c.label}: ${c.raw.toLocaleString()} AED` } } },
+                        plugins: { legend: { position: 'right', labels: { color: '#cbd5e1', font: { size: 11 }, padding: 15 } }, tooltip: { backgroundColor: '#0f172a', callbacks: { label: c => ` ${c.label}: ${c.raw.toLocaleString()} AED` } } },
                         animation: { duration: 500, easing: 'easeOutQuart' }
                     }
                 });
             }
         }
 
+        async function borrarExtractoBD() {
+            const val = document.getElementById('filtroGastosMes').value;
+            if (val === 'tendencia') return;
+            if (!confirm("⚠️ ¿Estás seguro de que deseas borrar el análisis de este mes de la base de datos?")) return;
+            
+            const { error } = await supabaseClient.from('extractos_emaar').delete().eq('id', val);
+            if (!error) {
+                alert("✅ Extracto borrado correctamente del histórico.");
+                cargarExtractosEmaar(); // Recarga la info y el dropdown
+            } else {
+                alert("Error al borrar el extracto: " + error.message);
+            }
+        }
+
         // ==========================================
-        // MÓDULO PARSER PDF: EMIRATES NBD
+        // MÓDULO LECTOR PDF
         // ==========================================
 
         function abrirModalExtracto() { document.getElementById('modalExtracto').classList.remove('hidden'); }
         function cerrarModalExtracto() { document.getElementById('modalExtracto').classList.add('hidden'); }
-
         function configurarDragAndDrop() {
             const dz = document.getElementById('dropZoneExtracto'); if(!dz) return;
             ['dragenter', 'dragover'].forEach(e => dz.addEventListener(e, ev => { ev.preventDefault(); ev.stopPropagation(); dz.classList.add('border-yellow-400', 'bg-slate-800/80'); }, false));
             ['dragleave', 'drop'].forEach(e => dz.addEventListener(e, ev => { ev.preventDefault(); ev.stopPropagation(); dz.classList.remove('border-yellow-400', 'bg-slate-800/80'); }, false));
             dz.addEventListener('drop', ev => { if (ev.dataTransfer.files.length > 0) leerPdf(ev.dataTransfer.files[0]); }, false);
         }
-
         function procesarArchivoPdf(event) { if (event.target.files[0]) leerPdf(event.target.files[0]); }
-
         async function leerPdf(file) {
             document.getElementById('dropZoneExtracto').classList.add('hidden'); document.getElementById('resultadoExtracto').classList.add('hidden'); document.getElementById('loadingPdf').classList.remove('hidden');
             try {
@@ -1220,11 +1193,8 @@
                 let text = '';
                 for (let i = 1; i <= pdf.numPages; i++) text += (await (await pdf.getPage(i)).getTextContent()).items.map(t => t.str).join(' ') + '\n';
                 analizarTextoExtracto(text);
-            } catch (err) {
-                alert("Error al leer PDF: " + err.message); document.getElementById('dropZoneExtracto').classList.remove('hidden'); document.getElementById('loadingPdf').classList.add('hidden');
-            }
+            } catch (err) { alert("Error al leer PDF: " + err.message); document.getElementById('dropZoneExtracto').classList.remove('hidden'); document.getElementById('loadingPdf').classList.add('hidden'); }
         }
-
         function cleanNumber(str) { return parseFloat(str ? str.replace(/,/g, '').trim() : 0) || 0; }
 
         function analizarTextoExtracto(texto) {
@@ -1244,10 +1214,10 @@
                 if (match[4].includes('CR')) continue;
 
                 if (desc.includes('OVERLIMIT FEE') || desc.includes('CASH ADVANCE FEE') || desc.includes('FINANCE CHARGES')) { categorias['Comisiones & Tasas'] += monto; comisionesDetectadas.push(`${desc.split(' ')[0]} Fee: ${monto}`); }
-                else if (desc.includes('VAT ON')) categorias['Comisiones & Tasas'] += monto;
+                else if (desc.includes('VAT ON') || desc.includes('SVC CHG ON')) categorias['Comisiones & Tasas'] += monto;
                 else if (/CAREEM FOOD|NOON FOOD|DELIVEROO|KEETA|MCDONALD|BURGERKING|RESTAURANT|BEEF BAR|GORDON RAMSAY|SIAM PARAGON/i.test(desc)) categorias['Comida & Delivery'] += monto;
                 else if (/AMAZON GROCERY|NOON MINUTES|CAREEM QUIK|LULU|MURALI|7ELEVEN|AEON|GROCERY|SUPERMARK/i.test(desc)) categorias['Supermercado & Alimentación'] += monto;
-                else if (/AMAZON|NOON|TEMU|SHOPEE|POPMART|POP MART|UNIQLO|ZARA|BALENCIAGA|REPLAY|ELEGOO|BESTSECRET|KINOKUN|BRANDS FOR LESS|DAISO|IKEA/i.test(desc)) categorias['Shopping, Ropa & Online'] += monto;
+                else if (/AMAZON|NOON|TEMU|SHOPEE|POPMART|POP MART|UNIQLO|ZARA|BALENCIAGA|REPLAY|ELEGOO|BESTSECRET|KINOKUN|BRANDS FOR LESS|DAISO|IKEA|PAPERCLIP/i.test(desc)) categorias['Shopping, Ropa & Online'] += monto;
                 else if (/APPLE\.COM|ITUNES|AMAZON PRIME|STACKSOCIAL|SPACESHIP|BYTESIM|GROUPON|DHGATE/i.test(desc)) categorias['Suscripciones & Digital'] += monto;
                 else if (/GRAB|BOLT|CABIFY|ENOC|EMARAT|TRIP\.COM|MAKEMYTRIP|VIAGOGO|STUBHUB|AIR EUROPA|IBERIA|TODAYTIX|REEL ENTERTAINMENT|LONDON THEATRE/i.test(desc)) categorias['Transporte, Vuelos & Viajes'] += monto;
                 else if (/DU AUTO PAY|ETISALAT|E& TELECOM|SMART DUBAI|DUBAI ELECTRICITY|FAZAA/i.test(desc)) categorias['Servicios & Gobierno'] += monto;
@@ -1256,7 +1226,6 @@
             }
 
             if (totalPurchases === 0) totalPurchases = Object.values(categorias).reduce((a, b) => a + b, 0);
-
             datosExtractoActual = { periodo, totalPurchases, currentBalance, totalPayments, minPayment, paymentDueDate, categorias, comisionesDetectadas };
             mostrarResultadosExtracto();
         }
@@ -1265,15 +1234,21 @@
             document.getElementById('loadingPdf').classList.add('hidden'); document.getElementById('resultadoExtracto').classList.remove('hidden');
             document.getElementById('resPeriodo').innerText = datosExtractoActual.periodo; document.getElementById('resCompras').innerText = Math.floor(datosExtractoActual.totalPurchases).toLocaleString() + ' AED'; document.getElementById('resSaldoTotal').innerText = datosExtractoActual.currentBalance.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' AED'; document.getElementById('resPagos').innerText = Math.floor(datosExtractoActual.totalPayments).toLocaleString() + ' AED'; document.getElementById('resPagoMin').innerText = datosExtractoActual.minPayment.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' AED'; document.getElementById('resFechaVenc').innerText = datosExtractoActual.paymentDueDate;
 
+            // Detección de duplicado en DB
+            const existeEnDB = extractosGlobales.find(e => e.periodo === datosExtractoActual.periodo);
+            const badgeDup = document.getElementById('badgeDuplicado');
+            if(existeEnDB) {
+                badgeDup.innerHTML = `<i class="fa-solid fa-rotate"></i> Actualizar Existente`;
+                badgeDup.className = "text-[9px] uppercase font-bold mt-1 inline-block px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400";
+                document.getElementById('btnGuardarHistorial').innerHTML = `<i class="fa-solid fa-rotate"></i> Sobrescribir Histórico`;
+            } else {
+                badgeDup.innerHTML = `<i class="fa-solid fa-plus"></i> Nuevo Periodo`;
+                badgeDup.className = "text-[9px] uppercase font-bold mt-1 inline-block px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400";
+                document.getElementById('btnGuardarHistorial').innerHTML = `<i class="fa-solid fa-database"></i> Guardar Nuevo`;
+            }
+
             if (datosExtractoActual.comisionesDetectadas.length > 0) { document.getElementById('alertaComisiones').classList.remove('hidden'); document.getElementById('resDetalleComisiones').innerHTML = datosExtractoActual.comisionesDetectadas.join(' • '); } 
             else document.getElementById('alertaComisiones').classList.add('hidden');
-
-            const catContainer = document.getElementById('resCategoriasContainer'); catContainer.innerHTML = '';
-            for (const [nombre, monto] of Object.entries(datosExtractoActual.categorias)) {
-                if (monto > 0) {
-                    catContainer.innerHTML += `<div class="flex justify-between items-center py-1 border-b border-slate-700/50"><span class="text-slate-300 font-medium">${nombre}</span><div class="flex items-center gap-2"><span class="text-slate-500 font-mono text-[10px]">${datosExtractoActual.totalPurchases > 0 ? Math.round((monto / datosExtractoActual.totalPurchases) * 100) : 0}%</span><span class="font-bold text-white">${Math.floor(monto).toLocaleString()} AED</span></div></div>`;
-                }
-            }
         }
 
         function aplicarGastoEmaar() { if (datosExtractoActual) { document.getElementById('gastoEmaar').value = Math.floor(datosExtractoActual.totalPurchases); actualizarGastos(); cerrarModalExtracto(); alert(`✅ Aplicado: ${Math.floor(datosExtractoActual.totalPurchases).toLocaleString()} AED`); } }
@@ -1290,8 +1265,19 @@
             let f = null; if (datosExtractoActual.paymentDueDate !== '---') { const p = datosExtractoActual.paymentDueDate.split('/'); if(p.length===3) f = `${p[2]}-${p[1]}-${p[0]}`; }
             const payload = { periodo: datosExtractoActual.periodo, fecha_vencimiento: f, total_compras: datosExtractoActual.totalPurchases, saldo_total: datosExtractoActual.currentBalance, pagos_recibidos: datosExtractoActual.totalPayments, pago_minimo: datosExtractoActual.minPayment, desglose_categorias: datosExtractoActual.categorias, comisiones_detectadas: datosExtractoActual.comisionesDetectadas };
             
+            const existeEnDB = extractosGlobales.find(e => e.periodo === datosExtractoActual.periodo);
+            
+            const btn = document.getElementById('btnGuardarHistorial'); const orig = btn.innerHTML;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Guardando...`; btn.disabled = true;
+
             const { error } = await supabaseClient.from('extractos_emaar').upsert([payload], { onConflict: 'periodo' });
-            if (error) alert("Error Supabase: " + error.message); else { alert("✅ Extracto guardado."); cargarExtractosEmaar(); cerrarModalExtracto(); }
+            if (error) alert("Error Supabase: " + error.message); 
+            else { 
+                if(existeEnDB) alert("🔄 Extracto actualizado en el histórico.");
+                else alert("✅ Nuevo extracto guardado en el histórico."); 
+                cargarExtractosEmaar(); cerrarModalExtracto(); 
+            }
+            btn.innerHTML = orig; btn.disabled = false;
         }
     </script>
 </body>
