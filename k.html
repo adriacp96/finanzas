@@ -4,10 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Adria | Kindle Hub</title>
-    <!-- Cargamos Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* Estilos e-ink: Blanco, Negro, Sin Sombras, Letras Grandes */
         body {
             font-family: sans-serif;
             background-color: #ffffff;
@@ -64,15 +61,17 @@
             display: none; z-index: 1000;
         }
         
-        /* Controles selector mes Kindle */
         .month-selector { display: flex; align-items: center; justify-content: center; border: 2px solid #000; padding: 5px; background: #fff; }
         .month-selector button { width: auto; margin: 0; padding: 10px 20px; font-size: 20px; }
         .month-selector span { margin: 0 15px; font-weight: bold; font-size: 16px; text-transform: uppercase; min-width: 150px; text-align: center; }
+        
+        #statusIndicator { font-size: 12px; font-weight: bold; padding: 8px; background: #eee; text-align: center; border-bottom: 2px solid #000; margin-bottom: 15px; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
     <div id="toast">Notificación</div>
+    <div id="statusIndicator">INICIANDO CONEXIÓN...</div>
 
     <header style="margin-bottom: 20px;">
         <div class="flex-between">
@@ -81,7 +80,6 @@
                 <span class="badge">E-Ink Mode</span>
             </div>
         </div>
-        <!-- Nuevo Selector de Mes Optimizado para E-Ink Táctil -->
         <div class="month-selector" style="margin-top: 15px;">
             <button onclick="cambiarMes(-1)" class="outline">&lt;</button>
             <span id="mesDisplay">Cargando...</span>
@@ -225,22 +223,18 @@
             <i>Cargando histórico...</i>
         </div>
     </div>
-    
-    <div id="debugLog" style="font-size: 10px; color: #666; margin-top: 20px;"></div>
 
     <script>
-        // Supabase Init Clásico (ES5 compatible)
-        var supabaseUrl = 'https://jgvgabkrriedaquqehpb.supabase.co';
+        // Credenciales
         var supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndmdhYmtycmllZGFxdXFlaHBiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5OTYzNDQsImV4cCI6MjEwMzU3MjM0NH0.jdq2xaDtJ0YO-8zpQYqQPu5e2dkyCl8XjXtw_cGhqko';
-        var supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-
+        
         // Constantes
         var BASE_FIJA_NETA = 11165.00; 
         var TARIFA_HORA_VUELO = 68.32;  
         var COSTES_FIJOS_BASE = 8329.00; 
 
         // Variables
-        var fechaActual = new Date(); // Mantiene el mes que estamos visualizando
+        var fechaActual = new Date();
         var gastoVariableEmaar = 2000.00;
         var gastoDewa = 400.00; 
         var lineaBaseDinamica = 0;
@@ -250,15 +244,12 @@
         var deudasGlobales = []; 
         var extractosGlobales = [];
 
-        // Funciones Utilitarias (Compatibles con Kindle)
+        // UI Utilitarias
         function setText(id, value, isCurrency) {
             var el = document.getElementById(id);
             if (el) {
-                if (isCurrency) {
-                    el.innerText = Math.floor(value).toLocaleString() + ' AED';
-                } else {
-                    el.innerText = value;
-                }
+                if (isCurrency) el.innerText = Math.floor(value).toLocaleString() + ' AED';
+                else el.innerText = value;
             }
         }
 
@@ -268,23 +259,18 @@
             toast.style.display = 'block';
             setTimeout(function() { toast.style.display = 'none'; }, 3000);
         }
-        
-        function logDebug(msg) {
-            var el = document.getElementById('debugLog');
-            if (el) el.innerHTML += "<div>" + msg + "</div>";
+
+        function setStatus(msg) {
+            var el = document.getElementById('statusIndicator');
+            if (el) el.innerText = msg;
         }
 
         function formatoMesBaseDatos(fecha) {
             var meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
-            try {
-                // Emulamos exactamente el toLocaleString de ES-ES (ej: "septiembre de 2026")
-                return fecha.toLocaleString('es-ES', { month: 'long', year: 'numeric' });
-            } catch(e) {
-                return meses[fecha.getMonth()] + " de " + fecha.getFullYear();
-            }
+            try { return fecha.toLocaleString('es-ES', { month: 'long', year: 'numeric' }); } 
+            catch(e) { return meses[fecha.getMonth()] + " de " + fecha.getFullYear(); }
         }
 
-        // Interfaz Fecha
         function renderizarMes() {
             var mesesPantalla = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
             document.getElementById('mesDisplay').innerText = mesesPantalla[fechaActual.getMonth()] + " " + fechaActual.getFullYear();
@@ -296,62 +282,110 @@
             cargarDatosMes();
         }
 
-        // Flujo Principal
+        // ==========================================
+        // MOTOR AJAX PURO (Compatibilidad Total Kindle)
+        // ==========================================
+        function apiRequest(method, endpoint, body, callback) {
+            var xhr = new XMLHttpRequest();
+            var url = 'https://jgvgabkrriedaquqehpb.supabase.co/rest/v1/' + endpoint;
+            
+            xhr.open(method, url, true);
+            xhr.setRequestHeader('apikey', supabaseKey);
+            xhr.setRequestHeader('Authorization', 'Bearer ' + supabaseKey);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            
+            if (method === 'POST') {
+                xhr.setRequestHeader('Prefer', 'resolution=merge-duplicates, return=representation');
+            } else if (method === 'PATCH') {
+                xhr.setRequestHeader('Prefer', 'return=representation');
+            }
+
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        var data = null;
+                        try { if (xhr.responseText) data = JSON.parse(xhr.responseText); } catch(e) {}
+                        callback(null, data);
+                    } else {
+                        callback("Error HTTP " + xhr.status + ": " + xhr.responseText, null);
+                    }
+                }
+            };
+            
+            xhr.onerror = function() {
+                callback("Error de red. Revisa la conexión WiFi del Kindle.", null);
+            };
+            
+            if (body) { xhr.send(JSON.stringify(body)); } 
+            else { xhr.send(null); }
+        }
+
+        // ==========================================
+        // LÓGICA DE DATOS
+        // ==========================================
         window.onload = function() {
             renderizarMes();
+            setStatus("Conectando con Supabase (Deudas)...");
             
-            cargarDeudas().then(function() {
-                cargarExtractosBaseDatos().then(function() {
-                    cargarDatosMes();
+            cargarDeudas(function(err1) {
+                if(err1) return setStatus(err1);
+                
+                setStatus("Conectando con Supabase (Extractos)...");
+                cargarExtractosBaseDatos(function(err2) {
+                    if(err2) return setStatus(err2);
+                    
+                    setStatus("Conectando con Supabase (Mes)...");
+                    cargarDatosMes(function(err3) {
+                        if(err3) setStatus(err3);
+                        else setStatus("SISTEMA ONLINE Y SINCRONIZADO");
+                    });
                 });
-            }).catch(function(e) {
-                logDebug("Error inicio: " + e.message);
             });
         };
 
-        function cargarDeudas() {
-            return supabaseClient.from('deudas').select('*').order('id', { ascending: true })
-                .then(function(response) {
-                    if (response.error) throw response.error;
-                    deudasGlobales = response.data || [];
-                });
+        function cargarDeudas(callback) {
+            apiRequest('GET', 'deudas?order=id.asc', null, function(err, data) {
+                if (!err) deudasGlobales = data || [];
+                if (callback) callback(err);
+            });
         }
 
-        function cargarExtractosBaseDatos() {
-            return supabaseClient.from('extractos_emaar').select('*').order('created_at', { ascending: false }).limit(5)
-                .then(function(response) {
-                    if (response.error) throw response.error;
-                    extractosGlobales = response.data || [];
+        function cargarExtractosBaseDatos(callback) {
+            apiRequest('GET', 'extractos_emaar?order=created_at.desc&limit=5', null, function(err, data) {
+                if (!err) {
+                    extractosGlobales = data || [];
                     mostrarUltimoExtracto();
-                });
+                }
+                if (callback) callback(err);
+            });
         }
 
-        function cargarDatosMes() {
+        function cargarDatosMes(callback) {
             var mesFormateado = formatoMesBaseDatos(fechaActual);
+            var endpoint = 'historial_meses?mes=eq.' + encodeURIComponent(mesFormateado) + '&limit=1';
             
-            supabaseClient.from('historial_meses').select('*').eq('mes', mesFormateado).single()
-                .then(function(response) {
-                    var data = response.data;
-                    if (data) {
-                        var isReal = (data.tipo === 'Real');
-                        document.getElementById('blockHoursInput').value = (data.horas_vuelo !== null && data.horas_vuelo !== undefined) ? data.horas_vuelo : 80;
-                        document.getElementById('mealAllowance').value = (data.dietas !== null && data.dietas !== undefined) ? data.dietas : 1500;
-                        document.getElementById('turnarounds').value = (data.turnarounds !== null && data.turnarounds !== undefined) ? data.turnarounds : 300;
-                        document.getElementById('gastoEmaar').value = (data.gasto_emaar !== null && data.gasto_emaar !== undefined) ? data.gasto_emaar : 2000;
-                        document.getElementById('dewaKwh').value = (data.dewa_kwh !== null && data.dewa_kwh !== undefined) ? data.dewa_kwh : 434;
-                        document.getElementById('dewaM3').value = (data.dewa_m3 !== null && data.dewa_m3 !== undefined) ? data.dewa_m3 : 2.3;
-                        document.getElementById('dewaRealInput').value = data.dewa_real ? data.dewa_real : '';
-                        document.getElementById('salarioRealInput').value = data.salario_real ? data.salario_real : '';
-                        setModo(isReal ? 'real' : 'simulacion', true);
-                    } else {
-                        resetearFormulario();
-                    }
-                    renderizarDeudasDinamicas();
-                }).catch(function(err) {
-                    // Si no hay datos, falla silenciosamente y resetea (comportamiento normal para mes nuevo)
+            setStatus("Cargando datos del mes...");
+            
+            apiRequest('GET', endpoint, null, function(err, data) {
+                if (!err && data && data.length > 0) {
+                    var row = data[0];
+                    var isReal = (row.tipo === 'Real');
+                    document.getElementById('blockHoursInput').value = (row.horas_vuelo !== null) ? row.horas_vuelo : 80;
+                    document.getElementById('mealAllowance').value = (row.dietas !== null) ? row.dietas : 1500;
+                    document.getElementById('turnarounds').value = (row.turnarounds !== null) ? row.turnarounds : 300;
+                    document.getElementById('gastoEmaar').value = (row.gasto_emaar !== null) ? row.gasto_emaar : 2000;
+                    document.getElementById('dewaKwh').value = (row.dewa_kwh !== null) ? row.dewa_kwh : 434;
+                    document.getElementById('dewaM3').value = (row.dewa_m3 !== null) ? row.dewa_m3 : 2.3;
+                    document.getElementById('dewaRealInput').value = row.dewa_real ? row.dewa_real : '';
+                    document.getElementById('salarioRealInput').value = row.salario_real ? row.salario_real : '';
+                    setModo(isReal ? 'real' : 'simulacion', true);
+                } else {
                     resetearFormulario();
-                    renderizarDeudasDinamicas();
-                });
+                }
+                renderizarDeudasDinamicas();
+                setStatus("SISTEMA ONLINE Y SINCRONIZADO");
+                if(callback) callback(null);
+            });
         }
 
         function resetearFormulario() {
@@ -501,15 +535,17 @@
             var nuevoSaldo = window.prompt("Actualizar Saldo\nIntroduce el saldo actual de la deuda:", saldoActual);
 
             if (nuevoSaldo !== null && nuevoSaldo !== '' && !isNaN(nuevoSaldo)) {
-                supabaseClient.from('deudas').update({ saldo: parseFloat(nuevoSaldo) }).eq('id', id)
-                    .then(function(response) {
-                        if (!response.error) {
-                            cargarDeudas().then(function() {
-                                renderizarDeudasDinamicas();
-                                showToast("Saldo actualizado");
-                            });
-                        }
-                    });
+                setStatus("Actualizando saldo...");
+                apiRequest('PATCH', 'deudas?id=eq.' + id, { saldo: parseFloat(nuevoSaldo) }, function(err, data) {
+                    if (err) { alert(err); setStatus("SISTEMA ONLINE Y SINCRONIZADO"); }
+                    else {
+                        cargarDeudas(function() {
+                            renderizarDeudasDinamicas();
+                            showToast("Saldo actualizado");
+                            setStatus("SISTEMA ONLINE Y SINCRONIZADO");
+                        });
+                    }
+                });
             }
         }
 
@@ -536,26 +572,36 @@
                 salario_real: parseFloat(document.getElementById('salarioRealInput').value) || null 
             };
 
-            supabaseClient.from('historial_meses').upsert([payload], { onConflict: 'mes' })
-                .then(function(response) {
-                    if (response.error) { 
-                        window.alert("Error BD: " + response.error.message); 
-                    } else {
-                        var today = new Date();
-                        if (fechaActual.getMonth() === today.getMonth() && fechaActual.getFullYear() === today.getFullYear() && modoActual === 'real') {
-                            var deudasPayload = [];
-                            for(var k=0; k<deudasGlobales.length; k++) {
-                                var d = deudasGlobales[k];
-                                var nuevSaldo = Math.max(0, parseFloat(d.saldo) - parseFloat(d.cuota_minima));
-                                deudasPayload.push({ id: d.id, saldo: nuevSaldo, nombre: d.nombre, cuota_minima: d.cuota_minima, limite_credito: d.limite_credito, created_at: d.created_at });
-                            }
-                            supabaseClient.from('deudas').upsert(deudasPayload).then(function() {
-                                cargarDeudas().then(function() { renderizarDeudasDinamicas(); });
-                            });
+            setStatus("Guardando mes en Supabase...");
+            
+            apiRequest('POST', 'historial_meses?on_conflict=mes', payload, function(err, response) {
+                if (err) { 
+                    window.alert("Error BD: " + err); 
+                    setStatus("SISTEMA ONLINE Y SINCRONIZADO");
+                } else {
+                    var today = new Date();
+                    // Si se está guardando el mes actual como Real, restar las cuotas
+                    if (fechaActual.getMonth() === today.getMonth() && fechaActual.getFullYear() === today.getFullYear() && modoActual === 'real') {
+                        var deudasPayload = [];
+                        for(var k=0; k<deudasGlobales.length; k++) {
+                            var d = deudasGlobales[k];
+                            var nuevSaldo = Math.max(0, parseFloat(d.saldo) - parseFloat(d.cuota_minima));
+                            deudasPayload.push({ id: d.id, saldo: nuevSaldo, nombre: d.nombre, cuota_minima: d.cuota_minima, limite_credito: d.limite_credito, created_at: d.created_at });
                         }
-                        showToast("Guardado con éxito.");
+                        
+                        apiRequest('POST', 'deudas?on_conflict=id', deudasPayload, function(err2, response2) {
+                            cargarDeudas(function() { 
+                                renderizarDeudasDinamicas(); 
+                                showToast("Guardado con éxito y deudas restadas.");
+                                setStatus("SISTEMA ONLINE Y SINCRONIZADO");
+                            });
+                        });
+                    } else {
+                        showToast("Mes guardado con éxito.");
+                        setStatus("SISTEMA ONLINE Y SINCRONIZADO");
                     }
-                });
+                }
+            });
         }
 
         function mostrarUltimoExtracto() {
@@ -574,7 +620,6 @@
             }
 
             var ultimo = extractosCuenta[0];
-            
             var tableHtml = '<table>';
             tableHtml += '<tr><th colspan="2">Periodo: ' + ultimo.periodo + '</th></tr>';
             tableHtml += '<tr><td>Total Gastos</td><td class="text-bold">' + Math.floor(ultimo.total_compras).toLocaleString() + ' AED</td></tr>';
@@ -588,7 +633,6 @@
                 if(categorias[cat] > 0) nombresCat.push(cat);
             }
             
-            // Ordenar por valor
             nombresCat.sort(function(a, b) { return categorias[b] - categorias[a]; });
             
             for(var j=0; j<Math.min(4, nombresCat.length); j++) {
