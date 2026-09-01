@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adria | Kindle Hub</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* Estilos optimizados para E-Ink (Blanco y Negro, Alto Contraste, Sin Animaciones) */
+        body {
+            font-family: sans-serif;
+            background-color: #ffffff;
+            color: #000000;
+            margin: 0;
+            padding: 10px;
+            font-size: 18px;
+            line-height: 1.4;
+        }
+        h1, h2, h3 { margin: 0 0 10px 0; text-transform: uppercase; }
+        h1 { font-size: 24px; border-bottom: 3px solid #000; padding-bottom: 5px; }
+        h2 { font-size: 20px; border-bottom: 2px solid #000; padding-bottom: 5px; margin-top: 20px; }
+        
+        .grid { display: flex; flex-wrap: wrap; gap: 10px; }
+        .col { flex: 1; min-width: 250px; }
+        
+        .card {
+            border: 2px solid #000000;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #ffffff;
+        }
+        
+        .badge {
+            display: inline-block;
+            border: 1px solid #000;
+            padding: 2px 5px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .kpi-title { font-size: 12px; font-weight: bold; text-transform: uppercase; color: #333; }
+        .kpi-value { font-size: 28px; font-weight: bold; }
+        
+        .input-group { margin-bottom: 10px; }
+        label { display: block; font-size: 14px; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
+        input[type="number"], input[type="month"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 18px;
+            border: 2px solid #000;
+            box-sizing: border-box;
+            background: #fff;
+            color: #000;
+        }
+
+        button {
+            background-color: #000;
+            color: #fff;
+            border: 2px solid #000;
+            padding: 12px 15px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        button:active { background-color: #fff; color: #000; }
+        button.outline { background-color: #fff; color: #000; }
+        button.outline:active { background-color: #000; color: #fff; }
+        
+        .progress-bar-bg { width: 100%; border: 1px solid #000; height: 10px; margin-top: 5px; }
+        .progress-bar-fill { background-color: #000; height: 100%; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #000; padding: 8px; text-align: left; font-size: 14px; }
+        th { background-color: #eee; }
+
+        .flex-between { display: flex; justify-content: space-between; align-items: baseline; }
+        .hidden { display: none !important; }
+        
+        /* Utilidades para texto */
+        .text-right { text-align: right; }
+        .text-bold { font-weight: bold; }
+        .text-small { font-size: 12px; }
+        
+        #toast {
+            position: fixed; top: 10px; left: 10px; right: 10px;
+            background: #000; color: #fff; padding: 15px;
+            border: 2px solid #fff; font-weight: bold; text-align: center;
+            display: none; z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="toast">Notificación</div>
+
+    <header class="flex-between" style="margin-bottom: 20px;">
+        <div>
+            <h1>Financial Hub</h1>
+            <span class="badge">E-Ink Mode</span>
+        </div>
+        <div>
+            <input type="month" id="mesSelector" onchange="cargarDatosMes()" style="width: auto;">
+        </div>
+    </header>
+
+    <div class="grid">
+        <div class="col card">
+            <div class="kpi-title">Deuda Total</div>
+            <div class="kpi-value" id="kpiTotalDebt">--- AED</div>
+            <div class="kpi-title" style="margin-top: 10px;">Costes Fijos Proyectados</div>
+            <div class="kpi-value" id="kpiCostesFijos">8,729 AED</div>
+        </div>
+    </div>
+
+    <div class="grid" style="margin-bottom: 10px;">
+        <div class="col"><button id="btnModoSim" onclick="setModo('simulacion')" class="outline">MODO PROYECCIÓN</button></div>
+        <div class="col"><button id="btnModoReal" onclick="setModo('real')">MODO REAL</button></div>
+    </div>
+
+    <div id="panelSimulacion" class="card">
+        <h2>Simulador de Ingresos</h2>
+        <div class="input-group">
+            <label>Horas de Vuelo (Block)</label>
+            <input type="number" id="blockHoursInput" value="80" oninput="calcularTodo()">
+        </div>
+        <div class="grid">
+            <div class="col input-group">
+                <label>Dietas (Meal) AED</label>
+                <input type="number" id="mealAllowance" value="1500" oninput="calcularTodo()">
+            </div>
+            <div class="col input-group">
+                <label>Turnarounds AED</label>
+                <input type="number" id="turnarounds" value="300" oninput="calcularTodo()">
+            </div>
+        </div>
+    </div>
+
+    <div id="panelReal" class="card hidden">
+        <h2>Nómina Final</h2>
+        <div class="input-group">
+            <label>Introduce tu ingreso neto exacto (AED)</label>
+            <input type="number" id="salarioRealInput" oninput="calcularTodo()">
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Gastos Dinámicos</h2>
+        <div class="input-group">
+            <label>Tarjeta Emaar (Liquidación)</label>
+            <input type="number" id="gastoEmaar" value="2000" oninput="actualizarGastos()">
+        </div>
+        
+        <div id="dewaSimulacionPanel">
+            <div class="grid">
+                <div class="col input-group">
+                    <label>DEWA Luz (kWh)</label>
+                    <input type="number" id="dewaKwh" value="434" oninput="actualizarGastos()">
+                </div>
+                <div class="col input-group">
+                    <label>DEWA Agua (m³)</label>
+                    <input type="number" id="dewaM3" value="2.3" step="0.1" oninput="actualizarGastos()">
+                </div>
+            </div>
+            <div class="text-right text-bold">DEWA Est: <span id="dewaTotalSimDisplay">400</span> AED</div>
+        </div>
+
+        <div id="dewaRealPanel" class="hidden">
+            <div class="input-group">
+                <label>Factura DEWA Real (AED)</label>
+                <input type="number" id="dewaRealInput" oninput="actualizarGastos()">
+            </div>
+        </div>
+    </div>
+
+    <div class="card" style="border-width: 4px;">
+        <h2>Estrategia de Excedente</h2>
+        
+        <div class="flex-between">
+            <span class="kpi-title">Línea de Vida Total:</span>
+            <span class="text-bold" id="val-base">10,729 AED</span>
+        </div>
+        <div class="flex-between" style="margin-bottom: 15px; border-bottom: 1px solid #000; padding-bottom: 10px;">
+            <span class="kpi-title">Ingresos Netos:</span>
+            <span class="kpi-value" id="val-salario">18,430 AED</span>
+        </div>
+
+        <div id="panelExcedente">
+            <div class="kpi-title">Excedente Libre</div>
+            <div class="kpi-value" id="val-excedente" style="margin-bottom: 10px;">7,701 AED</div>
+            
+            <div class="grid">
+                <div class="col" style="border: 1px dotted #000; padding: 10px;">
+                    <div class="kpi-title">Extra Deuda (70%)</div>
+                    <div class="text-bold" id="val-deuda" style="font-size: 22px;">5,390 AED</div>
+                </div>
+                <div class="col" style="border: 1px dotted #000; padding: 10px;">
+                    <div class="kpi-title">Fondo E. (30%)</div>
+                    <div class="text-bold" id="val-fondo" style="font-size: 22px;">2,310 AED</div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="sinExcedente" class="hidden" style="text-align: center; padding: 20px 0;">
+            <div class="kpi-value">⚠ SIN EXCEDENTE</div>
+        </div>
+
+        <button onclick="guardarMes()" style="margin-top: 20px;">GUARDAR EN SUPABASE</button>
+    </div>
+
+    <div class="card">
+        <h2>Pasivos en Tiempo Real</h2>
+        
+        <div style="border: 1px solid #000; padding: 10px; margin-bottom: 15px;">
+            <div class="flex-between">
+                <span class="kpi-title">Cheque Alquiler (Acumulado)</span>
+                <span class="badge" id="rentQuarterTitle">---</span>
+            </div>
+            <div class="kpi-value" id="rentSavedValue">--- AED</div>
+            <div class="progress-bar-bg"><div id="homeFillLiquid" class="progress-bar-fill"></div></div>
+            <div class="text-small" style="margin-top: 5px;">Meta: 9,099 AED</div>
+        </div>
+
+        <div id="debtCardsContainer">
+            <i>Cargando deudas...</i>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Último Extracto Emaar</h2>
+        <p class="text-small"><em>* El análisis de PDFs está deshabilitado en E-Ink por limitaciones de memoria. Sube los extractos desde el PC o móvil para verlos aquí.</em></p>
+        <div id="resumenExtractoDB">
+            <i>Cargando histórico...</i>
+        </div>
+    </div>
+
+    <script>
+        // Supabase Init
+        const supabaseUrl = 'https://jgvgabkrriedaquqehpb.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndmdhYmtycmllZGFxdXFlaHBiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5OTYzNDQsImV4cCI6MjEwMzU3MjM0NH0.jdq2xaDtJ0YO-8zpQYqQPu5e2dkyCl8XjXtw_cGhqko';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+        // Constantes Matemáticas
+        const BASE_FIJA_NETA = 11165.00; 
+        const TARIFA_HORA_VUELO = 68.32;  
+        const COSTES_FIJOS_BASE = 8329.00; 
+
+        // Variables de Estado
+        let gastoVariableEmaar = 2000.00;
+        let gastoDewa = 400.00; 
+        let lineaBaseDinamica = COSTES_FIJOS_BASE + gastoVariableEmaar + gastoDewa;
+        let salarioEstimadoCalculado = 0;
+        let excedente = 0, pagoDeuda = 0, fondoEmergencia = 0, deudaTotal = 0;
+        let modoActual = 'simulacion'; 
+        let deudasGlobales = []; 
+        let extractosGlobales = [];
+
+        // Reemplazo visual para animaciones de la versión original
+        function setText(id, value, isCurrency = true) {
+            const el = document.getElementById(id);
+            if(el) {
+                if(isCurrency) el.innerText = Math.floor(value).toLocaleString() + ' AED';
+                else el.innerText = value;
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 3000);
+        }
+
+        // Inicialización
+        window.onload = async () => {
+            const today = new Date();
+            document.getElementById('mesSelector').value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+            
+            await cargarDeudas();
+            await cargarExtractosBaseDatos();
+            await cargarDatosMes(); 
+        };
+
+        async function cargarDatosMes() {
+            const mesRaw = document.getElementById('mesSelector').value;
+            if (!mesRaw) return;
+            const mesFormateado = new Date(mesRaw + '-05').toLocaleString('es-ES', { month: 'long', year: 'numeric' });
+            
+            const { data, error } = await supabaseClient.from('historial_meses').select('*').eq('mes', mesFormateado).single();
+                
+            if (data) {
+                const isReal = data.tipo === 'Real';
+                document.getElementById('blockHoursInput').value = data.horas_vuelo ?? 80;
+                document.getElementById('mealAllowance').value = data.dietas ?? 1500;
+                document.getElementById('turnarounds').value = data.turnarounds ?? 300;
+                document.getElementById('gastoEmaar').value = data.gasto_emaar ?? 2000;
+                document.getElementById('dewaKwh').value = data.dewa_kwh ?? 434;
+                document.getElementById('dewaM3').value = data.dewa_m3 ?? 2.3;
+                document.getElementById('dewaRealInput').value = data.dewa_real ?? '';
+                document.getElementById('salarioRealInput').value = data.salario_real ?? '';
+                setModo(isReal ? 'real' : 'simulacion', true);
+            } else {
+                document.getElementById('blockHoursInput').value = 80;
+                document.getElementById('mealAllowance').value = 1500;
+                document.getElementById('turnarounds').value = 300;
+                document.getElementById('gastoEmaar').value = 2000;
+                document.getElementById('dewaKwh').value = 434;
+                document.getElementById('dewaM3').value = 2.3;
+                document.getElementById('dewaRealInput').value = '';
+                document.getElementById('salarioRealInput').value = '';
+                setModo('simulacion', true);
+            }
+            
+            renderizarDeudasDinamicas();
+            mostrarUltimoExtracto();
+        }
+
+        function setModo(modo, triggerCalc = true) {
+            modoActual = modo;
+            const esSim = modo === 'simulacion';
+            
+            // UI Toggle native buttons
+            document.getElementById('btnModoSim').className = esSim ? "" : "outline";
+            document.getElementById('btnModoReal').className = !esSim ? "" : "outline";
+            
+            document.getElementById('panelSimulacion').classList.toggle('hidden', !esSim);
+            document.getElementById('panelReal').classList.toggle('hidden', esSim);
+            document.getElementById('dewaSimulacionPanel').classList.toggle('hidden', !esSim);
+            document.getElementById('dewaRealPanel').classList.toggle('hidden', esSim);
+            
+            if (triggerCalc) actualizarGastos(); 
+        }
+
+        function actualizarGastos() {
+            gastoVariableEmaar = parseFloat(document.getElementById('gastoEmaar').value) || 0;
+            
+            if (modoActual === 'simulacion') {
+                const kwh = parseFloat(document.getElementById('dewaKwh').value) || 0;
+                const m3 = parseFloat(document.getElementById('dewaM3').value) || 0;
+                gastoDewa = (((kwh * 0.230) + (kwh * 0.060) + 5.00) * 1.05) + (((m3 * 7.700) + (m3 * 1.100) + 5.00) * 1.05) + 236.08;
+                setText('dewaTotalSimDisplay', gastoDewa, false);
+            } else {
+                gastoDewa = parseFloat(document.getElementById('dewaRealInput').value) || 0;
+            }
+
+            const totalFijosObligatorios = COSTES_FIJOS_BASE + gastoDewa;
+            lineaBaseDinamica = totalFijosObligatorios + gastoVariableEmaar;
+            
+            setText('kpiCostesFijos', totalFijosObligatorios);
+            setText('val-base', lineaBaseDinamica);
+            
+            calcularTodo();
+        }
+
+        function calcularTodo() {
+            if (modoActual === 'simulacion') {
+                const hours = parseFloat(document.getElementById('blockHoursInput').value) || 0;
+                const meals = parseFloat(document.getElementById('mealAllowance').value) || 0;
+                const turnarounds = parseFloat(document.getElementById('turnarounds').value) || 0;
+                salarioEstimadoCalculado = BASE_FIJA_NETA + (hours * TARIFA_HORA_VUELO) + meals + turnarounds;
+            } else {
+                salarioEstimadoCalculado = parseFloat(document.getElementById('salarioRealInput').value) || 0;
+            }
+            
+            setText('val-salario', salarioEstimadoCalculado);
+            calcularExcedente();
+        }
+
+        function calcularExcedente() {
+            const panelExcedente = document.getElementById('panelExcedente');
+            const panelSinExcedente = document.getElementById('sinExcedente');
+            
+            if (salarioEstimadoCalculado > lineaBaseDinamica) {
+                excedente = salarioEstimadoCalculado - lineaBaseDinamica;
+                pagoDeuda = excedente * 0.70; 
+                fondoEmergencia = excedente * 0.30;
+                
+                setText('val-excedente', excedente);
+                setText('val-deuda', pagoDeuda);
+                setText('val-fondo', fondoEmergencia);
+                
+                panelExcedente.classList.remove('hidden');
+                panelSinExcedente.classList.add('hidden');
+            } else {
+                excedente = 0; pagoDeuda = 0; fondoEmergencia = 0;
+                panelExcedente.classList.add('hidden');
+                panelSinExcedente.classList.remove('hidden');
+            }
+        }
+
+        async function cargarDeudas() {
+            const { data, error } = await supabaseClient.from('deudas').select('*').order('id', { ascending: true });
+            if (!error) deudasGlobales = data;
+        }
+
+        function renderizarDeudasDinamicas() {
+            const container = document.getElementById('debtCardsContainer');
+            if(deudasGlobales.length === 0) return; 
+            
+            container.innerHTML = ''; 
+            deudaTotal = 0;
+
+            const [selYear, selMonth] = document.getElementById('mesSelector').value.split('-');
+            const selectedDate = new Date(selYear, parseInt(selMonth) - 1, 1);
+            const today = new Date();
+            const monthDiff = (selectedDate.getFullYear() - today.getFullYear()) * 12 + (selectedDate.getMonth() - today.getMonth());
+            const maxDeuda = Math.max(...deudasGlobales.filter(d => !d.nombre.toLowerCase().includes('coche')).map(d => parseFloat(d.saldo)), 1);
+
+            deudasGlobales.forEach(deuda => {
+                const cuota = parseFloat(deuda.cuota_minima);
+                let saldoProyectado = Math.max(0, parseFloat(deuda.saldo) - (monthDiff * cuota));
+                deudaTotal += saldoProyectado;
+                
+                const porcentaje = Math.min(100, (saldoProyectado / maxDeuda) * 100);
+                const isLiquidado = saldoProyectado <= 0;
+
+                container.innerHTML += `
+                    <div style="border: 1px dashed #000; padding: 10px; margin-bottom: 10px; ${isLiquidado ? 'opacity: 0.5;' : ''}">
+                        <div class="flex-between">
+                            <strong>${deuda.nombre}</strong>
+                            <button class="outline" style="width: auto; padding: 5px; margin: 0; font-size: 12px;" onclick="actualizarSaldoNativo(${deuda.id}, ${deuda.saldo})">EDITAR</button>
+                        </div>
+                        <div style="font-size: 24px; font-weight: bold; margin: 5px 0;">${Math.floor(saldoProyectado).toLocaleString()} AED</div>
+                        <div class="text-small">Cuota: ${cuota.toLocaleString()} AED | ${isLiquidado ? 'PAGADO' : '~'+Math.ceil(saldoProyectado/cuota)+' meses'}</div>
+                        <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${porcentaje}%"></div></div>
+                    </div>
+                `;
+            });
+            
+            setText('kpiTotalDebt', deudaTotal);
+            calcularEstadoAlquiler(selectedDate);
+        }
+
+        function calcularEstadoAlquiler(fechaSeleccionada) {
+            const mes = fechaSeleccionada.getMonth() + 1;
+            let mesCheque, qText, mesesAhorrados;
+            if (mes <= 3) { mesCheque = 3; qText = "Q1 (Marzo)"; mesesAhorrados = mes === 3 ? 3 : mes; } 
+            else if (mes <= 6) { mesCheque = 6; qText = "Q2 (Junio)"; mesesAhorrados = mes === 6 ? 3 : mes - 3; } 
+            else if (mes <= 9) { mesCheque = 9; qText = "Q3 (Septiembre)"; mesesAhorrados = mes === 9 ? 3 : mes - 6; } 
+            else { mesCheque = 12; qText = "Q4 (Diciembre)"; mesesAhorrados = mes === 12 ? 3 : mes - 9; }
+
+            const ahorroActual = mesesAhorrados * 3033;
+            const porcentaje = Math.min(100, Math.max(0, (ahorroActual / 9099) * 100));
+            
+            document.getElementById('homeFillLiquid').style.width = `${porcentaje}%`;
+            document.getElementById('rentQuarterTitle').innerText = qText;
+            setText('rentSavedValue', ahorroActual);
+        }
+
+        async function actualizarSaldoNativo(id, saldoActual) {
+            // Usamos prompt nativo de JS, ideal para el Experimental Browser del Kindle
+            const nuevoSaldo = window.prompt(`Actualizar Saldo\nIntroduce el saldo actual de la deuda:`, saldoActual);
+
+            if (nuevoSaldo !== null && nuevoSaldo !== '' && !isNaN(nuevoSaldo)) {
+                const { error } = await supabaseClient.from('deudas').update({ saldo: parseFloat(nuevoSaldo) }).eq('id', id);
+                if (!error) { 
+                    await cargarDeudas();
+                    renderizarDeudasDinamicas();
+                    showToast("Saldo actualizado");
+                }
+            }
+        }
+
+        async function guardarMes() {
+            const mesRaw = document.getElementById('mesSelector').value;
+            if (!mesRaw) return window.alert("Selecciona un mes.");
+            if (salarioEstimadoCalculado <= 0) return window.alert("Ingreso debe ser > 0.");
+            
+            const payload = { 
+                mes: new Date(mesRaw + '-05').toLocaleString('es-ES', { month: 'long', year: 'numeric' }), 
+                salario: Math.floor(salarioEstimadoCalculado), 
+                linea_base: Math.floor(lineaBaseDinamica), 
+                excedente: Math.floor(excedente), 
+                pago_extra_deuda: Math.floor(pagoDeuda), 
+                fondo_emergencia: Math.floor(fondoEmergencia), 
+                tipo: modoActual === 'simulacion' ? 'Proyección' : 'Real', 
+                dewa: Math.floor(gastoDewa), 
+                horas_vuelo: parseFloat(document.getElementById('blockHoursInput').value) || 0, 
+                dietas: parseFloat(document.getElementById('mealAllowance').value) || 0, 
+                turnarounds: parseFloat(document.getElementById('turnarounds').value) || 0, 
+                gasto_emaar: parseFloat(document.getElementById('gastoEmaar').value) || 0, 
+                dewa_kwh: parseFloat(document.getElementById('dewaKwh').value) || 0, 
+                dewa_m3: parseFloat(document.getElementById('dewaM3').value) || 0, 
+                dewa_real: parseFloat(document.getElementById('dewaRealInput').value) || null, 
+                salario_real: parseFloat(document.getElementById('salarioRealInput').value) || null 
+            };
+
+            const { error } = await supabaseClient.from('historial_meses').upsert([payload], { onConflict: 'mes' });
+            if (error) { 
+                window.alert("Error: " + error.message); 
+            } else {
+                // Actualizar saldos si es el mes actual y es dato real
+                if (parseInt(mesRaw.split('-')[1]) === (new Date().getMonth() + 1) && parseInt(mesRaw.split('-')[0]) === new Date().getFullYear() && modoActual === 'real') {
+                    const deudasPayload = deudasGlobales.map(d => ({ ...d, saldo: Math.max(0, parseFloat(d.saldo) - parseFloat(d.cuota_minima)) }));
+                    await supabaseClient.from('deudas').upsert(deudasPayload);
+                    await cargarDeudas();
+                }
+                showToast("Guardado con éxito.");
+            }
+        }
+
+        async function cargarExtractosBaseDatos() {
+            const { data, error } = await supabaseClient.from('extractos_emaar').select('*').order('created_at', { ascending: false }).limit(5);
+            if (!error && data) {
+                extractosGlobales = data;
+            }
+        }
+
+        function mostrarUltimoExtracto() {
+            const container = document.getElementById('resumenExtractoDB');
+            const cActivaId = 'Credit-Emaar';
+            const extractosCuenta = extractosGlobales.filter(ext => (ext.cuenta || 'Credit-Emaar') === cActivaId);
+
+            if (extractosCuenta.length === 0) {
+                container.innerHTML = "<i>No hay extractos guardados.</i>";
+                return;
+            }
+
+            const ultimo = extractosCuenta[0];
+            
+            // Generar tabla simple para e-ink
+            let tableHtml = `
+                <table>
+                    <tr><th colspan="2">Periodo: ${ultimo.periodo}</th></tr>
+                    <tr><td>Total Gastos</td><td class="text-bold">${Math.floor(ultimo.total_compras).toLocaleString()} AED</td></tr>
+                    <tr><td>Saldo Pendiente</td><td class="text-bold">${Math.floor(ultimo.saldo_total).toLocaleString()} AED</td></tr>
+                    <tr><td>Pago Mínimo</td><td>${Math.floor(ultimo.pago_minimo).toLocaleString()} AED</td></tr>
+                </table>
+                <br>
+                <div class="kpi-title">Top Categorías:</div>
+            `;
+
+            // Filtrar y ordenar las categorías
+            const categorias = ultimo.desglose_categorias;
+            const sortedCats = Object.keys(categorias).filter(c => categorias[c] > 0).sort((a,b) => categorias[b] - categorias[a]).slice(0, 4);
+
+            sortedCats.forEach(cat => {
+                tableHtml += `<div class="flex-between" style="border-bottom: 1px dotted #000; padding: 5px 0;">
+                    <span class="text-small">${cat}</span>
+                    <span class="text-bold">${Math.floor(categorias[cat]).toLocaleString()} AED</span>
+                </div>`;
+            });
+
+            container.innerHTML = tableHtml;
+        }
+    </script>
+</body>
+</html>
