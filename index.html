@@ -540,7 +540,7 @@
                     </div>
                     <div>
                         <h3 class="text-xl font-black text-white">Lector Inteligente de PDF</h3>
-                        <p class="text-xs text-slate-400">Las categorías en blanco obligan revisión. Todo lo que elijas, el sistema lo aprenderá.</p>
+                        <p class="text-xs text-slate-400">Si un cargo está "Pendiente" puedes guardarlo igual y clasificarlo más adelante volviendo a subir este mismo PDF.</p>
                     </div>
                 </div>
             </div>
@@ -554,7 +554,7 @@
 
             <div id="loadingPdf" class="hidden py-12 text-center text-indigo-400">
                 <i class="fa-solid fa-spinner fa-spin text-4xl mb-4"></i>
-                <p class="text-base font-bold">Procesando, analizando y detectando duplicados...</p>
+                <p class="text-base font-bold">Procesando, analizando y cruzando con tu histórico...</p>
             </div>
 
             <div id="resultadoExtracto" class="hidden mt-6 space-y-6">
@@ -571,7 +571,7 @@
                         <span id="badgeDuplicado" class="text-[9px] uppercase font-bold mt-1 inline-block px-1.5 py-0.5 rounded hidden"></span>
                     </div>
                     <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700">
-                        <p class="text-[10px] font-bold text-yellow-400 uppercase tracking-wider mb-1">Total Gastos (Nuevos)</p>
+                        <p class="text-[10px] font-bold text-yellow-400 uppercase tracking-wider mb-1">Total Gastos</p>
                         <p id="resCompras" class="text-lg font-black text-white tick-number">--- AED</p>
                     </div>
                     <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700" id="cajaSaldoPendiente">
@@ -602,7 +602,7 @@
                     <div class="flex justify-between items-end mb-4">
                         <h4 class="text-sm font-black text-white flex items-center gap-2"><i class="fa-solid fa-brain text-indigo-400"></i> Inteligencia de Datos</h4>
                         <p id="alertaPendientesCategorizar" class="text-xs font-bold text-rose-400 hidden animate-pulse">
-                            ⚠️ Tienes transacciones sin categorizar
+                            ⚠️ Se guardarán las no elegidas como 'Pendiente'.
                         </p>
                     </div>
 
@@ -694,7 +694,8 @@
             'Préstamo Coche (Jetour)': '#ec4899',
             'Pago Tarjeta Emaar': '#10b981',
             'Transferencias & Envíos': '#06b6d4',
-            'Otros Gastos': '#94a3b8'
+            'Otros Gastos': '#94a3b8',
+            'Pendiente': '#64748b' // Color para las que guardes sin seleccionar
         };
 
         const catIcons = {
@@ -711,7 +712,8 @@
             'Préstamo Coche (Jetour)': 'fa-car',
             'Pago Tarjeta Emaar': 'fa-money-bill-transfer',
             'Transferencias & Envíos': 'fa-paper-plane',
-            'Otros Gastos': 'fa-receipt'
+            'Otros Gastos': 'fa-receipt',
+            'Pendiente': 'fa-circle-question'
         };
 
         const monthMap = { 'JAN': '01', 'FEB': '02', 'MAR': '03', 'APR': '04', 'MAY': '05', 'JUN': '06', 'JUL': '07', 'AUG': '08', 'SEP': '09', 'OCT': '10', 'NOV': '11', 'DEC': '12' };
@@ -1161,7 +1163,7 @@
 
             const bDias = document.getElementById('rentDaysBadge');
             if (diasRestantes <= 0 && diasRestantes > -30) { bDias.innerHTML = `<i class="fa-solid fa-money-check"></i> Mes de Cobro`; bDias.className = "text-xs font-bold text-amber-400 bg-amber-900/50 px-2.5 py-1 rounded-md border border-amber-700/50"; } 
-            else { bDias.innerHTML = `<i class="fa-regular fa-clock mr-1"></i> Vence en ~${Math.abs(diasRestantes)} días`; bDias.className = "text-xs font-bold text-slate-400 bg-slate-900/50 px-2.5 py-1 rounded-md border border-slate-700"; }
+            else { bDias.innerHTML = `<i class="fa-regular fa-clock mr-1"></i> Vence en ~${Math.abs(diasRestantes)} أيام`; bDias.className = "text-xs font-bold text-slate-400 bg-slate-900/50 px-2.5 py-1 rounded-md border border-slate-700"; }
         }
 
         async function actualizarSaldo(id, saldoActual) {
@@ -1305,7 +1307,7 @@
                     const catSum = dataPoints.reduce((a, b) => a + b, 0);
                     if (catSum > 0) {
                         datasets.push({ label: cat, data: dataPoints, backgroundColor: catColors[cat], borderWidth: 0, borderRadius: 4, barPercentage: 0.6 });
-                        if (cat !== 'Otros Gastos' && cat !== 'Pago Tarjeta Emaar' && catSum > maxCatValue) { maxCatValue = catSum; maxCatName = cat; }
+                        if (cat !== 'Otros Gastos' && cat !== 'Pago Tarjeta Emaar' && cat !== 'Pendiente' && catSum > maxCatValue) { maxCatValue = catSum; maxCatName = cat; }
                         totalGastoHistorico += catSum;
                         if(!isDebit && cat === 'Comisiones & Tasas') totalMetricSecundaria = catSum;
                     }
@@ -1349,7 +1351,7 @@
                     const monto = categorias[cat];
                     if (monto > 0) {
                         labels.push(cat); data.push(monto); bgColors.push(catColors[cat] || '#94a3b8');
-                        if (cat !== 'Otros Gastos' && cat !== 'Pago Tarjeta Emaar' && monto > topVal) { topVal = monto; topCat = cat; }
+                        if (cat !== 'Otros Gastos' && cat !== 'Pago Tarjeta Emaar' && cat !== 'Pendiente' && monto > topVal) { topVal = monto; topCat = cat; }
                     }
                 });
 
@@ -1486,11 +1488,11 @@
 
         function normalizarNombreComercio(desc) {
             let n = desc.toUpperCase();
-            n = n.replace(/[0-9]{2}\/[0-9]{2}\/[0-9]{2,4}/g, ''); // quita fechas
-            n = n.replace(/#[0-9a-zA-Z]+/g, ''); // tags
-            n = n.replace(/\b[A-Z0-9]{8,}\b/g, ''); // IDs largos de referencia
-            n = n.replace(/DUBAI|UAE|MALL|BRANCH|L\.L\.C\.|LLC|ARE/g, ''); // location y entidades
-            n = n.replace(/[^A-Z ]/g, ' '); // special chars
+            n = n.replace(/[0-9]{2}\/[0-9]{2}\/[0-9]{2,4}/g, ''); 
+            n = n.replace(/#[0-9a-zA-Z]+/g, ''); 
+            n = n.replace(/\b[A-Z0-9]{8,}\b/g, ''); 
+            n = n.replace(/DUBAI|UAE|MALL|BRANCH|L\.L\.C\.|LLC|ARE/g, ''); 
+            n = n.replace(/[^A-Z ]/g, ' '); 
             return n.replace(/\s+/g, ' ').trim();
         }
 
@@ -1616,7 +1618,6 @@
                             else if (absAmount > 1500 && absAmount < 2000) catAsignada = 'Préstamo Coche (Jetour)';
                         }
 
-                        if (!isDuplicado) totalPurchases += absAmount;
                         transacciones.push({ fecha: txFechaRaw, desc, monto: absAmount, cat: catAsignada, isComision: false, hash, duplicado: isDuplicado });
 
                     } else {
@@ -1639,7 +1640,7 @@
                 }
             }
 
-            datosExtractoActual = { cuenta: 'Debit-NBD', periodo, totalPurchases, currentBalance: 0, totalPayments: totalIngresos, minPayment: 0, paymentDueDate: '---', comisionesDetectadas, ingresos: totalIngresos, transacciones };
+            datosExtractoActual = { cuenta: 'Debit-NBD', periodo, totalPurchases: 0, currentBalance: 0, totalPayments: totalIngresos, minPayment: 0, paymentDueDate: '---', comisionesDetectadas, ingresos: totalIngresos, transacciones };
             prepararResultadosUI();
         }
 
@@ -1649,7 +1650,7 @@
             tx.cat = newCat;
             
             const norm = normalizarNombreComercio(tx.desc);
-            if (norm && newCat) {
+            if (norm && newCat && newCat !== 'Pendiente') { // No queremos que aprenda "Pendiente" como regla permanente
                 try {
                     await supabaseClient.from('reglas_categorizacion').upsert([{
                         comercio_normalizado: norm,
@@ -1683,7 +1684,7 @@
                 cat: '', 
                 isComision: false,
                 hash: tx.hash + '_split',
-                duplicado: false
+                duplicado: false // Al dividirlo lo forzamos como nuevo
             });
             
             showToast("Transacción dividida con éxito.", "success");
@@ -1694,14 +1695,13 @@
             datosExtractoActual.categorias = {};
             let nuevosGastosTotales = 0;
 
+            // Ahora iteramos sobre TODAS las transacciones para calcular el resumen, sean duplicadas o no.
+            // Así el resumen del periodo siempre representará el 100% del documento.
             datosExtractoActual.transacciones.forEach(tx => {
-                if (!tx.duplicado) {
-                    nuevosGastosTotales += tx.monto;
-                    if (tx.cat) {
-                        if(!datosExtractoActual.categorias[tx.cat]) datosExtractoActual.categorias[tx.cat] = 0;
-                        datosExtractoActual.categorias[tx.cat] += tx.monto;
-                    }
-                }
+                nuevosGastosTotales += tx.monto;
+                const catFinal = tx.cat || 'Pendiente'; // Si no eligieron, cuenta como Pendiente
+                if(!datosExtractoActual.categorias[catFinal]) datosExtractoActual.categorias[catFinal] = 0;
+                datosExtractoActual.categorias[catFinal] += tx.monto;
             });
             
             datosExtractoActual.totalPurchases = nuevosGastosTotales;
@@ -1714,28 +1714,30 @@
             const tbody = document.getElementById('txListBody');
             tbody.innerHTML = '';
             
-            let opcionesCat = '<option value="" disabled selected>-- Clasificar --</option>';
-            Object.keys(catColors).forEach(cat => { opcionesCat += `<option value="${cat}">${cat}</option>`; });
+            let opcionesCat = '<option value="">-- Clasificar --</option>'; // En blanco por defecto
+            Object.keys(catColors).forEach(cat => { 
+                if(cat !== 'Pendiente') opcionesCat += `<option value="${cat}">${cat}</option>`; 
+            });
 
             let pendientesDeCategorizar = 0;
-            let countNuevas = 0, countDup = 0;
+            let countDup = 0;
 
             datosExtractoActual.transacciones.forEach((tx, i) => {
                 const tr = document.createElement('tr');
                 
                 if (tx.duplicado) {
-                    tr.className = "opacity-30 bg-slate-900/50 border-b border-slate-700/50 grayscale";
+                    tr.className = "opacity-40 bg-slate-900/80 border-b border-slate-700/50 grayscale transition-all hover:grayscale-0 hover:opacity-100";
                     countDup++;
                 } else {
                     tr.className = "hover:bg-slate-700/30 transition-colors border-b border-slate-700/50";
-                    countNuevas++;
-                    if (!tx.cat) pendientesDeCategorizar++;
+                    if (!tx.cat || tx.cat === 'Pendiente') pendientesDeCategorizar++;
                 }
                 
-                let selectCls = tx.cat ? 'bg-slate-800 text-white border-slate-600' : 'bg-rose-900/40 text-rose-200 border-rose-500 font-bold outline-none ring-2 ring-rose-500/50 animate-pulse';
-                let selectHtml = `<select class="text-[10px] rounded px-1 py-1.5 focus:border-indigo-500 w-full truncate border ${selectCls}" onchange="updateTxCategory(${i}, this)" ${tx.duplicado ? 'disabled' : ''}>`;
+                // NOTA IMPORTANTE: Los selects YA NO están desactivados. Se pueden cambiar en cualquier momento.
+                let selectCls = (tx.cat && tx.cat !== 'Pendiente') ? 'bg-slate-800 text-white border-slate-600' : 'bg-rose-900/40 text-rose-200 border-rose-500 font-bold outline-none ring-2 ring-rose-500/50';
+                let selectHtml = `<select class="text-[10px] rounded px-1 py-1.5 focus:border-indigo-500 w-full truncate border ${selectCls}" onchange="updateTxCategory(${i}, this)">`;
                 
-                if (tx.cat) selectHtml += opcionesCat.replace(`value="${tx.cat}"`, `value="${tx.cat}" selected`);
+                if (tx.cat && tx.cat !== 'Pendiente') selectHtml += opcionesCat.replace(`value="${tx.cat}"`, `value="${tx.cat}" selected`);
                 else selectHtml += opcionesCat;
                 
                 selectHtml += `</select>`;
@@ -1744,12 +1746,12 @@
                     <td class="p-4 text-[10px] text-slate-400 whitespace-nowrap">${tx.fecha}</td>
                     <td class="p-4 font-bold text-xs truncate max-w-[200px]" title="${tx.desc}">
                         ${tx.desc} 
-                        ${tx.duplicado ? '<span class="ml-2 bg-slate-700 text-slate-400 text-[9px] px-1.5 py-0.5 rounded">DUPLICADA</span>' : ''}
+                        ${tx.duplicado ? '<span class="ml-2 bg-slate-700 text-slate-400 text-[9px] px-1.5 py-0.5 rounded">GUARDADA</span>' : ''}
                     </td>
                     <td class="p-4 text-white font-black text-right">${tx.monto.toLocaleString()} <span class="text-[9px] text-slate-500">AED</span></td>
                     <td class="p-4">${selectHtml}</td>
                     <td class="p-4 text-center">
-                        <button onclick="splitTransaction(${i})" class="text-slate-400 hover:text-indigo-400 p-2 rounded-lg bg-slate-800 border border-slate-700 shadow-sm transition disabled:opacity-30" title="Dividir Gasto" ${tx.duplicado ? 'disabled' : ''}>
+                        <button onclick="splitTransaction(${i})" class="text-slate-400 hover:text-indigo-400 p-2 rounded-lg bg-slate-800 border border-slate-700 shadow-sm transition" title="Dividir Gasto">
                             <i class="fa-solid fa-scissors"></i>
                         </button>
                     </td>
@@ -1757,33 +1759,23 @@
                 tbody.appendChild(tr);
             });
 
-            const btnGuardar = document.getElementById('btnGuardarHistorial');
-            const btnAplicar = document.getElementById('btnAplicarGasto');
-            const btnSync = document.getElementById('btnSyncDeuda');
             const alertaPendientes = document.getElementById('alertaPendientesCategorizar');
-
             if (pendientesDeCategorizar > 0) {
-                btnGuardar.disabled = true; btnGuardar.classList.add('opacity-50', 'cursor-not-allowed');
-                btnAplicar.disabled = true; btnAplicar.classList.add('opacity-50', 'cursor-not-allowed');
-                if(btnSync) { btnSync.disabled = true; btnSync.classList.add('opacity-50', 'cursor-not-allowed'); }
                 alertaPendientes.classList.remove('hidden');
             } else {
-                btnGuardar.disabled = false; btnGuardar.classList.remove('opacity-50', 'cursor-not-allowed');
-                btnAplicar.disabled = false; btnAplicar.classList.remove('opacity-50', 'cursor-not-allowed');
-                if(btnSync) { btnSync.disabled = false; btnSync.classList.remove('opacity-50', 'cursor-not-allowed'); }
                 alertaPendientes.classList.add('hidden');
             }
 
             const badgeDup = document.getElementById('badgeDuplicado');
-            if (countDup > 0 && countNuevas === 0) {
-                badgeDup.innerHTML = `<i class="fa-solid fa-ban"></i> 100% Duplicado`;
-                badgeDup.className = "text-[9px] uppercase font-bold mt-1 inline-block px-1.5 py-0.5 rounded bg-slate-500/20 text-slate-400";
+            if (countDup > 0 && countDup === datosExtractoActual.transacciones.length) {
+                badgeDup.innerHTML = `<i class="fa-solid fa-clock-rotate-left"></i> Modificando Histórico`;
+                badgeDup.className = "text-[9px] uppercase font-bold mt-1 inline-block px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400";
             }
         }
 
         function prepararResultadosUI() {
             datosExtractoActual.categorias = {};
-            recalcularDesdeTransacciones();
+            recalcularDesdeTransacciones(); // Esto calcula el resumen basándose en TODO el PDF
 
             document.getElementById('loadingPdf').classList.add('hidden'); document.getElementById('resultadoExtracto').classList.remove('hidden');
             
@@ -1813,7 +1805,7 @@
             const existeEnDB = extractosGlobales.find(e => e.periodo === datosExtractoActual.periodo && (e.cuenta || 'Credit-Emaar') === datosExtractoActual.cuenta);
             const badgeDup = document.getElementById('badgeDuplicado');
             if(existeEnDB) {
-                badgeDup.innerHTML = `<i class="fa-solid fa-rotate"></i> Modificando Existente`;
+                badgeDup.innerHTML = `<i class="fa-solid fa-rotate"></i> Actualizando Existente`;
                 badgeDup.className = "text-[9px] uppercase font-bold mt-1 inline-block px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400";
             } else {
                 badgeDup.innerHTML = `<i class="fa-solid fa-plus"></i> Nuevo Periodo`;
@@ -1848,8 +1840,6 @@
 
         async function guardarExtractoBD() {
             if (!datosExtractoActual) return showToast("No hay datos.", "error");
-            
-            const txsAInsertar = datosExtractoActual.transacciones.filter(tx => !tx.duplicado && tx.cat);
 
             let f = null; 
             if (datosExtractoActual.paymentDueDate !== '---') { 
@@ -1860,6 +1850,7 @@
             const btn = document.getElementById('btnGuardarHistorial'); const orig = btn.innerHTML;
             btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Guardando...`; btn.disabled = true;
 
+            // 1. Guardar o actualizar el Resumen
             const payloadSummary = { 
                 cuenta: datosExtractoActual.cuenta, 
                 periodo: datosExtractoActual.periodo, 
@@ -1881,26 +1872,29 @@
                 return;
             }
 
-            if(txsAInsertar.length > 0) {
-                const payloadTxs = txsAInsertar.map(tx => ({
+            // 2. Guardar TODAS las transacciones individuales (Upsert)
+            // Si el usuario modificó la categoría de un duplicado, se actualizará gracias al "onConflict".
+            if(datosExtractoActual.transacciones.length > 0) {
+                const payloadTxs = datosExtractoActual.transacciones.map(tx => ({
                     fecha: tx.fecha ? new Date(tx.fecha.split('/').reverse().join('-')) : new Date(), 
                     descripcion_original: tx.desc,
                     comercio_normalizado: normalizarNombreComercio(tx.desc),
                     monto: tx.monto,
-                    categoria: tx.cat,
+                    categoria: tx.cat || 'Pendiente', // Guardamos como Pendiente si no eligió
                     cuenta: datosExtractoActual.cuenta,
                     hash_duplicado: tx.hash,
                     es_ingreso: false 
                 }));
 
-                await supabaseClient.from('transacciones_bancarias').insert(payloadTxs);
+                await supabaseClient.from('transacciones_bancarias').upsert(payloadTxs, { onConflict: 'hash_duplicado' });
                 
-                txsAInsertar.forEach(tx => hashesDuplicadosDB.add(tx.hash));
+                // Actualizar memoria local de hashes
+                datosExtractoActual.transacciones.forEach(tx => hashesDuplicadosDB.add(tx.hash));
             }
 
             await cargarExtractosBaseDatos(); 
             cerrarModalExtracto(); 
-            showToast("Histórico y transacciones guardadas con éxito.", "success");
+            showToast("Histórico guardado correctamente.", "success");
             
             btn.innerHTML = orig; btn.disabled = false;
         }
