@@ -1497,11 +1497,9 @@
         function predecirCategoriaINTELIGENTE(descOriginal) {
             const comercioLimpio = normalizarNombreComercio(descOriginal);
 
-            // 1. Mirar si ya te lo aprendió en Supabase
             const regla = reglasAprendizajeDB.find(r => r.comercio_normalizado === comercioLimpio);
             if (regla) return regla.categoria;
 
-            // 2. Patrones originales hardcodeados (Regex)
             if (/OVERLIMIT FEE|CASH ADVANCE FEE|FINANCE CHARGES|VAT ON|SVC CHG ON/i.test(descOriginal)) return 'Comisiones & Tasas';
             if (/CAREEM FOOD|NOON FOOD|DELIVEROO|KEETA|MCDONALD|BURGERKING|RESTAURANT|BEEF BAR|GORDON RAMSAY|SIAM PARAGON|MATTO|SBUX|DOORDASH|SMILES FOOD|NAP MADRID/i.test(descOriginal)) return 'Comida & Delivery';
             if (/AMAZON GROCERY|NOON MINUTES|CAREEM QUIK|LULU|MURALI|7ELEVEN|AEON|GROCERY|SUPERMARK|NORMAL OSLO|WAITROSE|CARREFOUR/i.test(descOriginal)) return 'Supermercado & Alimentación';
@@ -1513,7 +1511,7 @@
 
             if (descOriginal.includes('INWARD CLEARING CHQ')) return 'Alquiler';
             if (descOriginal.includes('4034 2811') || descOriginal.includes('4034********2811')) return 'Pago Tarjeta Emaar';
-            if (descOriginal.includes('INSTL RECOVERY')) return 'Préstamo NBD'; // Se reajusta por monto luego
+            if (descOriginal.includes('INSTL RECOVERY')) return 'Préstamo NBD'; 
             if (descOriginal.includes('DDR-512000')) return 'Préstamo NBD';
             if (descOriginal.includes('P2P') || descOriginal.includes('TT REF') || descOriginal.includes('MOBILE BANKING TRANSFER') || descOriginal.includes('EXCHANGE')) return 'Transferencias & Envíos';
 
@@ -1544,7 +1542,10 @@
                     const ultimoImporteStr = importes[importes.length - 1][0];
                     const isCR = ultimoImporteStr.includes('CR');
                     const monto = cleanNumber(ultimoImporteStr);
-                    const txFecha = chunk.match(/\b\d{2}\/\d{2}\/\d{4}\b/)[0]; // Fecha transaccion
+                    
+                    let fechaMatch = chunk.match(/\b\d{2}\/\d{2}\/\d{4}\b/);
+                    if (!fechaMatch) return; 
+                    const txFecha = fechaMatch[0]; 
                     
                     let desc = chunk.replace(/\b\d{2}\/\d{2}\/\d{4}\b/g, '').replace(ultimoImporteStr, '').toUpperCase().trim();
 
@@ -1597,7 +1598,9 @@
                     let absAmount = Math.abs(amount);
                     let isExpense = amount < 0;
                     
-                    let txFechaRaw = chunk.match(/\b\d{2}\s[A-Za-z]{3}\s\d{4}\b/)[0];
+                    let fechaMatch = chunk.match(/\b\d{2}\s[A-Za-z]{3}\s\d{4}\b/);
+                    if (!fechaMatch) return; 
+                    let txFechaRaw = fechaMatch[0];
 
                     let desc = chunk.replace(matches[matches.length - 1][0], '').replace(matches[matches.length - 2][0], '').replace(/\b\d{2}\s[A-Za-z]{3}\s\d{4}\b/g, '').toUpperCase().trim();
                     if(desc.includes('STATEMENT OF ACCOUNT') || desc.includes('BALANCE')) return;
