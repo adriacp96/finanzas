@@ -716,7 +716,21 @@
 
         const monthMap = { 'JAN': '01', 'FEB': '02', 'MAR': '03', 'APR': '04', 'MAY': '05', 'JUN': '06', 'JUL': '07', 'AUG': '08', 'SEP': '09', 'OCT': '10', 'NOV': '11', 'DEC': '12' };
 
-        const historicalIncome = [ /* Array omitido para ahorrar espacio - Mantén el tuyo */ ];
+        const historicalIncome = [
+            { mes: 'Ago 23', valor: 6617.6 }, { mes: 'Sep 23', valor: 3361.67 }, { mes: 'Oct 23', valor: 4482.8 },
+            { mes: 'Nov 23', valor: 10353.51 }, { mes: 'Dic 23', valor: 12175.81 }, { mes: 'Ene 24', valor: 4167.82 },
+            { mes: 'Feb 24', valor: 9895.47 }, { mes: 'Mar 24', valor: 8218.58 }, { mes: 'Abr 24', valor: 12026.91 },
+            { mes: 'May 24', valor: 26177.74 }, { mes: 'Jun 24', valor: 10605.53 }, { mes: 'Jul 24', valor: 9939.08 },
+            { mes: 'Ago 24', valor: 11220.91 }, { mes: 'Sep 24', valor: 11869.78 }, { mes: 'Oct 24', valor: 7550.14 },
+            { mes: 'Nov 24', valor: 11258.69 }, { mes: 'Dic 24', valor: 11030.33 }, { mes: 'Ene 25', valor: 10647.28 },
+            { mes: 'Feb 25', valor: 8198.75 }, { mes: 'Mar 25', valor: 12273.74 }, { mes: 'Abr 25', valor: 11277.6 },
+            { mes: 'May 25', valor: 34760.4 }, { mes: 'Jun 25', valor: 11421.23 }, { mes: 'Jul 25', valor: 9288.2 },
+            { mes: 'Ago 25', valor: 11386.73 }, { mes: 'Sep 25', valor: 10949.61 }, { mes: 'Oct 25', valor: 10714.48 },
+            { mes: 'Nov 25', valor: 12577.88 }, { mes: 'Dic 25', valor: 12113.24 }, { mes: 'Ene 26', valor: 13519.2 },
+            { mes: 'Feb 26', valor: 12684.32 }, { mes: 'Mar 26', valor: 13169.11 }, { mes: 'Abr 26', valor: 16212.96 },
+            { mes: 'May 26', valor: 40873.32 }, { mes: 'Jun 26', valor: 16708.98 }, { mes: 'Jul 26', valor: 18696.08 },
+            { mes: 'Ago 26', valor: 29100.13 }
+        ];
 
         // ==========================================
         // UI/UX UTILS (Toasts, Modals, Animations)
@@ -814,10 +828,9 @@
             
             calcularDiasCobro();
             cargarDeudas();
-            await cargarHistorialIngresos(); // Reemplazado por función real si existe
+            cargarHistorialIngresos(); 
             configurarDragAndDrop();
 
-            // NUEVO: Cargar inteligencia artificial de la base de datos
             await cargarInteligenciaSupabase();
 
             await cargarExtractosBaseDatos();
@@ -832,34 +845,608 @@
                 const { data: txs } = await supabaseClient.from('transacciones_bancarias').select('hash_duplicado');
                 if (txs) hashesDuplicadosDB = new Set(txs.map(t => t.hash_duplicado));
             } catch (e) {
-                console.warn("Fallo cargando BD Inteligencia (las tablas aún no existen o fallo de red):", e);
+                console.warn("Fallo cargando BD Inteligencia:", e);
             }
         }
 
-        // RESTO DE FUNCIONES MANTENIDAS (cambiarTarjetaVisual, calcularDiasCobro, cambiarMes, cargarDatosMes, etc...)
-        // (Omito las funciones de UI principal por espacio, no se modifica NINGUNA)
-        function cambiarTarjetaVisual(offset) { /* Original */ }
-        function calcularDiasCobro() { /* Original */ }
-        function cambiarMes(offset) { /* Original */ }
-        async function cargarDatosMes() { /* Original */ }
-        function sincronizarExtractoVisor() { /* Original */ }
-        function setModo(modo, triggerCalc = true) { /* Original */ }
-        function actualizarSlider() { /* Original */ }
-        function actualizarGastos() { /* Original */ }
-        function calcularTodo() { /* Original */ }
-        function calcularExcedente() { /* Original */ }
-        function actualizarGraficoDistribucion(base, deuda, fondo) { /* Original */ }
-        async function cargarDeudas() { /* Original */ }
-        function renderizarDeudasDinamicas() { /* Original */ }
-        function calcularEstadoAlquiler(fechaSeleccionada) { /* Original */ }
-        async function actualizarSaldo(id, saldoActual) { /* Original */ }
-        async function cargarHistorialIngresos() { /* Original */ }
-        async function guardarMes() { /* Original */ }
-        async function cargarExtractosBaseDatos() { /* Original */ }
-        function actualizarDropdownExtractos() { /* Original */ }
-        function renderizarAnalisisVisual() { /* Original */ }
-        async function borrarExtractoBD() { /* Original */ }
+        // ==========================================
+        // FUNCIONES ORIGINALES (UI Y LÓGICA CORE)
+        // ==========================================
 
+        function cambiarTarjetaVisual(offset) {
+            cuentaActivaIndex += offset;
+            if (cuentaActivaIndex < 0) cuentaActivaIndex = cuentasDisponibles.length - 1;
+            if (cuentaActivaIndex >= cuentasDisponibles.length) cuentaActivaIndex = 0;
+            
+            const cActiva = cuentasDisponibles[cuentaActivaIndex];
+            document.getElementById('lblTarjetaActiva').innerHTML = `<i class="${cActiva.icon} text-indigo-400"></i> ${cActiva.nombre}`;
+            
+            actualizarDropdownExtractos();
+        }
+
+        function calcularDiasCobro() {
+            const today = new Date();
+            let payday = new Date(today.getFullYear(), today.getMonth(), 26);
+            if (today.getDate() > 26) payday = new Date(today.getFullYear(), today.getMonth() + 1, 26);
+            const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            const diffDays = Math.ceil((payday - todayDate) / (1000 * 60 * 60 * 24));
+            const widget = document.getElementById('paydayCountdown');
+            if (widget) {
+                if (diffDays === 0) widget.innerHTML = `<span class="text-emerald-400">¡Hoy cobras! 🎉</span>`;
+                else if (diffDays === 1) widget.innerHTML = `Mañana`;
+                else widget.innerHTML = `Faltan <span class="text-emerald-400 text-2xl">${diffDays}</span> días`;
+            }
+        }
+
+        function cambiarMes(offset) {
+            const selector = document.getElementById('mesSelector');
+            if (!selector.value) return;
+            const [year, month] = selector.value.split('-');
+            let date = new Date(year, parseInt(month) - 1 + offset, 1);
+            selector.value = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+            cargarDatosMes(); 
+        }
+
+        async function cargarDatosMes() {
+            const mesRaw = document.getElementById('mesSelector').value;
+            if (!mesRaw) return;
+            const mesFormateado = new Date(mesRaw + '-05').toLocaleString('es-ES', { month: 'long', year: 'numeric' });
+            const { data, error } = await supabaseClient.from('historial_meses').select('*').eq('mes', mesFormateado).single();
+                
+            if (data) {
+                const isReal = data.tipo === 'Real';
+                document.getElementById('blockHoursSlider').value = data.horas_vuelo ?? 80;
+                document.getElementById('mealAllowance').value = data.dietas ?? 1500;
+                document.getElementById('turnarounds').value = data.turnarounds ?? 300;
+                document.getElementById('gastoEmaar').value = data.gasto_emaar ?? 2000;
+                document.getElementById('dewaKwh').value = data.dewa_kwh ?? 434;
+                document.getElementById('dewaM3').value = data.dewa_m3 ?? 2.3;
+                document.getElementById('dewaRealInput').value = data.dewa_real ?? '';
+                document.getElementById('salarioRealInput').value = data.salario_real ?? '';
+                
+                const val = data.horas_vuelo ?? 80;
+                document.getElementById('blockHoursSlider').style.background = `linear-gradient(to right, #6366f1 0%, #6366f1 ${(val / 130) * 100}%, #334155 ${(val / 130) * 100}%, #334155 100%)`;
+                document.getElementById('sliderValue').innerHTML = `${val}<span class="text-xl text-indigo-400">h</span>`;
+                setModo(isReal ? 'real' : 'simulacion', true);
+            } else {
+                document.getElementById('blockHoursSlider').value = 80;
+                document.getElementById('mealAllowance').value = 1500;
+                document.getElementById('turnarounds').value = 300;
+                document.getElementById('gastoEmaar').value = 2000;
+                document.getElementById('dewaKwh').value = 434;
+                document.getElementById('dewaM3').value = 2.3;
+                document.getElementById('dewaRealInput').value = '';
+                document.getElementById('salarioRealInput').value = '';
+                document.getElementById('blockHoursSlider').style.background = `linear-gradient(to right, #6366f1 0%, #6366f1 61.5%, #334155 61.5%, #334155 100%)`;
+                document.getElementById('sliderValue').innerHTML = `80<span class="text-xl text-indigo-400">h</span>`;
+                setModo('simulacion', true);
+            }
+            
+            renderizarDeudasDinamicas();
+            sincronizarExtractoVisor();
+        }
+
+        function sincronizarExtractoVisor() {
+            const mesRaw = document.getElementById('mesSelector').value; 
+            const badgeStatus = document.getElementById('badgeExtractoStatus');
+            const cActiva = cuentasDisponibles[cuentaActivaIndex];
+
+            const extractosCuenta = extractosGlobales.filter(ext => (ext.cuenta || 'Credit-Emaar') === cActiva.id);
+
+            if (!mesRaw || extractosCuenta.length === 0) {
+                if(badgeStatus) {
+                    badgeStatus.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> Pendiente`;
+                    badgeStatus.className = "text-[10px] font-bold px-2 py-1.5 rounded-xl bg-rose-500/20 border border-rose-500/30 text-rose-400";
+                }
+                return;
+            }
+            
+            const [year, month] = mesRaw.split('-');
+            
+            const extractoMatch = extractosCuenta.find(ext => {
+                const fechas = ext.periodo.match(/(\d{2})-([A-Za-z]{3})-(\d{2})/g) || ext.periodo.match(/(\d{2})\s([A-Za-z]{3})\s(\d{4})/g);
+                if (fechas && fechas.length >= 1) {
+                    const endDate = fechas[fechas.length - 1];
+                    const partes = endDate.split(/[\s\-]/);
+                    const endM = monthMap[partes[1].toUpperCase()];
+                    const endY = partes[2].length === 2 ? '20' + partes[2] : partes[2];
+                    return endM === month && endY === year;
+                }
+                return false;
+            });
+
+            const selectAnalisis = document.getElementById('filtroGastosMes');
+            
+            if (extractoMatch) {
+                if(selectAnalisis) selectAnalisis.value = extractoMatch.id;
+                if(badgeStatus) {
+                    badgeStatus.innerHTML = `<i class="fa-solid fa-circle-check"></i> Extracto Subido`;
+                    badgeStatus.className = "text-[10px] font-bold px-2 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400";
+                }
+            } else {
+                if(selectAnalisis) selectAnalisis.value = 'tendencia'; 
+                if(badgeStatus) {
+                    badgeStatus.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> Falta Extracto`;
+                    badgeStatus.className = "text-[10px] font-bold px-2 py-1.5 rounded-xl bg-rose-500/20 border border-rose-500/30 text-rose-400";
+                }
+            }
+            
+            renderizarAnalisisVisual();
+        }
+
+        function setModo(modo, triggerCalc = true) {
+            modoActual = modo;
+            const esSim = modo === 'simulacion';
+            
+            document.getElementById('btnModoSim').className = esSim ? "flex-1 sm:w-48 py-3 text-sm font-black bg-indigo-500/20 text-indigo-400 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2" : "flex-1 sm:w-48 py-3 text-sm font-black text-slate-400 hover:text-slate-200 rounded-xl transition-all flex items-center justify-center gap-2";
+            document.getElementById('btnModoReal').className = !esSim ? "flex-1 sm:w-48 py-3 text-sm font-black bg-teal-500/20 text-teal-400 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2" : "flex-1 sm:w-48 py-3 text-sm font-black text-slate-400 hover:text-slate-200 rounded-xl transition-all flex items-center justify-center gap-2";
+            
+            document.getElementById('panelSimulacion').classList.toggle('hidden', !esSim);
+            document.getElementById('panelReal').classList.toggle('hidden', esSim);
+            document.getElementById('dewaSimulacionPanel').classList.toggle('hidden', !esSim);
+            document.getElementById('dewaRealPanel').classList.toggle('hidden', esSim);
+            document.getElementById('desgloseSimulacion').classList.toggle('hidden', !esSim);
+            
+            document.getElementById('tituloIngresos').innerText = esSim ? "Simulador de Ingresos" : "Ingreso Real";
+            document.getElementById('textoBotonGuardar').innerText = esSim ? "Guardar Proyección en Supabase" : "Guardar Dato Real en Supabase";
+            document.getElementById('tipoRegistroBadge').innerHTML = esSim ? `<i class="fa-solid fa-hat-wizard"></i> PROYECCIÓN` : `<i class="fa-solid fa-money-check-dollar"></i> DATO REAL`;
+            document.getElementById('tipoRegistroBadge').className = esSim ? "bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 text-xs font-extrabold px-3.5 py-1.5 rounded-lg uppercase tracking-wider inline-flex items-center gap-2" : "bg-teal-500/20 border border-teal-500/30 text-teal-400 text-xs font-extrabold px-3.5 py-1.5 rounded-lg uppercase tracking-wider inline-flex items-center gap-2";
+            
+            if (triggerCalc) actualizarGastos(); 
+        }
+
+        function actualizarSlider() {
+            const val = document.getElementById('blockHoursSlider').value;
+            document.getElementById('sliderValue').innerHTML = `${val}<span class="text-xl text-indigo-400">h</span>`;
+            document.getElementById('blockHoursSlider').style.background = `linear-gradient(to right, #6366f1 0%, #6366f1 ${(val / 130) * 100}%, #334155 ${(val / 130) * 100}%, #334155 100%)`;
+            calcularTodo();
+        }
+
+        function actualizarGastos() {
+            gastoVariableEmaar = parseFloat(document.getElementById('gastoEmaar').value) || 0;
+            if (modoActual === 'simulacion') {
+                const kwh = parseFloat(document.getElementById('dewaKwh').value) || 0;
+                const m3 = parseFloat(document.getElementById('dewaM3').value) || 0;
+                gastoDewa = (((kwh * 0.230) + (kwh * 0.060) + 5.00) * 1.05) + (((m3 * 7.700) + (m3 * 1.100) + 5.00) * 1.05) + 236.08;
+                animateValue(document.getElementById('dewaTotalSimDisplay'), gastoDewa, 400, '', ' AED');
+            } else {
+                gastoDewa = parseFloat(document.getElementById('dewaRealInput').value) || 0;
+            }
+
+            const totalFijosObligatorios = COSTES_FIJOS_BASE + gastoDewa;
+            lineaBaseDinamica = totalFijosObligatorios + gastoVariableEmaar;
+            
+            animateTexts('val-emaar', gastoVariableEmaar, '-', ' AED');
+            animateTexts('val-dewa-tooltip', gastoDewa, '', ' AED');
+            animateValue(document.getElementById('kpiCostesFijos'), totalFijosObligatorios, 400, '', ' AED');
+            animateValue(document.getElementById('resumenFijos'), totalFijosObligatorios, 400, '-', ' AED');
+            animateTexts('val-base', lineaBaseDinamica, '', ' AED');
+            calcularTodo();
+        }
+
+        function calcularTodo() {
+            if (modoActual === 'simulacion') {
+                const hours = parseFloat(document.getElementById('blockHoursSlider').value) || 0;
+                const meals = parseFloat(document.getElementById('mealAllowance').value) || 0;
+                const turnarounds = parseFloat(document.getElementById('turnarounds').value) || 0;
+                salarioEstimadoCalculado = BASE_FIJA_NETA + (hours * TARIFA_HORA_VUELO) + meals + turnarounds;
+                animateValue(document.getElementById('pagoVueloDisplay'), hours * TARIFA_HORA_VUELO, 400, '', ' AED');
+                animateValue(document.getElementById('dietasDisplay'), meals + turnarounds, 400, '', ' AED');
+            } else {
+                salarioEstimadoCalculado = parseFloat(document.getElementById('salarioRealInput').value) || 0;
+            }
+            animateTexts('val-salario', salarioEstimadoCalculado, '', ' AED');
+            calcularExcedente();
+        }
+
+        function calcularExcedente() {
+            const panelExcedente = document.getElementById('panelExcedente');
+            const panelSinExcedente = document.getElementById('sinExcedente');
+            
+            if (salarioEstimadoCalculado > lineaBaseDinamica) {
+                excedente = salarioEstimadoCalculado - lineaBaseDinamica;
+                pagoDeuda = excedente * 0.70; fondoEmergencia = excedente * 0.30;
+                animateTexts('val-excedente', excedente, '', ' AED');
+                animateTexts('val-deuda', pagoDeuda, '', ' AED');
+                animateTexts('val-fondo', fondoEmergencia, '', ' AED');
+                
+                panelExcedente.style.opacity = '1'; panelExcedente.style.pointerEvents = 'auto';
+                panelSinExcedente.classList.add('hidden');
+                actualizarGraficoDistribucion(lineaBaseDinamica, pagoDeuda, fondoEmergencia);
+            } else {
+                excedente = 0; pagoDeuda = 0; fondoEmergencia = 0;
+                panelExcedente.style.opacity = '0.1'; panelExcedente.style.pointerEvents = 'none';
+                panelSinExcedente.classList.remove('hidden');
+                actualizarGraficoDistribucion(salarioEstimadoCalculado, 0, 0);
+            }
+            if (deudaTotal > 0 && pagoDeuda > 0) document.getElementById('kpiMonthsFree').innerText = `~${Math.ceil(deudaTotal / (pagoDeuda + 3346 + 1739))} Meses`;
+            else document.getElementById('kpiMonthsFree').innerText = "---";
+        }
+
+        function actualizarGraficoDistribucion(base, deuda, fondo) {
+            if (distChartInstance) { distChartInstance.data.datasets[0].data = [base, deuda, fondo]; distChartInstance.update(); } 
+            else {
+                distChartInstance = new Chart(document.getElementById('distributionChart').getContext('2d'), {
+                    type: 'doughnut',
+                    data: { labels: ['Costes + Tarjeta', 'Ataque Deuda', 'Fondo'], datasets: [{ data: [base, deuda, fondo], backgroundColor: ['#334155', '#f43f5e', '#3b82f6'], borderWidth: 0, hoverOffset: 5 }] },
+                    options: { responsive: true, maintainAspectRatio: false, cutout: '80%', plugins: { legend: { display: false }, tooltip: { enabled: true } }, animation: { duration: 400, easing: 'easeOutQuart' } }
+                });
+            }
+        }
+
+        async function cargarDeudas() {
+            if (deudasGlobales.length === 0) {
+                const { data, error } = await supabaseClient.from('deudas').select('*').order('id', { ascending: true });
+                if (!error) deudasGlobales = data || [];
+            }
+            renderizarDeudasDinamicas();
+        }
+
+        function renderizarDeudasDinamicas() {
+            const container = document.getElementById('debtCardsContainer');
+            if(!container || deudasGlobales.length === 0) return; 
+            
+            container.innerHTML = ''; deudaTotal = 0;
+
+            const [selYear, selMonth] = document.getElementById('mesSelector').value.split('-');
+            const selectedDate = new Date(selYear, parseInt(selMonth) - 1, 1);
+            const today = new Date();
+            const monthDiff = (selectedDate.getFullYear() - today.getFullYear()) * 12 + (selectedDate.getMonth() - today.getMonth());
+
+            const maxDeuda = Math.max(...deudasGlobales.filter(d => !d.nombre.toLowerCase().includes('coche')).map(d => parseFloat(d.saldo)), 1);
+
+            deudasGlobales.forEach(deuda => {
+                const cuota = parseFloat(deuda.cuota_minima);
+                let saldoProyectado = Math.max(0, parseFloat(deuda.saldo) - (monthDiff * cuota));
+                deudaTotal += saldoProyectado;
+                
+                if (deuda.nombre.toLowerCase().includes('coche')) {
+                    const carSaldoEl = document.getElementById('carWidgetSaldo');
+                    if (carSaldoEl) animateValue(carSaldoEl, saldoProyectado, 500, '', ' AED');
+                    document.getElementById('carWidgetEditBtn').onclick = () => actualizarSaldo(deuda.id, deuda.saldo); 
+                    const carMesesEl = document.getElementById('carWidgetMeses');
+                    if (saldoProyectado <= 0) { carMesesEl.innerText = "¡Liquidado!"; carMesesEl.className = "text-xs font-bold text-white bg-gradient-to-r from-emerald-500 to-teal-400 px-2 py-1 rounded-md shadow-lg shadow-emerald-500/30"; } 
+                    else { carMesesEl.innerText = `Quedan ~${Math.ceil(saldoProyectado/cuota)} meses`; carMesesEl.className = "text-xs font-bold text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded-md"; }
+                } else {
+                    const porcentaje = (saldoProyectado / maxDeuda) * 100;
+                    const isCreditCard = deuda.nombre.toLowerCase().includes('tarjeta') || deuda.nombre.includes('2811') || deuda.nombre.toLowerCase().includes('emaar');
+                    let badgeTexto = monthDiff > 0 ? `Proyección (+${monthDiff} meses)` : (monthDiff < 0 ? `Histórico (${monthDiff} meses)` : 'Lo que queda (Hoy)');
+                    const textMesesRestantes = saldoProyectado > 0 ? `<span class="text-indigo-400 font-black ml-1">(~${Math.ceil(saldoProyectado/cuota)} meses)</span>` : `<span class="text-emerald-400 font-black ml-1">¡PAGADO! 🎉</span>`;
+
+                    container.innerHTML += `
+                        <div class="bg-slate-800/50 border border-slate-700 p-6 rounded-3xl shadow-sm transition-all duration-300 group flex flex-col justify-between ${saldoProyectado <= 0 ? 'opacity-40 grayscale' : 'hover:shadow-lg hover:shadow-slate-900/50'}">
+                            <div>
+                                <div class="flex justify-between items-start mb-4">
+                                    <h3 class="font-bold text-white leading-tight pr-2">${deuda.nombre}</h3>
+                                    <button onclick="actualizarSaldo(${deuda.id}, ${deuda.saldo})" class="text-[10px] uppercase font-bold tracking-wider text-indigo-400 bg-indigo-500/20 px-3 py-1.5 rounded-lg hover:bg-indigo-500/40 transition">Editar Hoy</button>
+                                </div>
+                                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1 text-${monthDiff > 0 ? 'indigo-300' : 'slate-400'}">${badgeTexto}</p>
+                                <p class="text-3xl font-black text-white tracking-tight mb-2">${saldoProyectado.toLocaleString('en-US', {minimumFractionDigits: 2})} <span class="text-sm font-bold text-slate-500">AED</span></p>
+                            </div>
+                            <div class="mt-4">
+                                <div class="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
+                                    <span>Progreso / Peso</span>
+                                    <span>Cuota: ${cuota.toLocaleString()} AED ${textMesesRestantes}</span>
+                                </div>
+                                <div class="w-full bg-slate-700 rounded-full h-1.5 overflow-hidden">
+                                    <div class="${isCreditCard ? 'bg-emerald-500' : 'bg-rose-500'} h-full rounded-full transition-all duration-1000" style="width: ${porcentaje}%"></div>
+                                </div>
+                            </div>
+                        </div>`;
+                }
+            });
+            animateValue(document.getElementById('kpiTotalDebt'), deudaTotal, 500, '', ' AED');
+            calcularEstadoAlquiler(selectedDate);
+        }
+
+        function calcularEstadoAlquiler(fechaSeleccionada) {
+            const mes = fechaSeleccionada.getMonth() + 1;
+            let mesCheque, qText, mesesAhorrados;
+            if (mes <= 3) { mesCheque = 3; qText = "Q1 (Marzo)"; mesesAhorrados = mes === 3 ? 3 : mes; } 
+            else if (mes <= 6) { mesCheque = 6; qText = "Q2 (Junio)"; mesesAhorrados = mes === 6 ? 3 : mes - 3; } 
+            else if (mes <= 9) { mesCheque = 9; qText = "Q3 (Septiembre)"; mesesAhorrados = mes === 9 ? 3 : mes - 6; } 
+            else { mesCheque = 12; qText = "Q4 (Diciembre)"; mesesAhorrados = mes === 12 ? 3 : mes - 9; }
+
+            const ahorroActual = mesesAhorrados * 3033;
+            const diasRestantes = Math.ceil((new Date(fechaSeleccionada.getFullYear(), mesCheque - 1, 26) - fechaSeleccionada) / (1000 * 60 * 60 * 24));
+            const porcentaje = Math.min(100, Math.max(0, (ahorroActual / 9099) * 100));
+            
+            setTimeout(() => { document.getElementById('homeFillLiquid').style.clipPath = `inset(${100 - porcentaje}% 0 0 0)`; }, 100);
+            document.getElementById('rentQuarterTitle').innerText = `Cheque Alquiler ${qText}`;
+            animateValue(document.getElementById('rentSavedValue'), ahorroActual, 500, '', '');
+            
+            const bPct = document.getElementById('rentPercentageBadge');
+            if (ahorroActual >= 9099) { bPct.innerHTML = `<i class="fa-solid fa-check"></i> Listo para Pagar`; bPct.className = "text-white bg-gradient-to-r from-emerald-500 to-teal-400 px-2 py-0.5 rounded shadow-sm font-black"; } 
+            else { bPct.innerText = `${Math.floor(porcentaje)}% Lleno`; bPct.className = "text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded"; }
+
+            const bDias = document.getElementById('rentDaysBadge');
+            if (diasRestantes <= 0 && diasRestantes > -30) { bDias.innerHTML = `<i class="fa-solid fa-money-check"></i> Mes de Cobro`; bDias.className = "text-xs font-bold text-amber-400 bg-amber-900/50 px-2.5 py-1 rounded-md border border-amber-700/50"; } 
+            else { bDias.innerHTML = `<i class="fa-regular fa-clock mr-1"></i> Vence en ~${Math.abs(diasRestantes)} días`; bDias.className = "text-xs font-bold text-slate-400 bg-slate-900/50 px-2.5 py-1 rounded-md border border-slate-700"; }
+        }
+
+        async function actualizarSaldo(id, saldoActual) {
+            const nuevoSaldo = await showModal({
+                title: 'Actualizar Saldo',
+                message: 'Introduce el saldo pendiente a día de hoy:',
+                type: 'prompt',
+                defaultValue: saldoActual
+            });
+
+            if (nuevoSaldo !== null && nuevoSaldo !== '' && !isNaN(nuevoSaldo)) {
+                if (!(await supabaseClient.from('deudas').update({ saldo: parseFloat(nuevoSaldo) }).eq('id', id)).error) { 
+                    deudasGlobales = []; 
+                    cargarDeudas();
+                    showToast("Saldo actualizado correctamente.", "success");
+                }
+            }
+        }
+
+        async function cargarHistorialIngresos() {
+            const { data, error } = await supabaseClient.from('historial_meses').select('mes, salario, tipo').order('id', { ascending: true });
+            let combinedData = [...historicalIncome.map(d => ({...d, tipo: 'Real'}))]; 
+            if (!error && data) data.forEach(r => combinedData.push({ mes: r.mes.substring(0,3).charAt(0).toUpperCase() + r.mes.substring(1,3).toLowerCase() + ' ' + r.mes.slice(-2), valor: parseFloat(r.salario), tipo: r.tipo || 'Real' }));
+            
+            const labels = combinedData.map(d => d.tipo === 'Proyección' ? d.mes + ' 🔮' : d.mes);
+            const values = combinedData.map(d => d.valor);
+            const ctx = document.getElementById('incomeHistoryChart').getContext('2d');
+            const gradient = ctx.createLinearGradient(0, 0, 0, 350); gradient.addColorStop(0, 'rgba(99, 102, 241, 0.4)'); gradient.addColorStop(1, 'rgba(99, 102, 241, 0.0)');
+
+            if (historyChartInstance) historyChartInstance.destroy();
+            historyChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: { labels, datasets: [
+                    { label: 'Ingreso Neto', data: values, borderColor: '#6366f1', borderWidth: 3, backgroundColor: gradient, fill: true, tension: 0.4, pointBackgroundColor: combinedData.map(d => d.tipo === 'Proyección' ? '#fbbf24' : '#ffffff'), pointBorderColor: '#6366f1', pointBorderWidth: 2, pointRadius: 4, pointHoverRadius: 6, order: 2 },
+                    { label: 'Media', data: Array(labels.length).fill(values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : 0), borderColor: '#94a3b8', borderWidth: 2, borderDash: [5, 5], fill: false, pointRadius: 0, pointHoverRadius: 0, order: 1 }
+                ]},
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#0f172a', padding: 12, callbacks: { label: c => c.datasetIndex === 1 ? ` Media: ${Math.floor(c.raw).toLocaleString()} AED` : ` ${combinedData[c.dataIndex].tipo}: ${c.raw.toLocaleString()} AED` } } }, scales: { y: { beginAtZero: true, grid: { color: '#1e293b', drawBorder: false }, ticks: { color: '#94a3b8', callback: v => v / 1000 + 'k' } }, x: { grid: { display: false }, ticks: { color: '#94a3b8', maxTicksLimit: 12 } } }, interaction: { mode: 'index', intersect: false } }
+            });
+        }
+
+        async function guardarMes() {
+            const mesRaw = document.getElementById('mesSelector').value;
+            if (!mesRaw) return showToast("Selecciona el mes a registrar.", "error");
+            if (salarioEstimadoCalculado <= 0) return showToast("El ingreso debe ser mayor a 0.", "warning");
+            
+            const btn = event.currentTarget; const originalContent = btn.innerHTML;
+            btn.innerHTML = `<svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> <span>Sincronizando...</span>`;
+            btn.disabled = true;
+
+            const payload = { mes: new Date(mesRaw + '-05').toLocaleString('es-ES', { month: 'long', year: 'numeric' }), salario: Math.floor(salarioEstimadoCalculado), linea_base: Math.floor(lineaBaseDinamica), excedente: Math.floor(excedente), pago_extra_deuda: Math.floor(pagoDeuda), fondo_emergencia: Math.floor(fondoEmergencia), tipo: modoActual === 'simulacion' ? 'Proyección' : 'Real', dewa: Math.floor(gastoDewa), horas_vuelo: parseFloat(document.getElementById('blockHoursSlider').value) || 0, dietas: parseFloat(document.getElementById('mealAllowance').value) || 0, turnarounds: parseFloat(document.getElementById('turnarounds').value) || 0, gasto_emaar: parseFloat(document.getElementById('gastoEmaar').value) || 0, dewa_kwh: parseFloat(document.getElementById('dewaKwh').value) || 0, dewa_m3: parseFloat(document.getElementById('dewaM3').value) || 0, dewa_real: parseFloat(document.getElementById('dewaRealInput').value) || null, salario_real: parseFloat(document.getElementById('salarioRealInput').value) || null };
+
+            const { error } = await supabaseClient.from('historial_meses').upsert([payload], { onConflict: 'mes' });
+            if (error) { showToast("Error: " + error.message, "error"); } 
+            else {
+                if (parseInt(mesRaw.split('-')[1]) === (new Date().getMonth() + 1) && parseInt(mesRaw.split('-')[0]) === new Date().getFullYear() && modoActual === 'real') {
+                    if (!(await supabaseClient.from('deudas').upsert(deudasGlobales.map(d => ({ ...d, saldo: Math.max(0, parseFloat(d.saldo) - parseFloat(d.cuota_minima)) })))).error) { deudasGlobales = []; cargarDeudas(); }
+                }
+                showToast("Guardado con éxito en Supabase.", "success");
+                cargarHistorialIngresos();
+            }
+            btn.innerHTML = originalContent; btn.disabled = false;
+        }
+
+        async function cargarExtractosBaseDatos() {
+            const { data, error } = await supabaseClient.from('extractos_emaar').select('*').order('created_at', { ascending: true });
+            if (error) return console.error("Error cargando extractos:", error);
+            
+            extractosGlobales = data || [];
+            extractosGlobales.sort((a, b) => new Date(a.fecha_vencimiento || a.created_at) - new Date(b.fecha_vencimiento || b.created_at));
+            
+            actualizarDropdownExtractos();
+        }
+
+        function actualizarDropdownExtractos() {
+            const cActiva = cuentasDisponibles[cuentaActivaIndex];
+            const extractosFiltrados = extractosGlobales.filter(ext => (ext.cuenta || 'Credit-Emaar') === cActiva.id);
+
+            const select = document.getElementById('filtroGastosMes');
+            select.innerHTML = '<option value="tendencia">📈 Tendencia Global</option>';
+            
+            [...extractosFiltrados].reverse().forEach(ext => {
+                const opt = document.createElement('option');
+                opt.value = ext.id;
+                opt.text = `📄 ${ext.periodo}`;
+                select.appendChild(opt);
+            });
+            
+            sincronizarExtractoVisor();
+        }
+
+        function renderizarAnalisisVisual() {
+            const val = document.getElementById('filtroGastosMes').value;
+            const ctx = document.getElementById('expensesChart').getContext('2d');
+            const cActiva = cuentasDisponibles[cuentaActivaIndex];
+            const isDebit = cActiva.id === 'Debit-NBD';
+            
+            const btnBorrar = document.getElementById('btnBorrarExtracto');
+            if(val === 'tendencia') btnBorrar.classList.add('hidden');
+            else btnBorrar.classList.remove('hidden');
+
+            if (expensesChartInstance) expensesChartInstance.destroy();
+
+            document.getElementById('kpiTotalMoM').className = "hidden";
+            document.getElementById('kpiTopCategoriaMoM').className = "hidden";
+            const gridContainer = document.getElementById('contenedorCategoriasVisual');
+            gridContainer.classList.add('hidden');
+            gridContainer.innerHTML = ''; 
+
+            const extractosFiltrados = extractosGlobales.filter(ext => (ext.cuenta || 'Credit-Emaar') === cActiva.id);
+
+            if (val === 'tendencia') {
+                document.getElementById('labelPromedioGasto').innerText = "Promedio Mensual (Gastos)";
+                document.getElementById('labelComisiones').innerText = isDebit ? "Ingresos Históricos" : "Fugas Históricas (Comisiones/Tasas)";
+                document.getElementById('colorIngresoOComision').className = "absolute left-0 top-0 bottom-0 w-1.5 " + (isDebit ? "bg-emerald-500" : "bg-amber-500");
+
+                if (extractosFiltrados.length === 0) {
+                    animateValue(document.getElementById('kpiPromedioGasto'), 0, 100, '', ' <span class="text-sm text-slate-400">AED</span>');
+                    document.getElementById('kpiTopCategoria').innerText = "---";
+                    document.getElementById('kpiTopCategoriaAmount').innerHTML = "--- AED";
+                    animateValue(document.getElementById('kpiComisiones'), 0, 100, '', ' AED');
+                    
+                    gridContainer.innerHTML = `
+                        <div class="col-span-2 sm:col-span-3 lg:col-span-4 py-16 text-center flex flex-col items-center justify-center opacity-60">
+                            <div class="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mb-4">
+                                <i class="fa-solid fa-file-invoice-dollar text-2xl text-slate-500"></i>
+                            </div>
+                            <p class="text-slate-400 font-bold text-lg">Aún no hay extractos subidos</p>
+                            <p class="text-sm text-slate-500 mt-1">Arrastra tu primer PDF en el botón superior para comenzar a analizar tu cuenta de ${cActiva.nombre}.</p>
+                        </div>
+                    `;
+                    gridContainer.classList.remove('hidden');
+                    return;
+                }
+
+                const labels = extractosFiltrados.map(e => e.periodo.substring(0, 8)); 
+                const datasets = [];
+                let totalGastoHistorico = 0, maxCatValue = 0, maxCatName = "---", totalMetricSecundaria = 0;
+
+                Object.keys(catColors).forEach(cat => {
+                    const dataPoints = extractosFiltrados.map(ext => ext.desglose_categorias[cat] || 0);
+                    const catSum = dataPoints.reduce((a, b) => a + b, 0);
+                    if (catSum > 0) {
+                        datasets.push({ label: cat, data: dataPoints, backgroundColor: catColors[cat], borderWidth: 0, borderRadius: 4, barPercentage: 0.6 });
+                        if (cat !== 'Otros Gastos' && cat !== 'Pago Tarjeta Emaar' && catSum > maxCatValue) { maxCatValue = catSum; maxCatName = cat; }
+                        totalGastoHistorico += catSum;
+                        if(!isDebit && cat === 'Comisiones & Tasas') totalMetricSecundaria = catSum;
+                    }
+                });
+
+                if (isDebit) {
+                    totalMetricSecundaria = extractosFiltrados.reduce((acc, curr) => acc + (parseFloat(curr.ingresos) || 0), 0);
+                }
+
+                animateValue(document.getElementById('kpiPromedioGasto'), totalGastoHistorico / extractosFiltrados.length, 500, '', ' <span class="text-sm text-slate-400">AED</span>');
+                document.getElementById('kpiTopCategoria').innerText = maxCatName;
+                animateValue(document.getElementById('kpiTopCategoriaAmount'), maxCatValue / extractosFiltrados.length, 500, '~', ' AED/mes');
+                
+                animateValue(document.getElementById('kpiComisiones'), totalMetricSecundaria, 500, '', ' AED');
+                document.getElementById('kpiComisiones').className = `text-xl font-black ${isDebit ? 'text-emerald-400' : 'text-amber-400'} tick-number`;
+
+                expensesChartInstance = new Chart(ctx, {
+                    type: 'bar', data: { labels, datasets },
+                    options: {
+                        responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, backgroundColor: '#0f172a', padding: 10 } },
+                        scales: { x: { stacked: true, grid: { display: false }, ticks: { color: '#94a3b8' } }, y: { stacked: true, grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } } }
+                    }
+                });
+
+            } else {
+                document.getElementById('labelPromedioGasto').innerText = "Gasto Total del Mes";
+                document.getElementById('labelComisiones').innerText = isDebit ? "Ingresos Este Mes" : "Fugas Este Mes (Comisiones/Tasas)";
+                document.getElementById('colorIngresoOComision').className = "absolute left-0 top-0 bottom-0 w-1.5 " + (isDebit ? "bg-emerald-500" : "bg-amber-500");
+
+                const currentIndex = extractosFiltrados.findIndex(e => e.id.toString() === val);
+                if (currentIndex === -1) return;
+                
+                const extracto = extractosFiltrados[currentIndex];
+                const extractoAnterior = currentIndex > 0 ? extractosFiltrados[currentIndex - 1] : null;
+
+                const categorias = extracto.desglose_categorias;
+                const labels = [], data = [], bgColors = [];
+                let topCat = "---", topVal = 0;
+
+                Object.keys(categorias).forEach(cat => {
+                    const monto = categorias[cat];
+                    if (monto > 0) {
+                        labels.push(cat); data.push(monto); bgColors.push(catColors[cat] || '#94a3b8');
+                        if (cat !== 'Otros Gastos' && cat !== 'Pago Tarjeta Emaar' && monto > topVal) { topVal = monto; topCat = cat; }
+                    }
+                });
+
+                animateValue(document.getElementById('kpiPromedioGasto'), extracto.total_compras, 500, '', ' <span class="text-sm text-slate-400">AED</span>');
+                
+                if(extractoAnterior && extractoAnterior.total_compras > 0) {
+                    const diffPct = ((extracto.total_compras - extractoAnterior.total_compras) / extractoAnterior.total_compras) * 100;
+                    const badge = document.getElementById('kpiTotalMoM');
+                    badge.classList.remove('hidden', 'bg-rose-500/20', 'text-rose-400', 'bg-emerald-500/20', 'text-emerald-400');
+                    if(diffPct > 0) { badge.innerHTML = `<i class="fa-solid fa-arrow-trend-up"></i> +${diffPct.toFixed(1)}%`; badge.classList.add('bg-rose-500/20', 'text-rose-400'); } 
+                    else { badge.innerHTML = `<i class="fa-solid fa-arrow-trend-down"></i> ${diffPct.toFixed(1)}%`; badge.classList.add('bg-emerald-500/20', 'text-emerald-400'); }
+                }
+
+                document.getElementById('kpiTopCategoria').innerText = topCat;
+                animateValue(document.getElementById('kpiTopCategoriaAmount'), topVal, 500, '', ' AED');
+                
+                if(extractoAnterior && extractoAnterior.desglose_categorias[topCat] > 0) {
+                    const antVal = extractoAnterior.desglose_categorias[topCat];
+                    const diffCat = ((topVal - antVal) / antVal) * 100;
+                    const badgeCat = document.getElementById('kpiTopCategoriaMoM');
+                    badgeCat.classList.remove('hidden', 'bg-rose-500/20', 'text-rose-400', 'bg-emerald-500/20', 'text-emerald-400');
+                    if(diffCat > 0) { badgeCat.innerHTML = `+${diffCat.toFixed(0)}%`; badgeCat.classList.add('bg-rose-500/20', 'text-rose-400'); }
+                    else { badgeCat.innerHTML = `${diffCat.toFixed(0)}%`; badgeCat.classList.add('bg-emerald-500/20', 'text-emerald-400'); }
+                }
+                
+                let valSecundario = isDebit ? (extracto.ingresos || 0) : (categorias['Comisiones & Tasas'] || 0);
+                animateValue(document.getElementById('kpiComisiones'), valSecundario, 500, '', ' AED');
+                document.getElementById('kpiComisiones').className = `text-xl font-black ${isDebit ? 'text-emerald-400' : 'text-amber-400'} tick-number`;
+
+                gridContainer.classList.remove('hidden');
+
+                const sortedCats = Object.keys(categorias).filter(c => categorias[c] > 0).sort((a,b) => categorias[b] - categorias[a]);
+                
+                sortedCats.forEach(cat => {
+                    const monto = categorias[cat];
+                    const pctTotal = extracto.total_compras > 0 ? Math.round((monto / extracto.total_compras) * 100) : 0;
+                    let momHtml = '';
+                    
+                    if(extractoAnterior && extractoAnterior.desglose_categorias[cat] > 0) {
+                        const antVal = extractoAnterior.desglose_categorias[cat];
+                        const diffPct = ((monto - antVal) / antVal) * 100;
+                        const icon = diffPct > 0 ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down';
+                        const colorClass = diffPct > 0 ? 'text-rose-400' : 'text-emerald-400';
+                        momHtml = `<span class="${colorClass} text-[10px] font-bold ml-2"><i class="fa-solid ${icon}"></i> ${Math.abs(diffPct).toFixed(0)}%</span>`;
+                    }
+
+                    gridContainer.innerHTML += `
+                        <div class="bg-slate-800/40 p-4 rounded-2xl border border-slate-700/80 hover:bg-slate-800/80 transition flex flex-col justify-between">
+                            <div class="flex justify-between items-start mb-3">
+                                <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm shadow-inner" style="background-color: ${catColors[cat] || '#94a3b8'}20; color: ${catColors[cat] || '#94a3b8'}; border: 1px solid ${catColors[cat] || '#94a3b8'}40;">
+                                    <i class="fa-solid ${catIcons[cat] || 'fa-tag'}"></i>
+                                </div>
+                                <span class="text-slate-500 font-black text-xs">${pctTotal}%</span>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-tight mb-1 truncate" title="${cat}">${cat}</p>
+                                <div class="flex items-baseline">
+                                    <p class="text-lg font-black text-white">${Math.floor(monto).toLocaleString()}</p>
+                                    ${momHtml}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                expensesChartInstance = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: { labels, datasets: [{ data, backgroundColor: bgColors, borderWidth: 0, hoverOffset: 8 }] },
+                    options: { 
+                        responsive: true, maintainAspectRatio: false, cutout: '70%', 
+                        plugins: { legend: { position: 'right', labels: { color: '#cbd5e1', font: { size: 11 }, padding: 15 } }, tooltip: { backgroundColor: '#0f172a', callbacks: { label: c => ` ${c.label}: ${c.raw.toLocaleString()} AED` } } },
+                        animation: { duration: 500, easing: 'easeOutQuart' }
+                    }
+                });
+            }
+        }
+
+        async function borrarExtractoBD() {
+            const val = document.getElementById('filtroGastosMes').value;
+            if (val === 'tendencia') return;
+            
+            const confirmed = await showModal({
+                title: 'Borrar Extracto',
+                message: '⚠️ ¿Estás seguro de que deseas borrar el análisis de este mes de la base de datos?',
+                type: 'confirm'
+            });
+
+            if (!confirmed) return;
+            
+            const { error } = await supabaseClient.from('extractos_emaar').delete().eq('id', val);
+            if (!error) {
+                showToast("Extracto borrado correctamente del histórico.", "success");
+                cargarExtractosBaseDatos(); 
+            } else {
+                showToast("Error al borrar el extracto: " + error.message, "error");
+            }
+        }
 
         // ==========================================
         // MÓDULO LECTOR PDF (SUPER-INTELIGENCIA)
@@ -897,7 +1484,6 @@
         
         function cleanNumber(str) { return parseFloat(str ? str.replace(/,/g, '').trim() : 0) || 0; }
 
-        // NUEVO: Funciones de Normalización e Inteligencia
         function normalizarNombreComercio(desc) {
             let n = desc.toUpperCase();
             n = n.replace(/[0-9]{2}\/[0-9]{2}\/[0-9]{2,4}/g, ''); // quita fechas
@@ -931,12 +1517,10 @@
             if (descOriginal.includes('DDR-512000')) return 'Préstamo NBD';
             if (descOriginal.includes('P2P') || descOriginal.includes('TT REF') || descOriginal.includes('MOBILE BANKING TRANSFER') || descOriginal.includes('EXCHANGE')) return 'Transferencias & Envíos';
 
-            // 3. NO SABE -> Obligamos a que tú elijas.
             return ""; 
         }
 
         function generarHashUnico(fecha, importe, comercioOriginal) {
-            // Un hash infalible basado en Fecha + ImporteExacto + ComercioNormalizado
             const base = `${fecha}_${Math.abs(importe).toFixed(2)}_${normalizarNombreComercio(comercioOriginal).replace(/\s/g,'')}`;
             return btoa(base).substring(0, 50);
         }
@@ -1024,7 +1608,6 @@
                     if(isExpense) {
                         let catAsignada = predecirCategoriaINTELIGENTE(desc);
                         
-                        // Ajuste por importe en préstamos NBD/Jetour
                         if (desc.includes('INSTL RECOVERY') || desc.includes('INSTL_RECOVERY')) {
                             if (absAmount > 3000 && absAmount < 3500) catAsignada = 'Préstamo NBD';
                             else if (absAmount > 1500 && absAmount < 2000) catAsignada = 'Préstamo Coche (Jetour)';
@@ -1062,7 +1645,6 @@
             const tx = datosExtractoActual.transacciones[idx];
             tx.cat = newCat;
             
-            // INTELIGENCIA: Guardar regla en Supabase inmediatamente para el futuro
             const norm = normalizarNombreComercio(tx.desc);
             if (norm && newCat) {
                 try {
@@ -1095,7 +1677,7 @@
                 fecha: tx.fecha,
                 desc: tx.desc + ' (Split)',
                 monto: splitVal,
-                cat: '', // Forzamos categorización
+                cat: '', 
                 isComision: false,
                 hash: tx.hash + '_split',
                 duplicado: false
@@ -1106,7 +1688,6 @@
         }
 
         function recalcularDesdeTransacciones() {
-            // Regenerar Categorias para el objeto
             datosExtractoActual.categorias = {};
             let nuevosGastosTotales = 0;
 
@@ -1173,7 +1754,6 @@
                 tbody.appendChild(tr);
             });
 
-            // CONTROL DE BOTONES Y VALIDACIÓN
             const btnGuardar = document.getElementById('btnGuardarHistorial');
             const btnAplicar = document.getElementById('btnAplicarGasto');
             const btnSync = document.getElementById('btnSyncDeuda');
@@ -1199,7 +1779,6 @@
         }
 
         function prepararResultadosUI() {
-            // Re-generamos la base de categorias vacía para que se recalcule
             datosExtractoActual.categorias = {};
             recalcularDesdeTransacciones();
 
@@ -1278,7 +1857,6 @@
             const btn = document.getElementById('btnGuardarHistorial'); const orig = btn.innerHTML;
             btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Guardando...`; btn.disabled = true;
 
-            // 1. Guardar resumen consolidado de categorías (Extractos globales para la analítica)
             const payloadSummary = { 
                 cuenta: datosExtractoActual.cuenta, 
                 periodo: datosExtractoActual.periodo, 
@@ -1300,22 +1878,20 @@
                 return;
             }
 
-            // 2. Guardar Transacciones Individuales (Para hashes anti-duplicados la proxima vez)
             if(txsAInsertar.length > 0) {
                 const payloadTxs = txsAInsertar.map(tx => ({
-                    fecha: tx.fecha ? new Date(tx.fecha.split('/').reverse().join('-')) : new Date(), // Ajustar si el formato falla
+                    fecha: tx.fecha ? new Date(tx.fecha.split('/').reverse().join('-')) : new Date(), 
                     descripcion_original: tx.desc,
                     comercio_normalizado: normalizarNombreComercio(tx.desc),
                     monto: tx.monto,
                     categoria: tx.cat,
                     cuenta: datosExtractoActual.cuenta,
                     hash_duplicado: tx.hash,
-                    es_ingreso: (datosExtractoActual.cuenta === 'Debit-NBD' && false) // Lógica de ingreso omitida para simpleza de compras
+                    es_ingreso: false 
                 }));
 
                 await supabaseClient.from('transacciones_bancarias').insert(payloadTxs);
                 
-                // Actualizar hashes locales
                 txsAInsertar.forEach(tx => hashesDuplicadosDB.add(tx.hash));
             }
 
