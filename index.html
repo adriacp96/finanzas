@@ -1379,7 +1379,7 @@
                 
                 let valSecundario = isDebit ? (extracto.ingresos || 0) : (categorias['Comisiones & Tasas'] || 0);
                 animateValue(document.getElementById('kpiComisiones'), valSecundario, 500, '', ' AED');
-                document.getElementById('kpiComisiones').className = `text-xl font-black ${isDebit ? 'text-emerald-400' : 'text-amber-400'} tick-number`;
+                document.getElementById('kpiComisiones').className = `text-xl font-black ${isDebit ? 'textemerald-400' : 'text-amber-400'} tick-number`;
 
                 gridContainer.classList.remove('hidden');
 
@@ -1556,7 +1556,7 @@
 
                     let catAsignada = predecirCategoriaINTELIGENTE(desc);
                     let isComision = (catAsignada === 'Comisiones & Tasas');
-                    if (esComision) comisionesDetectadas.push(`${desc.split(' ')[0]} Fee: ${monto}`);
+                    if (isComision) comisionesDetectadas.push(`${desc.split(' ')[0]} Fee: ${monto}`);
                     
                     const hash = generarHashUnico(txFecha, monto, desc);
                     const isDuplicado = hashesDuplicadosDB.has(hash);
