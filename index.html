@@ -1379,7 +1379,7 @@
                 
                 let valSecundario = isDebit ? (extracto.ingresos || 0) : (categorias['Comisiones & Tasas'] || 0);
                 animateValue(document.getElementById('kpiComisiones'), valSecundario, 500, '', ' AED');
-                document.getElementById('kpiComisiones').className = `text-xl font-black ${isDebit ? 'textemerald-400' : 'text-amber-400'} tick-number`;
+                document.getElementById('kpiComisiones').className = `text-xl font-black ${isDebit ? 'text-emerald-400' : 'text-amber-400'} tick-number`;
 
                 gridContainer.classList.remove('hidden');
 
@@ -1594,9 +1594,9 @@
             chunks.forEach(chunk => {
                 if(!chunk.trim()) return;
                 
-                let matches = [...chunk.matchAll(/(?:^|\s)(-?\d+(?:\.\d+)?)(?=\s*(?:Cr|Dr|$|\s))/gi)];
+                let matches = [...chunk.matchAll(/(?:^|\s)(-?[0-9,]+(?:\.\d+)?)(?=\s*(?:Cr|Dr|$|\s))/gi)];
                 if (matches.length >= 2) {
-                    let amount = parseFloat(matches[matches.length - 2][1]);
+                    let amount = parseFloat(matches[matches.length - 2][1].replace(/,/g, ''));
                     let absAmount = Math.abs(amount);
                     let isExpense = amount < 0;
                     
@@ -1650,7 +1650,7 @@
             tx.cat = newCat;
             
             const norm = normalizarNombreComercio(tx.desc);
-            if (norm && newCat && newCat !== 'Pendiente') { // No queremos que aprenda "Pendiente" como regla permanente
+            if (norm && newCat && newCat !== 'Pendiente') { 
                 try {
                     await supabaseClient.from('reglas_categorizacion').upsert([{
                         comercio_normalizado: norm,
@@ -1684,7 +1684,7 @@
                 cat: '', 
                 isComision: false,
                 hash: tx.hash + '_split',
-                duplicado: false // Al dividirlo lo forzamos como nuevo
+                duplicado: false 
             });
             
             showToast("Transacción dividida con éxito.", "success");
@@ -1695,11 +1695,9 @@
             datosExtractoActual.categorias = {};
             let nuevosGastosTotales = 0;
 
-            // Ahora iteramos sobre TODAS las transacciones para calcular el resumen, sean duplicadas o no.
-            // Así el resumen del periodo siempre representará el 100% del documento.
             datosExtractoActual.transacciones.forEach(tx => {
                 nuevosGastosTotales += tx.monto;
-                const catFinal = tx.cat || 'Pendiente'; // Si no eligieron, cuenta como Pendiente
+                const catFinal = tx.cat || 'Pendiente'; 
                 if(!datosExtractoActual.categorias[catFinal]) datosExtractoActual.categorias[catFinal] = 0;
                 datosExtractoActual.categorias[catFinal] += tx.monto;
             });
@@ -1714,7 +1712,7 @@
             const tbody = document.getElementById('txListBody');
             tbody.innerHTML = '';
             
-            let opcionesCat = '<option value="">-- Clasificar --</option>'; // En blanco por defecto
+            let opcionesCat = '<option value="">-- Clasificar --</option>'; 
             Object.keys(catColors).forEach(cat => { 
                 if(cat !== 'Pendiente') opcionesCat += `<option value="${cat}">${cat}</option>`; 
             });
@@ -1733,7 +1731,6 @@
                     if (!tx.cat || tx.cat === 'Pendiente') pendientesDeCategorizar++;
                 }
                 
-                // NOTA IMPORTANTE: Los selects YA NO están desactivados. Se pueden cambiar en cualquier momento.
                 let selectCls = (tx.cat && tx.cat !== 'Pendiente') ? 'bg-slate-800 text-white border-slate-600' : 'bg-rose-900/40 text-rose-200 border-rose-500 font-bold outline-none ring-2 ring-rose-500/50';
                 let selectHtml = `<select class="text-[10px] rounded px-1 py-1.5 focus:border-indigo-500 w-full truncate border ${selectCls}" onchange="updateTxCategory(${i}, this)">`;
                 
@@ -1775,7 +1772,7 @@
 
         function prepararResultadosUI() {
             datosExtractoActual.categorias = {};
-            recalcularDesdeTransacciones(); // Esto calcula el resumen basándose en TODO el PDF
+            recalcularDesdeTransacciones(); 
 
             document.getElementById('loadingPdf').classList.add('hidden'); document.getElementById('resultadoExtracto').classList.remove('hidden');
             
@@ -1850,7 +1847,6 @@
             const btn = document.getElementById('btnGuardarHistorial'); const orig = btn.innerHTML;
             btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Guardando...`; btn.disabled = true;
 
-            // 1. Guardar o actualizar el Resumen
             const payloadSummary = { 
                 cuenta: datosExtractoActual.cuenta, 
                 periodo: datosExtractoActual.periodo, 
@@ -1872,15 +1868,13 @@
                 return;
             }
 
-            // 2. Guardar TODAS las transacciones individuales (Upsert)
-            // Si el usuario modificó la categoría de un duplicado, se actualizará gracias al "onConflict".
             if(datosExtractoActual.transacciones.length > 0) {
                 const payloadTxs = datosExtractoActual.transacciones.map(tx => ({
-                    fecha: tx.fecha ? new Date(tx.fecha.split('/').reverse().join('-')) : new Date(), 
+                    fecha: tx.fecha ? (tx.fecha.includes('/') ? new Date(tx.fecha.split('/').reverse().join('-')) : new Date(tx.fecha)) : new Date(), 
                     descripcion_original: tx.desc,
                     comercio_normalizado: normalizarNombreComercio(tx.desc),
                     monto: tx.monto,
-                    categoria: tx.cat || 'Pendiente', // Guardamos como Pendiente si no eligió
+                    categoria: tx.cat || 'Pendiente', 
                     cuenta: datosExtractoActual.cuenta,
                     hash_duplicado: tx.hash,
                     es_ingreso: false 
@@ -1888,7 +1882,6 @@
 
                 await supabaseClient.from('transacciones_bancarias').upsert(payloadTxs, { onConflict: 'hash_duplicado' });
                 
-                // Actualizar memoria local de hashes
                 datosExtractoActual.transacciones.forEach(tx => hashesDuplicadosDB.add(tx.hash));
             }
 
