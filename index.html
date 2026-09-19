@@ -1555,7 +1555,7 @@
                     if (isCR) return;
 
                     let catAsignada = predecirCategoriaINTELIGENTE(desc);
-                    let esComision = (catAsignada === 'Comisiones & Tasas');
+                    let isComision = (catAsignada === 'Comisiones & Tasas');
                     if (esComision) comisionesDetectadas.push(`${desc.split(' ')[0]} Fee: ${monto}`);
                     
                     const hash = generarHashUnico(txFecha, monto, desc);
